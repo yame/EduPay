@@ -234,7 +234,6 @@ const updatePassword = ()=>{
 
               <VCol
                 cols="12"
-                md="6"
               >
                 <!-- 👉 confirm password -->
                 <AppTextField

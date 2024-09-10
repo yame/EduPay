@@ -87,7 +87,7 @@ export interface DtoNewPayment {
 
 export interface DtoNewStudent {
   code: string,
-  programId: PROGRAM,
+  programID: PROGRAM,
   firstName: string,
   lastName: string,
   email: string
@@ -118,3 +118,5 @@ export interface ChangePWDTO {
   oldPassword: string,
   newPassword: string
 }
+
+export const PROGRAM_ITEMS = [PROGRAM.SMA, PROGRAM.SMC, PROGRAM.SMI, PROGRAM.SMP, PROGRAM.SVT];

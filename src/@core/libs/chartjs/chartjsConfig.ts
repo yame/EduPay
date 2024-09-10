@@ -1,5 +1,5 @@
-import type { ThemeInstance } from 'vuetify'
 import { hexToRgb } from '@core/utils/colorConverter'
+import type { ThemeInstance } from 'vuetify'
 
 // 👉 Colors variables
 const colorVariables = (themeColors: ThemeInstance['themes']['value']['colors']) => {
@@ -30,15 +30,15 @@ export const getLatestBarChartConfig = (themeColors: ThemeInstance['themes']['va
         ticks: { color: labelColor },
       },
       y: {
-        min: 0,
-        max: 400,
+        // min: 0,
+        // max: 400,
         grid: {
           borderColor,
           drawBorder: false,
           color: borderColor,
         },
         ticks: {
-          stepSize: 100,
+          // stepSize: 100,
           color: labelColor,
         },
       },

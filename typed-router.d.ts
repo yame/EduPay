@@ -33,5 +33,6 @@ declare module 'vue-router/auto-routes' {
     'student-add': RouteRecordInfo<'student-add', '/student/add', Record<never, never>, Record<never, never>>,
     'student-details-code': RouteRecordInfo<'student-details-code', '/student/details/:code', { code: ParamValue<true> }, { code: ParamValue<false> }>,
     'student-list': RouteRecordInfo<'student-list', '/student/list', Record<never, never>, Record<never, never>>,
+    'user-list-pending': RouteRecordInfo<'user-list-pending', '/user/list-pending', Record<never, never>, Record<never, never>>,
   }
 }

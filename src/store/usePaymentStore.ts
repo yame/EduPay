@@ -34,9 +34,9 @@ export const usePaymentStore = defineStore('payment', () => {
   }
 
   //👉 - Get all payments by student
-  async function getPaymentsByStudent(code: string) {
+  async function getPaymentsByStudent() {
     try {
-      const { data, error: hasError, isFetching } = await useApi(`/payments/student/${code}`)
+      const { data, error: hasError, isFetching } = await useApi(`/payments/student-payments`)
       paymentsList.value = data.value as Payment[]
       loading.value = isFetching.value
       error.value = hasError.value

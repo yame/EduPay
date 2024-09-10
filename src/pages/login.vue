@@ -9,6 +9,7 @@ import authV2MaskDark from "@images/pages/misc-mask-dark.png";
 import authV2MaskLight from "@images/pages/misc-mask-light.png";
 import { VNodeRenderer } from "@layouts/components/VNodeRenderer";
 import { themeConfig } from "@themeConfig";
+import { jwtDecode } from 'jwt-decode';
 import { VForm } from "vuetify/components/VForm";
 
 definePage({
@@ -50,7 +51,7 @@ const refVForm = ref<VForm>();
 const authStore = useAuthStore();
 const { login, getCurrentUser, setCurrentUser, setToken } = authStore;
 const { loading } = storeToRefs(authStore);
-  const loader = ref(false) 
+const loader = ref(false)
 
 const LogIn = async () => {
   try {
@@ -59,22 +60,45 @@ const LogIn = async () => {
     setToken(token);
 
     // Redirect
-    if(token){
-      const isLoggedIn = !!(useCookie('accessToken').value)    
-      if(isLoggedIn)
-      {
+    if (token) {
+      const isLoggedIn = !!(useCookie('accessToken').value)
+      if (isLoggedIn) {
         setTimeout(() => {
           loader.value = false
         }, 1000)
-        router.push(route.query.to ? String(route.query.to) : "/force-change-password");
 
+        const userData = jwtDecode(token?.toString()) || {}
+        console.table(userData)
+        if (!userData?.credentialsNonExpired) {
+          router.push(route.query.to ? String(route.query.to) : "/force-change-password");
+        }
+        else {
+          const userDataa = await getCurrentUser();
+          setCurrentUser(userDataa);
+          console.log(userDataa);
+          let userAbilityRules = [];
+          if (userData?.scope.includes("ROLE_ADMIN")) {
+            userAbilityRules = [
+              { action: "manage", subject: "all" },
+              { action: "manage", subject: "ADMIN" },
+              { action: "manage", subject: "STUDENT" },
+            ];
+          } else {
+            userAbilityRules = [{ action: "manage", subject: "STUDENT" }];
+          }
+
+          useCookie("userAbilityRules").value = userAbilityRules;
+          ability.update(userAbilityRules);
+
+          router.push(route.query.to ? String(route.query.to) : "/");
+        }
       }
-      else 
+      else
         alert('Credentials Error')
-        loader.value = false
-      }
       loader.value = false
-      // await nextTick(() => {
+    }
+    loader.value = false
+    // await nextTick(() => {
     //   router.push(route.query.to ? String(route.query.to) : "/");
     // });
   } catch (err) {
@@ -107,38 +131,20 @@ const onLoginSubmit = () => {
   <VRow no-gutters class="auth-wrapper bg-surface">
     <VCol md="8" class="d-none d-md-flex">
       <div class="position-relative bg-background w-100 me-0">
-        <div
-          class="d-flex align-center justify-center w-100 h-100"
-          style="padding-inline: 6.25rem"
-        >
-          <VImg
-            max-width="613"
-            :src="authThemeImg"
-            class="auth-illustration mt-16 mb-2"
-          />
+        <div class="d-flex align-center justify-center w-100 h-100" style="padding-inline: 6.25rem">
+          <VImg max-width="613" :src="authThemeImg" class="auth-illustration mt-16 mb-2" />
         </div>
 
-        <img
-          class="auth-footer-mask flip-in-rtl"
-          :src="authThemeMask"
-          alt="auth-footer-mask"
-          height="280"
-          width="100"
-        />
+        <img class="auth-footer-mask flip-in-rtl" :src="authThemeMask" alt="auth-footer-mask" height="280" width="100" />
       </div>
     </VCol>
 
-    <VCol
-      cols="12"
-      md="4"
-      class="auth-card-v2 d-flex align-center justify-center"
-    >
+    <VCol cols="12" md="4" class="auth-card-v2 d-flex align-center justify-center">
       <VCard flat :max-width="500" class="mt-12 mt-sm-0 pa-6">
         <VCardText>
           <h4 class="text-h4 mb-1">
             Welcome to
-            <span class="text-capitalize">{{ themeConfig.app.title }}</span
-            >! 👋🏻
+            <span class="text-capitalize">{{ themeConfig.app.title }}</span>! 👋🏻
           </h4>
           <p class="mb-0">
             Please sign-in to your account and start the adventure
@@ -149,37 +155,16 @@ const onLoginSubmit = () => {
             <VRow>
               <!-- email -->
               <VCol cols="12">
-                <AppTextField
-                  v-model="credentials.email"
-                  autofocus
-                  label="Email or Username"
-                  type="email"
-                  placeholder="Email address or username"
-                  :rules="[requiredValidator, emailValidator]"
-                />
+                <AppTextField v-model="credentials.email" autofocus label="Email or Username" type="email" placeholder="Email address or username" :rules="[requiredValidator, emailValidator]" />
               </VCol>
 
               <!-- password -->
               <VCol cols="12">
-                <AppTextField
-                  v-model="credentials.password"
-                  label="Password"
-                  placeholder="Password"
-                  :error-messages="errors.password"
-                  :type="isPasswordVisible ? 'text' : 'password'"
-                  :append-inner-icon="
+                <AppTextField v-model="credentials.password" label="Password" placeholder="Password" :error-messages="errors.password" :type="isPasswordVisible ? 'text' : 'password'" :append-inner-icon="
                     isPasswordVisible ? 'tabler-eye-off' : 'tabler-eye'
-                  "
-                  @click:append-inner="isPasswordVisible = !isPasswordVisible"
-                  :rules="[requiredValidator]"
-                />
-                <div
-                  class="d-flex align-center flex-wrap justify-space-between mt-3"
-                >
-                  <RouterLink
-                    class="text-secondary ms-2 mb-1"
-                    :to="{ name: 'forgot-password' }"
-                  >
+                  " @click:append-inner="isPasswordVisible = !isPasswordVisible" :rules="[requiredValidator]" />
+                <div class="d-flex align-center flex-wrap justify-space-between mt-3">
+                  <RouterLink class="text-secondary ms-2 mb-1" :to="{ name: 'forgot-password' }">
                     Forgot Password?
                   </RouterLink>
                 </div>

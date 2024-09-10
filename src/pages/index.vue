@@ -1,155 +1,109 @@
- <script setup lang="ts">
+<script setup lang="ts">
+import { useStatisticsStore } from '@/store/useStatisticsStore';
+import type { ChartJsCustomColors } from '@/views/charts/chartjs/types';
+import { getLatestBarChartConfig, getPolarChartConfig } from '@core/libs/chartjs/chartjsConfig';
+import BarChart from '@core/libs/chartjs/components/BarChart';
+import PolarAreaChart from '@core/libs/chartjs/components/PolarAreaChart';
+import { ref, watch } from 'vue';
+import { useTheme } from 'vuetify';
 
- const { data,isFetching,error } = await useApi('/user/student/all')
-const search = ref('')
+// Get the statistics store
+const statisticsStore = useStatisticsStore();
+const { statisticsBarCharData, statisticsPolarAreaCharData, error, loading } = storeToRefs(statisticsStore);
+const { getStatisticsByAmount, getStatisticsByProgram } = statisticsStore
+const vuetifyTheme = useTheme()
 
-// headers
-const headers = [
-  { title: 'prénom', key: 'firstName' },
-  { title: 'nom', key: 'lastName' },
-  { title: 'email', key: 'email' },
-  { title: 'Programme', key: 'programId' },
-  { title: 'code', key: 'code' },
-  // { title: 'STATUS', key: 'status' },
-  { title: 'view', key: 'hamza', sortable: false },
-]
+const chartOptions = computed(() => getLatestBarChartConfig(vuetifyTheme.current.value))
 
-// 👉 methods
-const deleteItem = (itemId: number) => {
-  if (!productList.value)
-    return
+const chartConfig = computed(() => getPolarChartConfig(vuetifyTheme.current.value))
 
-  const index = productList.value.findIndex(item => item.product.id === itemId)
-
-  productList.value.splice(index, 1)
+// Define custom colors for the chart
+const chartJsCustomColors: ChartJsCustomColors = {
+  white: '#fff',
+  yellow: '#ffe802',
+  primary: '#836af9',
+  areaChartBlue: '#2c9aff',
+  barChartYellow: '#ffcf5c',
+  polarChartGrey: '#4f5d70',
+  polarChartInfo: '#299aff',
+  lineChartYellow: '#d4e157',
+  polarChartGreen: '#28dac6',
+  lineChartPrimary: '#9e69fd',
+  lineChartWarning: '#ff9800',
+  horizontalBarInfo: '#26c6da',
+  polarChartWarning: '#ff8131',
+  scatterChartGreen: '#28c76f',
+  warningShade: '#ffbd1f',
+  areaChartBlueLight: '#84d0ff',
+  areaChartGreyLight: '#edf1f4',
+  scatterChartWarning: '#ff9f43',
 }
 
-const categoryIcons = [
-  { name: 'Mouse', icon: 'tabler-mouse', color: 'warning' },
-  { name: 'Glass', icon: 'tabler-eyeglass', color: 'primary' },
-  { name: 'Smart Watch', icon: 'tabler-device-watch', color: 'success' },
-  { name: 'Bag', icon: 'tabler-briefcase', color: 'info' },
-  { name: 'Storage Device', icon: 'tabler-device-audio-tape', color: 'warning' },
-  { name: 'Bluetooth', icon: 'tabler-bluetooth', color: 'error' },
-  { name: 'Gaming', icon: 'tabler-device-gamepad-2', color: 'warning' },
-  { name: 'Home', icon: 'tabler-home', color: 'error' },
-  { name: 'VR', icon: 'tabler-badge-vr', color: 'primary' },
-  { name: 'Shoes', icon: 'tabler-shoe', color: 'success' },
-  { name: 'Electronics', icon: 'tabler-cpu', color: 'info' },
-  { name: 'Projector', icon: 'tabler-theater', color: 'warning' },
-  { name: 'iPod', icon: 'tabler-device-airpods', color: 'error' },
-  { name: 'Keyboard', icon: 'tabler-keyboard', color: 'primary' },
-  { name: 'Smart Phone', icon: 'tabler-device-mobile', color: 'success' },
-  { name: 'Smart TV', icon: 'tabler-device-tv', color: 'info' },
-  { name: 'Google Home', icon: 'tabler-brand-google', color: 'warning' },
-  { name: 'Mac', icon: 'tabler-brand-apple', color: 'error' },
-  { name: 'Headphone', icon: 'tabler-headphones', color: 'primary' },
-  { name: 'iMac', icon: 'tabler-device-imac', color: 'success' },
-  { name: 'iPhone', icon: 'tabler-brand-apple', color: 'warning' },
-]
+// Define selectedOption and items for the month selection
+const selectedOption = ref<{ title: string; pos: number }>({ title: 'Jan', pos: 1 });
 
-const resolveStatusColor = (status: string) => {
-  if (status === 'Confirmed')
-    return 'primary'
-  if (status === 'Completed')
-    return 'success'
-  if (status === 'Cancelled')
-    return 'error'
-}
-const options = ref({ page: 1, itemsPerPage: 5, sortBy: [''], sortDesc: [false] })
+const items = [
+  { title: 'Jan', pos: 1 },
+  { title: 'Feb', pos: 2 },
+  { title: 'Mar', pos: 3 },
+  { title: 'Apr', pos: 4 },
+  { title: 'May', pos: 5 },
+  { title: 'Jun', pos: 6 },
+  { title: 'Jul', pos: 7 },
+  { title: 'Aug', pos: 8 },
+  { title: 'Sep', pos: 9 },
+  { title: 'Oct', pos: 10 },
+  { title: 'Nov', pos: 11 },
+  { title: 'Dec', pos: 12 },
+];
 
-const categoryIconFilter = (categoryName: string): {
-  icon: string
-  color: string }[] => {
-  const index = categoryIcons.findIndex(category => category.name === categoryName)
+watch(selectedOption, async (val) => {
+  if (val == null) {
+    await getStatisticsByAmount();
+  } else {
+    await getStatisticsByAmount(val.pos);
+  }
 
-  if (index !== -1)
-    return [{ icon: categoryIcons[index].icon, color: categoryIcons[index].color }]
+});
 
-  return [{ icon: 'tabler-help-circle', color: 'primary' }]
-}
+onMounted(() => {
+  getStatisticsByAmount()
+  getStatisticsByProgram()
+})
 
-if (error.value)
-  console.error(error.value)
 </script>
 
 <template>
-  <VCard>
-    <v-card-text class="text-h4 m-5">
-      Liste des Students
-    </v-card-text>
-    <VCardText>
-      <VRow>
-        <VCol
-          cols="12"
-          offset-md="8"
-          md="4"
-        >
-          <AppTextField
-            v-model="search"
-            placeholder="Search ..."
-            append-inner-icon="tabler-search"
-            single-line
-            hide-details
-            dense
-            outlined
-          />
-        </VCol>
-      </VRow>
-    </VCardText>
+  <!-- Latest Statistics -->
+  <VRow class="match-height">
+    <VCol cols="12" md="6">
+      <VCard>
+        <VCardItem class="d-flex flex-wrap justify-space-between gap-4">
+          <VCardTitle>Statistics by month</VCardTitle>
 
-    <!-- 👉 Data Table  -->
-    <VDataTable
-    v-if="data"
-      :headers="headers"
-      :items="data || []"
-      :search="search"
-     :items-per-page="options.itemsPerPage"
-    :page="options.page"
-    :options="options"
-      class="text-no-wrap"
-    >
-      <template #bottom>
-      <VCardText class="pt-2">
-        <div class="d-flex flex-wrap justify-center justify-sm-space-between gap-y-2 mt-2">
-          <VTextField
-            v-model="options.itemsPerPage"
-            label="Rows per page:"
-            type="number"
-            min="-1"
-            max="15"
-            hide-details
-            variant="underlined"
-            style="max-inline-size: 8rem;min-inline-size: 5rem;"
-          />
+          <template #append>
+            <div>
+              <AppCombobox v-model="selectedOption" :items="items" item-title="title" item-value="pos" label="Filter by month" placeholder="Clear to see all " return-object clearable :class="$vuetify.display.width ? '1000' : '900'" />
 
-          <VPagination
-            v-model="options.page"
-            :total-visible="$vuetify.display.smAndDown ? 3 : 5"
-            :length="Math.ceil(data.length / options.itemsPerPage)"
-          />
-        </div>
-      </VCardText>
-    </template>
+            </div>
+          </template>
+        </VCardItem>
 
-      <!-- Delete -->
-      <template #item.hamza="{ item }">
-        <IconBtn @click="console.log(item.firstName)">
-          <VIcon icon="tabler-eye" color="primary" />
-        </IconBtn>
-      </template>
-    </VDataTable>
-  </VCard>
+        <VCardText v-if="statisticsBarCharData">
+
+          <BarChart :height="400" :chart-data="statisticsBarCharData" :chart-options="chartOptions" />
+        </VCardText>
+      </VCard>
+    </VCol>
+    <VCol cols="12" md="6">
+      <VCard title="Statistics by program">
+        <VCardText v-if="statisticsPolarAreaCharData">
+          <PolarAreaChart :height="400" :chart-data="statisticsPolarAreaCharData" :chart-options="chartConfig" />
+        </VCardText>
+      </VCard>
+    </VCol>
+  </VRow>
 </template>
-<style lang="scss">
-.v-table th .v-data-table-header__content {
-  font-size:1.2em;
 
-font-weight: bolder;
-}
-
-
-.v-table > .v-table__wrapper > table > tbody > tr > td{
-  font-size:12px
-}
+<style lang="scss" scoped>
 </style>

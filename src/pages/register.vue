@@ -4,6 +4,8 @@ import { VForm } from 'vuetify/components/VForm'
 import { VNodeRenderer } from '@layouts/components/VNodeRenderer'
 import { themeConfig } from '@themeConfig'
 
+import { DtoNewStudent, PROGRAM, PROGRAM_ITEMS } from '@/@core/types'
+import { useAuthStore } from '@/store/useAuthStore'
 import authV2RegisterIllustrationBorderedDark from '@images/pages/auth-v2-register-illustration-bordered-dark.png'
 import authV2RegisterIllustrationBorderedLight from '@images/pages/auth-v2-register-illustration-bordered-light.png'
 import authV2RegisterIllustrationDark from '@images/pages/auth-v2-register-illustration-dark.png'
@@ -15,7 +17,6 @@ const imageVariant = useGenerateImageVariant(authV2RegisterIllustrationLight,
   authV2RegisterIllustrationDark,
   authV2RegisterIllustrationBorderedLight,
   authV2RegisterIllustrationBorderedDark, true)
-
 const authThemeMask = useGenerateImageVariant(authV2MaskLight, authV2MaskDark)
 
 definePage({
@@ -25,14 +26,47 @@ definePage({
   },
 })
 
-const form = ref({
-  username: '',
+const authStore = useAuthStore()
+const { register } = authStore
+
+const form = ref<DtoNewStudent>({
+  code: '',
   email: '',
-  password: '',
-  privacyPolicies: false,
+  firstName: '',
+  lastName: '',
+  programID: PROGRAM.SMI
 })
 
-const isPasswordVisible = ref(false)
+const refVForm = ref<VForm>()
+const router = useRouter()
+const loading = ref(false);
+const isRegistred = ref(false)
+const msgRegistration = ref(null)
+
+const onSubmit = () => {
+  refVForm.value?.validate().then(({ valid }) => {
+    if (valid) {
+      loading.value = true
+      try {
+        console.table(form.value)
+        register(form.value).then((res) => {
+          msgRegistration.value = res.data.value
+          console.log(msgRegistration.value);
+          loading.value = false
+          isRegistred.value = true
+          // router.push('/login')
+        })
+      } catch (error) {
+        console.log(error);
+
+      }
+
+    }
+  })
+}
+
+
+
 </script>
 
 <template>
@@ -45,47 +79,19 @@ const isPasswordVisible = ref(false)
     </div>
   </RouterLink>
 
-  <VRow
-    no-gutters
-    class="auth-wrapper bg-surface"
-  >
-    <VCol
-      md="8"
-      class="d-none d-md-flex"
-    >
+  <VRow no-gutters class="auth-wrapper bg-surface">
+    <VCol md="8" class="d-none d-md-flex">
       <div class="position-relative bg-background w-100 me-0">
-        <div
-          class="d-flex align-center justify-center w-100 h-100"
-          style="padding-inline: 100px;"
-        >
-          <VImg
-            max-width="500"
-            :src="imageVariant"
-            class="auth-illustration mt-16 mb-2"
-          />
+        <div class="d-flex align-center justify-center w-100 h-100" style="padding-inline: 100px;">
+          <VImg max-width="500" :src="imageVariant" class="auth-illustration mt-16 mb-2" />
         </div>
 
-        <img
-          class="auth-footer-mask"
-          :src="authThemeMask"
-          alt="auth-footer-mask"
-          height="280"
-          width="100"
-        >
+        <img class="auth-footer-mask" :src="authThemeMask" alt="auth-footer-mask" height="280" width="100">
       </div>
     </VCol>
 
-    <VCol
-      cols="12"
-      md="4"
-      class="auth-card-v2 d-flex align-center justify-center"
-      style="background-color: rgb(var(--v-theme-surface));"
-    >
-      <VCard
-        flat
-        :max-width="500"
-        class="mt-12 mt-sm-0 pa-4"
-      >
+    <VCol cols="12" md="4" class="auth-card-v2 d-flex align-center justify-center" style="background-color: rgb(var(--v-theme-surface));">
+      <VCard flat :max-width="500" class="mt-12 mt-sm-0 pa-4">
         <VCardText>
           <h4 class="text-h4 mb-1">
             Adventure starts here 🚀
@@ -96,86 +102,59 @@ const isPasswordVisible = ref(false)
         </VCardText>
 
         <VCardText>
-          <VForm @submit.prevent="() => {}">
+          <VForm v-if="!isRegistred" ref="refVForm" @submit.prevent="onSubmit">
             <VRow>
-              <!-- Username -->
-              <VCol cols="12">
-                <AppTextField
-                  v-model="form.username"
-                  :rules="[requiredValidator]"
-                  autofocus
-                  label="Username"
-                  placeholder="Johndoe"
-                />
-              </VCol>
-
               <!-- email -->
               <VCol cols="12">
-                <AppTextField
-                  v-model="form.email"
-                  :rules="[requiredValidator, emailValidator]"
-                  label="Email"
-                  type="email"
-                  placeholder="johndoe@email.com"
-                />
+                <AppTextField v-model="form.email" :rules="[requiredValidator, emailValidator]" label="Email" type="email" placeholder="Email" />
+              </VCol>
+              <!-- FirstName -->
+              <VCol cols="12">
+                <AppTextField v-model="form.code" type="number" :rules="[requiredValidator]" label="Student Code" placeholder="Student Code" />
+              </VCol>
+              <!-- LastName -->
+              <VCol cols="12">
+                <AppTextField v-model="form.lastName" :rules="[requiredValidator]" label="LastName" placeholder="LastName" />
               </VCol>
 
-              <!-- password -->
+              <!-- LastName -->
               <VCol cols="12">
-                <AppTextField
-                  v-model="form.password"
-                  :rules="[requiredValidator]"
-                  label="Password"
-                  placeholder="············"
-                  :type="isPasswordVisible ? 'text' : 'password'"
-                  :append-inner-icon="isPasswordVisible ? 'tabler-eye-off' : 'tabler-eye'"
-                  @click:append-inner="isPasswordVisible = !isPasswordVisible"
-                />
+                <AppTextField v-model="form.firstName" :rules="[requiredValidator]" label="FirstName" placeholder="FirstName" />
 
-                <div class="d-flex align-center my-6">
-                  <VCheckbox
-                    id="privacy-policy"
-                    v-model="form.privacyPolicies"
-                    inline
-                  />
-                  <VLabel
-                    for="privacy-policy"
-                    style="opacity: 1;"
-                  >
-                    <span class="me-1 text-high-emphasis">I agree to</span>
-                    <a
-                      href="javascript:void(0)"
-                      class="text-primary"
-                    >privacy policy & terms</a>
-                  </VLabel>
-                </div>
+              </VCol>
 
-                <VBtn
-                  block
-                  type="submit"
-                >
-                  Sign up
+              <VCol cols="12">
+                <AppAutocomplete v-model="form.programID" label="States" :items="PROGRAM_ITEMS" :rules="[requiredValidator]" placeholder="Your program" chips closable-chips />
+
+              </VCol>
+              <VCol cols="12">
+
+                <VBtn block type="submit" :loading="loading">
+                  Register
                 </VBtn>
               </VCol>
-                <VDivider  class="my-3"/>
+              <VDivider class="my-3" />
 
               <!-- create account -->
-              <VCol
-                cols="12"
-                class="text-center text-base"
-              >
+              <VCol cols="12" class="text-center text-base">
                 <span class="d-inline-block">Already have an account?</span>
-                <RouterLink
-                  class="text-secondary ms-1 d-inline-block"
-                  :to="{ name: 'login' }"
-                >
+                <RouterLink class="text-secondary ms-1 d-inline-block" :to="{ name: 'login' }">
                   Sign in instead
                 </RouterLink>
               </VCol>
 
-            
             </VRow>
           </VForm>
+          <div v-else>
+            <VCol cols="12">
+              <Alert :title="msgRegistration" text="Registration successful! Your account is under review. You'll receive an email once it's approved and ready for login." type="info" />
+            </VCol>
+            <VCol cols="12">
+              <VBtn block color="info" @click="router.push('/login')">
+                You Can Login from here
+              </VBtn>
+            </VCol>
+          </div>
         </VCardText>
       </VCard>
     </VCol>
@@ -185,6 +164,6 @@ const isPasswordVisible = ref(false)
 <style lang="scss" scoped>
 @use "@core/scss/template/pages/page-auth.scss";
 ::v-deep(.text-secondary:hover) {
-    color: red !important;
+  color: red !important;
 }
 </style>

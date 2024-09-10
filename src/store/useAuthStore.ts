@@ -1,4 +1,4 @@
-import { ChangePWDTO } from './../@core/types';
+import { ChangePWDTO, DtoNewStudent } from './../@core/types';
 
 
 import axios from 'axios';
@@ -55,6 +55,13 @@ export const useAuthStore = defineStore('auth', () => {
       console.log(err);
     }
   }
+  //👉 - Register new Student
+  async function register(payload: DtoNewStudent) {
+    console.log("hi");
+
+    return await useApi('/user/register').post(payload)
+  }
+
 
   //👉 - Get All Student 
   async function logout() {
@@ -100,5 +107,23 @@ export const useAuthStore = defineStore('auth', () => {
     return accessToken.value
   }
 
-  return { currentUser, loading, error, accessToken, setCurrentUser, setToken, login, logout, getUserData, getToken, getCurrentUser, resetPasswordToDefault, changePassword }
+  //👉 - Approve Registration
+  async function approveRegistration(email: string) {
+    return await useApi('/user/approve?email=' + email).post()
+  }
+
+  //👉 - Decline Registration
+  async function declineRegistration(email: string) {
+    return await useApi('/user/decline?email=' + email).post()
+  }
+
+  //👉 - Ban Registration
+  async function banRegistration(email: string) {
+    return await useApi('/user/ban?email=' + email).post()
+  }
+
+
+  return {
+    currentUser, loading, error, accessToken, register, setCurrentUser, setToken, login, logout, getUserData, getToken, getCurrentUser, resetPasswordToDefault, changePassword, approveRegistration, declineRegistration, banRegistration
+  }
 })
