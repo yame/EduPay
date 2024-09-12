@@ -5,12 +5,6 @@ import { useStudentStore } from '@/store/useStudentStore';
 import { toast } from 'vue3-toastify';
 
 
-definePage({
-  meta: {
-    action: 'manage',
-    subject: 'STUDENT'
-  }
-})
 const searchQuery = ref('')
 
 // Data table options

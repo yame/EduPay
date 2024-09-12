@@ -107,12 +107,6 @@ const afterSubmit = (statusCode: number) => {
 }
 
 
-definePage({
-  meta: {
-    action: 'manage',
-    subject: 'ADMIN'
-  }
-})
 </script>
 
 <template>
