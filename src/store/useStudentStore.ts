@@ -4,6 +4,7 @@ import { PROGRAM } from './../@core/types';
 export const useStudentStore = defineStore('student', () => {
 
   const studentsList = ref<Student[]>()
+  const currentEmail = ref(null)
   const currentStudent = ref<Student>()
   const loading = ref(true)
   const error = ref('')
@@ -35,6 +36,11 @@ export const useStudentStore = defineStore('student', () => {
   //👉 - Add Student 
   async function addOne(newStudent: DtoNewStudent) {
     return await useApi('/user/student/new').post(newStudent)
+  }
+
+  //👉 - Update Student
+  async function updateOne(newStudent: DtoNewStudent) {
+    return await useApi('/user/student/update').put(newStudent)
   }
 
   //👉 - Find all students by program
@@ -98,6 +104,16 @@ export const useStudentStore = defineStore('student', () => {
     return await useApi(`/user/pending-students`).get();
   }
 
+  //👉 - Set Current Email
+  function setCurrentStudentEmail(email: string) {
+    currentEmail.value = email
+  }
 
-  return { studentsList, currentStudent, loading, error, approvingStudentRegistration, banStudentRegistration, declineStudentRegistration, getPendingStudents, deleteUserByEmail, getAllStudents, addOne, getStudentByCode, getStudentsByProgram, getStudentByEmail }
+  //👉 - Set Current Email
+  function getCurrentStudentEmail() {
+    return currentEmail.value
+  }
+
+
+  return { studentsList, currentStudent, currentEmail, loading, error, updateOne, approvingStudentRegistration, banStudentRegistration, declineStudentRegistration, getPendingStudents, deleteUserByEmail, getAllStudents, addOne, getStudentByCode, getStudentsByProgram, getStudentByEmail, setCurrentStudentEmail, getCurrentStudentEmail }
 })

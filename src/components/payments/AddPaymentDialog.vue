@@ -13,7 +13,7 @@ const refForm = ref<VForm>();
 
 
 interface Props {
-  studentCode: string
+  studentCode?: string
   isDialogVisible: boolean
 }
 
@@ -23,16 +23,16 @@ interface Emit {
 }
 
 const paymentStore = usePaymentStore();
-const {addOne} = paymentStore
- 
+const { addOne } = paymentStore
+
 const props = defineProps<Props>()
 const emit = defineEmits<Emit>()
 
 const newPayment = ref<DtoNewPayment>({
-  studentCode : props.studentCode,
+  studentCode: props.studentCode ? props.studentCode : "",
   amount: 0,
-  date : new Date(),
-  paymentType : PAYMENT_TYPE.CASH
+  date: new Date(),
+  paymentType: PAYMENT_TYPE.CASH
 })
 
 interface FileData {
@@ -44,30 +44,31 @@ const fileData = ref<FileData[]>([])
 const file = ref([])
 const blob = ref(null)
 
-const currentPage =  ref(0)
-const pageCount =  ref(0)
+const currentPage = ref(0)
+const pageCount = ref(0)
 
 const selectFile = (e) => {
-    fileData.value[0] = {
-      file: file.value[0],
-      url: useObjectUrl(file.value[0]).value ?? '',
-    }
-    blob.value = fileData.value[0].url    
+  fileData.value[0] = {
+    file: file.value[0],
+    url: useObjectUrl(file.value[0]).value ?? '',
+  }
+  blob.value = fileData.value[0].url
 }
-  
-const paymentTypeItems = [PAYMENT_TYPE.TRANSFER,PAYMENT_TYPE.CHECK,PAYMENT_TYPE.DEPOSIT,PAYMENT_TYPE.CASH]
+
+const paymentTypeItems = [PAYMENT_TYPE.TRANSFER, PAYMENT_TYPE.CHECK, PAYMENT_TYPE.DEPOSIT, PAYMENT_TYPE.CASH]
 
 const onFormSubmit = async () => {
-   refForm.value?.validate().then(({valid})=>{
-    if(valid){
-      console.log("hola");
-      newPayment.value.amount = Number(newPayment.value.amount )
-      addOne(newPayment.value,file.value[0]).then(statusCode=>{
-        emit('onSubmit',statusCode);
+  refForm.value?.validate().then(({ valid }) => {
+    if (valid) {
+      newPayment.value.amount = Number(newPayment.value.amount)
+      console.table(newPayment.value);
+
+      addOne(newPayment.value, file.value[0]).then(statusCode => {
+        emit('onSubmit', statusCode);
         dialogModelValueUpdate(false)
-      })      
+      })
     }
-  }).then(()=>{
+  }).then(() => {
     blob.value = null
     onFormReset()
   })
@@ -80,12 +81,13 @@ const dialogModelValueUpdate = (val: boolean) => {
 
 const onFormReset = () => {
   newPayment.value = {
-    studentCode : props.studentCode,
+    studentCode: !props.studentCode ? '' : props.studentCode,
     amount: 0,
-    date : new Date(),
-    paymentType : PAYMENT_TYPE.CASH
+    date: new Date(),
+    paymentType: PAYMENT_TYPE.CASH
   }
   file.value = []
+  dialogModelValueUpdate(false)
 
 }
 
@@ -93,12 +95,7 @@ const onFormReset = () => {
 </script>
 
 <template>
-  <VDialog
-    persistent
-    :width="$vuetify.display.smAndDown ? 'auto' : 900"
-    :model-value="props.isDialogVisible"
-    @update:model-value="dialogModelValueUpdate"
-  >
+  <VDialog persistent :width="$vuetify.display.smAndDown ? 'auto' : 900" :model-value="props.isDialogVisible" @update:model-value="dialogModelValueUpdate">
     <!-- Dialog close btn -->
     <DialogCloseBtn @click="dialogModelValueUpdate(false)" />
 
@@ -113,103 +110,44 @@ const onFormReset = () => {
         </p>
 
         <!-- 👉 Form -->
-        <VForm
-          ref="refForm"
-          class="mt-6"
-          @submit.prevent="onFormSubmit"
-        >
+        <VForm ref="refForm" class="mt-6" @submit.prevent="onFormSubmit">
           <VRow>
             <!-- 👉 Student Code -->
-            <VCol
-              cols="12"
-              md="6"
-            >
-              <AppTextField
-                :rules="[requiredValidator]"
-                v-model="newPayment.studentCode"
-                label="Student Code"
-                disabled
-              />
+            <VCol cols="12" md="6">
+              <AppTextField :rules="[requiredValidator]" v-model="newPayment.studentCode" label="Student Code" :disabled="props.studentCode ? true : false" />
             </VCol>
 
             <!-- 👉 Amount -->
-            <VCol
-              cols="12"
-              md="6"
-            >
-              <AppTextField
-                :rules="[requiredValidator]"
-                v-model="newPayment.amount"
-                type="number"
-                label="Amount"
-                placeholder="Enter Amount"
-              />
+            <VCol cols="12" md="6">
+              <AppTextField :rules="[requiredValidator]" v-model="newPayment.amount" type="number" label="Amount" placeholder="Enter Amount" />
             </VCol>
 
-           
-
             <!-- 👉 Payment Type -->
-            <VCol
-              cols="12"
-              md="6"
-            >
-              <AppSelect
-               :rules="[requiredValidator]"
-                v-model="newPayment.paymentType"
-                label="Type"
-                placeholder="Enter Type"
-                :items="paymentTypeItems"
-              />
+            <VCol cols="12" md="6">
+              <AppSelect :rules="[requiredValidator]" v-model="newPayment.paymentType" label="Type" placeholder="Enter Type" :items="paymentTypeItems" />
             </VCol>
 
             <!-- 👉 Payment Date -->
-             <VCol
-              cols="12"
-              md="6"
-            >
-              <AppDateTimePicker
-                  :rules="[requiredValidator]"
-                  v-model="newPayment.date"
-                  label="Date"
-                  placeholder="Select date of your payment"
-                />
+            <VCol cols="12" md="6">
+              <AppDateTimePicker :rules="[requiredValidator]" v-model="newPayment.date" label="Date" placeholder="Select date of your payment" />
             </VCol>
-            
+
             <!-- 👉 Receipt -->
-            <VCol
-                cols="12"
-                md="12"
-              >
-                 <VFileInput
-                    label="Receipt"
-                    :rules="[requiredValidator,fileValidator]"
-                    v-model="file"
-                    @change="selectFile"
-                    accept=".pdf"
-                    placeholder="Upload your receipt"
-                  />
-              </VCol>
+            <VCol cols="12" md="12">
+              <VFileInput label="Receipt" :rules="[requiredValidator,fileValidator]" v-model="file" @change="selectFile" accept=".pdf" placeholder="Upload your receipt" />
+            </VCol>
 
-                <VCol cols="12"
-                    md="12">
-                  <pdf  v-if="blob" :src="blob"  @num-pages="pageCount = $event"
-                        @page-loaded="currentPage = $event"></pdf>
-                </VCol>
+            <VCol cols="12" md="12">
+              <pdf v-if="blob" :src="blob" @num-pages="pageCount = $event" @page-loaded="currentPage = $event"></pdf>
+            </VCol>
 
-           <!-- 👉 Submit and Cancel -->
-            <VCol
-              cols="12"
-              class="d-flex flex-wrap justify-center gap-4"
-            >
+            <!-- 👉 Submit and Cancel -->
+            <VCol cols="12" class="d-flex flex-wrap justify-center gap-4">
               <VBtn type="submit" color="success" variant="outlined">
                 Add Payment
               </VBtn>
 
-              <VBtn
-                color="error"
-                variant="tonal"
-                @click="onFormReset"
-              >
+              <VBtn color="error" variant="tonal" @click="onFormReset">
                 Cancel
               </VBtn>
             </VCol>

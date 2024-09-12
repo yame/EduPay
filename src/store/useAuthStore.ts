@@ -32,12 +32,23 @@ export const useAuthStore = defineStore('auth', () => {
 
   //👉 - Get All Student 
   async function login(credentials: Credentials) {
+    let response;
     try {
-      const response = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/auth/login?username=${credentials.email}&password=${credentials.password}`)
+      response = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/auth/login?username=${credentials.email}&password=${credentials.password}`)
+      console.log(response.data);
       setToken(response.data.access_token)
       return response.data.access_token
     } catch (err) {
-      error.value = err?.message
+      if (axios.isAxiosError(err)) {
+        // Handle AxiosError and display backend error message
+        console.error('AxiosError: ', err.response?.data || 'An error occurred.');
+        error.value = err.response?.data
+      } else {
+        // Handle non-Axios errors
+        console.error('Error: ', err.message);
+
+      }
+
     }
   }
 
@@ -122,8 +133,12 @@ export const useAuthStore = defineStore('auth', () => {
     return await useApi('/user/ban?email=' + email).post()
   }
 
+  //👉 - 
+  async function toogleAccountStatus(email: string) {
+    return await useApi('/toggle-account-status?email=' + email).put()
+  }
 
   return {
-    currentUser, loading, error, accessToken, register, setCurrentUser, setToken, login, logout, getUserData, getToken, getCurrentUser, resetPasswordToDefault, changePassword, approveRegistration, declineRegistration, banRegistration
+    currentUser, loading, error, accessToken, register, setCurrentUser, setToken, login, logout, getUserData, getToken, getCurrentUser, resetPasswordToDefault, changePassword, approveRegistration, declineRegistration, banRegistration, toogleAccountStatus
   }
 })

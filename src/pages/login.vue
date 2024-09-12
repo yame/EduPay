@@ -10,6 +10,7 @@ import authV2MaskLight from "@images/pages/misc-mask-light.png";
 import { VNodeRenderer } from "@layouts/components/VNodeRenderer";
 import { themeConfig } from "@themeConfig";
 import { jwtDecode } from 'jwt-decode';
+import { toast } from 'vue3-toastify';
 import { VForm } from "vuetify/components/VForm";
 
 definePage({
@@ -20,7 +21,7 @@ definePage({
 });
 const credentials = ref({
   email: "hamza@damiri.com",
-  password: "12345",
+  password: "123321",
 });
 
 const isPasswordVisible = ref(false);
@@ -46,11 +47,15 @@ const errors = ref<Record<string, string | undefined>>({
   email: undefined,
   password: undefined,
 });
-
+//  const notify = () => {
+//       Vue3Toastify("Wow so easy !", {
+//         autoClose: 1000,
+//       }); // ToastOptions
+//     }
 const refVForm = ref<VForm>();
 const authStore = useAuthStore();
 const { login, getCurrentUser, setCurrentUser, setToken } = authStore;
-const { loading } = storeToRefs(authStore);
+const { loading, error } = storeToRefs(authStore);
 const loader = ref(false)
 
 const LogIn = async () => {
@@ -63,13 +68,15 @@ const LogIn = async () => {
     if (token) {
       const isLoggedIn = !!(useCookie('accessToken').value)
       if (isLoggedIn) {
-        setTimeout(() => {
-          loader.value = false
-        }, 1000)
+        // setTimeout(() => {
+        //   loader.value = false
+        // }, 1000)
 
         const userData = jwtDecode(token?.toString()) || {}
         console.table(userData)
-        if (!userData?.credentialsNonExpired) {
+        if (!userData?.isPasswordChanged) {
+          console.log(userData?.isPasswordChanged);
+
           router.push(route.query.to ? String(route.query.to) : "/force-change-password");
         }
         else {
@@ -90,17 +97,28 @@ const LogIn = async () => {
           useCookie("userAbilityRules").value = userAbilityRules;
           ability.update(userAbilityRules);
 
-          router.push(route.query.to ? String(route.query.to) : "/");
+          router.push(route.query.to ? String(route.query.to) : "/").finally(() => {
+            loader.value = false
+            toast.success('Login successful ✔', {
+              "theme": useCookie('EduPayment-theme').value || 'auto'
+            })
+          })
         }
       }
-      else
-        alert('Credentials Error')
-      loader.value = false
+      else {
+        toast.error(error.value + ' 🧨❌', {
+          "theme": useCookie('EduPayment-theme').value || 'auto'
+        })
+        loader.value = false
+      }
     }
-    loader.value = false
-    // await nextTick(() => {
-    //   router.push(route.query.to ? String(route.query.to) : "/");
-    // });
+    else {
+      toast.error(error.value + ' 🧨❌', {
+        "theme": useCookie('EduPayment-theme').value || 'auto'
+      })
+      loader.value = false
+
+    }
   } catch (err) {
     console.error(err);
   }
@@ -116,6 +134,12 @@ const onLoginSubmit = () => {
     })
     .catch((err) => console.log(err));
 };
+
+
+
+// toast.success('Login successful!', {
+//               "theme": useCookie('EduPayment-theme').value || 'auto'
+//             })
 </script>
 
 <template>

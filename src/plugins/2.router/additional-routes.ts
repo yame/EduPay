@@ -1,3 +1,4 @@
+import { useStudentStore } from '@/store/useStudentStore';
 import { jwtDecode } from 'jwt-decode';
 import type { RouteRecordRaw } from 'vue-router/auto';
 
@@ -21,11 +22,12 @@ export const redirects: RouteRecordRaw[] = [
 
       const userRole = ref((roles.value?.includes('ROLE_ADMIN')) ? 'admin' : 'student')
       console.log("😍 user role", userRole.value);
-
+      const studentStore = useStudentStore();
+      studentStore.setCurrentStudentEmail(userData?.sub);
       if (userRole.value === 'admin')
         return { name: 'root' }
       if (userRole.value === 'student')
-        return { name: 'student-list' }
+        return { name: 'student-payments-student' }
       if (to.meta.public)
         return
     },

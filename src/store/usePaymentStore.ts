@@ -19,7 +19,8 @@ export const usePaymentStore = defineStore('payment', () => {
           page: (currentPage - 1),
           size: itemsPerPage,
           status: status?.toString(),
-          type: type?.toString()
+          type: type?.toString(),
+          code: code?.toString()
         }
       })
       )
@@ -34,11 +35,21 @@ export const usePaymentStore = defineStore('payment', () => {
   }
 
   //👉 - Get all payments by student
-  async function getPaymentsByStudent() {
+  async function getPaymentsByStudent(currentPage?: Number, itemsPerPage?: Number, status?: string, type?: string, min?: number, max?: number) {
     try {
-      const { data, error: hasError, isFetching } = await useApi(`/payments/student-payments`)
+      const { data, error: hasError, isFetching } = await useApi(createUrl('/payments/student-payments', {
+        query: {
+          page: (currentPage - 1),
+          size: itemsPerPage,
+          status: status?.toString(),
+          type: type?.toString(),
+        }
+      })
+      )
       paymentsList.value = data.value as Payment[]
       loading.value = isFetching.value
+      console.log(loading.value);
+
       error.value = hasError.value
     } catch (error) {
       console.log(error)

@@ -87,7 +87,7 @@ export interface DtoNewPayment {
 
 export interface DtoNewStudent {
   code: string,
-  programID: PROGRAM,
+  programId: PROGRAM,
   firstName: string,
   lastName: string,
   email: string

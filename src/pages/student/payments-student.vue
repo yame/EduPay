@@ -3,8 +3,14 @@
 import { Payment, PAYMENT_STATUS, PAYMENT_TYPE } from '@/@core/types';
 import { usePaymentStore } from '@/store/usePaymentStore';
 import { useStudentStore } from '@/store/useStudentStore';
+import { useConfigStore } from '@core/stores/config';
 import { toast } from 'vue3-toastify';
 import { VCardText, VCardTitle } from 'vuetify/components';
+
+
+
+const configStore = useConfigStore()
+configStore.isVerticalNavCollapsed = true;
 
 // Data table options
 const itemsPerPage = ref(10)
@@ -19,26 +25,6 @@ const updateOptions = (options: any) => {
   orderBy.value = options.sortBy[0]?.order
 }
 
-const resolvePaymentStatus = (status: string) => {
-  if (status === PAYMENT_STATUS.CREATED)
-    return { text: PAYMENT_STATUS.CREATED, color: 'primary' }
-  if (status === PAYMENT_STATUS.VALIDATED)
-    return { text: PAYMENT_STATUS.VALIDATED, color: 'success' }
-  return { text: PAYMENT_STATUS.REJECTED, color: 'error' }
-}
-
-const resolvePaymentType = (type: string) => {
-  if (type === PAYMENT_TYPE.CASH)
-    return { text: PAYMENT_TYPE.CASH, color: 'success' }
-  if (type === PAYMENT_TYPE.CHECK)
-    return { text: PAYMENT_TYPE.CHECK, color: 'primary' }
-  if (type === PAYMENT_TYPE.DEPOSIT)
-    return { text: PAYMENT_TYPE.DEPOSIT, color: 'info' }
-  return { text: PAYMENT_TYPE.TRANSFER, color: 'warning' }
-}
-
-
-
 const router = useRouter()
 const route = useRoute()
 const search = ref('')
@@ -46,18 +32,15 @@ const search = ref('')
 
 
 const studentStore = useStudentStore()
-const { getStudentByCode } = studentStore
-const { currentStudent } = storeToRefs(studentStore)
+const { getStudentByEmail, getCurrentStudentEmail } = studentStore
+const { currentStudent, currentEmail } = storeToRefs(studentStore)
+const email = ref(currentEmail.value)
 
 const isViewReceiptPDFVisible = ref(false)
 const pdfUrl = ref(null)
 const paymentStore = usePaymentStore()
-const { getPaymentFile, getPaymentsByStudent, updateOne, getAllPayments } = paymentStore
+const { getPaymentFile, getPaymentsByStudent, updateOne } = paymentStore
 const { paymentsList, error, loading } = storeToRefs(paymentStore)
-
-
-
-// const { data: paymentsData, execute: fetchPayments } = await useApi('/payments/student/'+route.params.code)
 
 const payments = computed(() => paymentsList.value?.content)
 const totalPayments = computed(() => paymentsList.value?.totalElements)
@@ -75,7 +58,7 @@ const afterSubmit = (statusCode: number) => {
     toast.success('Payment successfully added ✅', {
       "theme": useCookie('EduPayment-theme').value || 'auto'
     })
-    getAllPayments(page.value, itemsPerPage.value, selectedStatus.value, selectedType.value, route.params?.code);
+    getPaymentsByStudent(page.value, itemsPerPage.value, selectedStatus.value, selectedType.value);
   }
   else {
     toast.error('Payment was not added ❌', {
@@ -117,7 +100,7 @@ const updateStatus = (newStatus, newPayment) => {
   console.log(newPayment)
   updateOne(newPayment.id, newStatus).then(() => {
     clearFilters()
-    getAllPayments(page.value, itemsPerPage.value, selectedStatus.value, selectedType.value, route.params?.code);
+    getPaymentsByStudent(page.value, itemsPerPage.value, selectedStatus.value, selectedType.value);
   }).catch(err => {
     toast.success('Error from the server 💥❌', {
       "theme": useCookie('EduPayment-theme').value || 'auto'
@@ -149,7 +132,7 @@ const selectedType = ref('')
 
 watch([selectedStatus, selectedType], (newValue) => {
   page.value = 1;
-  getAllPayments(page.value, itemsPerPage.value, newValue[0], newValue[1], route?.params?.code);
+  getPaymentsByStudent(page.value, itemsPerPage.value, newValue[0], newValue[1], route?.params?.code);
 
 })
 
@@ -163,18 +146,24 @@ const changePage = (val) => {
 watch(itemsPerPage, (newVal) => {
   console.log("💢💌💢💔" + route.params.code);
 
-  getAllPayments(page.value, newVal, selectedStatus.value, selectedType.value, route.params?.code);
+  getPaymentsByStudent(page.value, newVal, selectedStatus.value, selectedType.value);
 });
 watch(page, (newPage) => {
-  getAllPayments(newPage, itemsPerPage.value, selectedStatus.value, selectedType.value, route.params?.code);
+  getPaymentsByStudent(newPage, itemsPerPage.value, selectedStatus.value, selectedType.value);
 });
 
-
+definePage({
+  meta: {
+    action: 'manage',
+    subject: 'STUDENT'
+  }
+})
 
 
 onMounted(() => {
-  getAllPayments(page.value, itemsPerPage.value, selectedStatus.value, selectedType.value, route.params?.code).then(() => {
-    getStudentByCode(route.params?.code)
+  console.log(getCurrentStudentEmail())
+  getPaymentsByStudent(page.value, itemsPerPage.value, selectedStatus.value, selectedType.value).then(() => {
+    getStudentByEmail(email.value)
   })
 })
 
@@ -213,7 +202,7 @@ onMounted(() => {
     <VCardText>
       <div class="d-flex justify-sm-end justify-end flex-wrap gap-4">
         <VBtn class="mr-3" color="primary" prepend-icon="tabler-new-section" text="New Payment" @click="isAddPayementDialogVisible = true" />
-        <VBtn color="success" prepend-icon="tabler-upload" text="Export" />
+        <VBtn v-if="$can('manage', 'all')" color="success" prepend-icon="tabler-upload" text="Export" />
       </div>
     </VCardText>
 
@@ -231,14 +220,13 @@ onMounted(() => {
         <div v-if="payments && payments.length>0">
 
           <VDivider />
-          <!-- <AppDataTableServer :headers="headers" :data="payments" :totalData = "totalPayments" :loading="loading" v-model:itemsPerPage = "itemsPerPage" v-model:page="page" :search="searchQuery" :error="error" @edit-status="editStatus" :actions="actions"></AppDataTableServer> -->
 
           <AppDataTableServer v-if="payments" :headers="[
-              {
-                key: 'studentDTO',
-                title: 'Student',
-                format: (item) => item.studentDTO?.lastName + ' ' + item.studentDTO?.firstName
-              },
+              // {
+              //   key: 'studentDTO',
+              //   title: 'Student',
+              //   format: (item) => item.studentDTO?.lastName + ' ' + item.studentDTO?.firstName
+              // },
               {
                 key: 'date',
                 title: 'Date',
@@ -251,8 +239,6 @@ onMounted(() => {
               {
                 key: 'amount',
                 title: 'Amount',
-                format: (item) => item.amount + ' DH '
-
               },
               {
                 key: 'status',
@@ -261,14 +247,8 @@ onMounted(() => {
               {
                 key: 'receipt',
                 title: 'receipt',
-              },
-              {
-                key: 'actions',
-                title : 'Actions'
               }
-            ]" @viewPDF="viewPDF" :data="payments" :totalData="totalPayments" :actions="[
-              { icon: 'tabler-edit', handler: (item) => editStatus(item) },
-            ]" @update:items-per-page="changeSize" @update:page="changePage" />
+            ]" @viewPDF="viewPDF" :data="payments" :totalData="totalPayments" @update:items-per-page="changeSize" @update:page="changePage" />
 
         </div>
         <div v-else>
@@ -287,7 +267,7 @@ onMounted(() => {
 
 
 
-<style lang="scss" scoped>
+<!-- <style lang="scss" scoped>
 .customer-title:hover {
   color: rgba(var(--v-theme-primary)) !important;
 }
@@ -304,6 +284,6 @@ onMounted(() => {
 ::v-deep(.v-data-table-header__content) {
   font-weight: bold !important;
 }
-</style>
+</style> -->
 
 

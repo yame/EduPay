@@ -83,8 +83,7 @@ onMounted(() => {
 
           <template #append>
             <div>
-              <AppCombobox v-model="selectedOption" :items="items" item-title="title" item-value="pos" label="Filter by month" placeholder="Clear to see all " return-object clearable :class="$vuetify.display.width ? '1000' : '900'" />
-
+              <AppCombobox v-model="selectedOption" :items="items" item-title="title" item-value="pos" label="Filter by month" placeholder="all" return-object clearable :class="$vuetify.display.width ? '1000' : '900'" />
             </div>
           </template>
         </VCardItem>

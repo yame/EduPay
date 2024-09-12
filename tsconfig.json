@@ -57,7 +57,8 @@
     "types": [
       "vite/client",
       "unplugin-vue-router/client",
-      "vite-plugin-vue-layouts/client"
+      "vite-plugin-vue-layouts/client",
+      "vue3-toastify/global"
     ]
   },
   "include": [

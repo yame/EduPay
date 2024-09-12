@@ -9,8 +9,6 @@ export default [
       title: 'List',
       to: { name: 'student-list' },
       icon: { icon: 'tabler-users' },
-      action: 'manage',
-      subject: 'STUDENT',
     },
     {
       title: 'Add',

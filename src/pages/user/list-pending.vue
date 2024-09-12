@@ -87,9 +87,9 @@ console.table(pendingStudents.value)
 
 <template>
   <VCard>
-    <v-card-text class="text-h4 m-5">
+    <VCardTitle class="pa-9 text-h3">
       Pending Students
-    </v-card-text>
+    </VCardTitle>
     <VCardText>
       <VRow>
         <VCol cols="12" offset-md="8" md="4">
@@ -114,8 +114,45 @@ console.table(pendingStudents.value)
       <template #item.actions="{item}">
         <IconBtn>
           <VIcon icon="tabler-dots-vertical" />
+          <VMenu activator="parent" transition="slide-x-transition" offset-y>
+            <VList>
+              <!-- Approve Section -->
+              <VListItem @click="approveUser(item.email)">
 
-          <VMenu activator="parent" transition="slide-x-transition">
+                <VListItemTitle class="mt-2"><span class="text-transform-underline text-uppercase text-success">Approve User</span>
+                  <VIcon color="success">tabler-circle-check</VIcon>
+                </VListItemTitle>
+                <VListItemSubtitle class="mb-2">
+                  <VSwitch v-model="item.isApproved" color="success" :label="item.isApproved ? 'Approved' : 'Not Approved'" dense />
+                </VListItemSubtitle>
+              </VListItem>
+              <v-divider></v-divider>
+              <!-- Decline Section -->
+              <VListItem @click="declineUser(item.email)">
+
+                <VListItemTitle class="mt-2"><span class="text-underline text-uppercase text-warning">Decline User</span>
+                  <VIcon color="warning">mdi-close-circle</VIcon>
+                </VListItemTitle>
+                <VListItemSubtitle class="mb-2">
+                  <VSwitch v-model="item.isDeclined" color="warning" :label="item.isDeclined ? 'Declined' : 'Not Declined'" dense />
+                </VListItemSubtitle>
+              </VListItem>
+              <v-divider></v-divider>
+
+              <!-- Ban Section -->
+              <VListItem @click="banUser(item.email)">
+
+                <VListItemTitle class="mt-2"><span class="text-underline text-uppercase text-error">Ban User</span>
+                  <VIcon color="error">tabler-ban</VIcon>
+                </VListItemTitle>
+                <VListItemSubtitle class="mb-2">
+                  <VSwitch v-model="item.isBanned" color="error" :label="item.isBanned ? 'Banned' : 'Not Banned'" dense />
+                </VListItemSubtitle>
+              </VListItem>
+            </VList>
+          </VMenu>
+
+          <!-- <VMenu activator="parent" transition="slide-x-transition">
             <VList>
               <VListItem @click="approveUser(item.email)">
                 <v-icon>tabler-check</v-icon>
@@ -130,7 +167,7 @@ console.table(pendingStudents.value)
                 <VSwitch v-model="item.isBanned" color="error" :label="`${item.isBanned ? 'User Banned' : 'User not Banned'} `" />
               </VListItem>
             </VList>
-          </VMenu>
+          </VMenu> -->
         </IconBtn>
         <!-- <VMenu offset-y>
           <template v-slot:activator="{ on, attrs }">
@@ -171,7 +208,7 @@ console.table(pendingStudents.value)
     </VDataTable>
   </VCard>
 </template>
-<style lang="scss">
+<style lang="scss" scoped>
 .v-table th .v-data-table-header__content {
   font-size: 1.2em;
 
@@ -180,5 +217,17 @@ console.table(pendingStudents.value)
 
 .v-table > .v-table__wrapper > table > tbody > tr > td {
   font-size: 12px;
+}
+
+::v-deep(.v-table .v-table__wrapper > table > tbody > tr > td) {
+  font-size: 12px;
+}
+
+::v-deep(.v-data-table-header__content) {
+  font-weight: bold !important;
+}
+
+::v-deep(.v-table > .v-table__wrapper > table) {
+  padding: 0 30px;
 }
 </style>
