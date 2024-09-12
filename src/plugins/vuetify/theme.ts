@@ -1,19 +1,19 @@
 import type { ThemeDefinition } from 'vuetify'
 
-export const staticPrimaryColor = '#49058D'
-export const staticPrimaryDarkenColor = '#28024D'
+export const staticPrimaryDarkenColor = '#162032'
+export const staticPrimaryColor = '#2C4962'
 
 export const themes: Record<string, ThemeDefinition> = {
   light: {
     dark: false,
     colors: {
-      'primary': staticPrimaryDarkenColor,
+      'primary': staticPrimaryColor,
       'on-primary': '#fff',
-      'primary-darken-1': '#49058D',
+      'primary-darken-1': '#1F598C',
       'secondary': '#808390',
       'on-secondary': '#fff',
       'secondary-darken-1': '#737682',
-      'success': '#28C76F',
+      'success': '#59D938',
       'on-success': '#fff',
       'success-darken-1': '#24B364',
       'info': '#00BAD1',
@@ -22,7 +22,7 @@ export const themes: Record<string, ThemeDefinition> = {
       'warning': '#FF9F43',
       'on-warning': '#fff',
       'warning-darken-1': '#E68F3C',
-      'error': '#FF4C51',
+      'error': '#F25C69',
       'on-error': '#fff',
       'error-darken-1': '#E64449',
       'background': '#F8F7FA',
@@ -81,13 +81,13 @@ export const themes: Record<string, ThemeDefinition> = {
   dark: {
     dark: true,
     colors: {
-      'primary': staticPrimaryDarkenColor,
+      'primary': staticPrimaryColor,
       'on-primary': '#fff',
-      'primary-darken-1': '#675DD8',
+      'primary-darken-1': '#1F598C',
       'secondary': '#808390',
       'on-secondary': '#fff',
       'secondary-darken-1': '#737682',
-      'success': '#28C76F',
+      'success': '#59D938',
       'on-success': '#fff',
       'success-darken-1': '#24B364',
       'info': '#00BAD1',
@@ -96,10 +96,10 @@ export const themes: Record<string, ThemeDefinition> = {
       'warning': '#FF9F43',
       'on-warning': '#fff',
       'warning-darken-1': '#E68F3C',
-      'error': '#FF4C51',
+      'error': '#F25C69',
       'on-error': '#fff',
       'error-darken-1': '#E64449',
-      'background': '#25293C',
+      'background': '#25293A',
       'on-background': '#E1DEF5',
       'surface': '#2F3349',
       'on-surface': '#E1DEF5',

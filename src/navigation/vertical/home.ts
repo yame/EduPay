@@ -2,9 +2,9 @@ export default [
   { heading: 'Dashboard' },
 
   {
-    title: 'Home',
+    title: 'Dashboard',
     to: { name: 'root' },
-    icon: { icon: 'tabler-smart-home' },
+    icon: { icon: 'tabler-dashboard' },
 
   }
 ]

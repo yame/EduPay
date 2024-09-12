@@ -4,7 +4,7 @@ export default [
   {
     title: 'Users',
     to: { name: 'user-list-pending' },
-    icon: { icon: 'tabler-smart-home' },
+    icon: { icon: 'tabler-users-group' },
 
   }
 ]

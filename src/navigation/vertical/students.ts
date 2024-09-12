@@ -4,7 +4,7 @@ export default [
   {
     title: 'Students',
     to: { name: 'student' },
-    icon: { icon: 'tabler-smart-home' },
+    icon: { icon: 'tabler-school' },
     children: [{
       title: 'List',
       to: { name: 'student-list' },

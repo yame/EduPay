@@ -4,7 +4,7 @@ export default [
   {
     title: 'Payments',
     to: { name: 'payment' },
-    icon: { icon: 'tabler-smart-home' },
+    icon: { icon: 'tabler-brand-cashapp' },
     children: [{
       title: 'List',
       to: { name: 'payment-list' },

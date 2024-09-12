@@ -79,11 +79,9 @@ export const useAuthStore = defineStore('auth', () => {
     try {
 
       setCurrentUser(null);
-      setToken(null);
-      useCookie('accessToken').value = null;
       useCookie('userData').value = null;
 
-      // return await useApi('/auth/logout').post()
+      return await useApi('/auth/logout').post()
     } catch (err) {
       error.value = err?.message;
     }
