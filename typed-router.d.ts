@@ -25,6 +25,8 @@ declare module 'vue-router/auto-routes' {
     'forgot-password': RouteRecordInfo<'forgot-password', '/forgot-password', Record<never, never>, Record<never, never>>,
     'login': RouteRecordInfo<'login', '/login', Record<never, never>, Record<never, never>>,
     'not-authorized': RouteRecordInfo<'not-authorized', '/not-authorized', Record<never, never>, Record<never, never>>,
+    'notification-payment-id': RouteRecordInfo<'notification-payment-id', '/notification/payment/:id', { id: ParamValue<true> }, { id: ParamValue<false> }>,
+    'notification-registration-email': RouteRecordInfo<'notification-registration-email', '/notification/registration/:email', { email: ParamValue<true> }, { email: ParamValue<false> }>,
     'payment-add': RouteRecordInfo<'payment-add', '/payment/add', Record<never, never>, Record<never, never>>,
     'payment-list': RouteRecordInfo<'payment-list', '/payment/list', Record<never, never>, Record<never, never>>,
     'profile': RouteRecordInfo<'profile', '/profile', Record<never, never>, Record<never, never>>,

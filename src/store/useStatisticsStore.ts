@@ -57,38 +57,58 @@ export const useStatisticsStore = defineStore('statistic', () => {
       console.log(error)
     }
   }
-  //👉 - Get Statistics by program 
-  async function getStatisticsByProgram(month?: number) {
+
+  //👉 - On Login Fetch Data
+  async function onLoginFetchData(month?: number) {
     try {
-      const url = `/user/student/count-by-program`
-
+      const url = month === undefined
+        ? '/app/on-login-data'
+        : `/app/dashboard-data?month=${month}`
       const { data, error: hasError, isFetching } = await useApi(url)
-      if (data.value) {
-        const labels = Object.keys(data.value)
-        const values = Object.values(data.value)
-        console.log(values[0]);
-
-
-        statisticsPolarAreaCharData.value = {
-          labels: labels,
-          datasets: [
-            {
-              borderWidth: 0,
-              label: 'Total Students ',
-              data: values.map(v => v[0]),
-              backgroundColor: [chartJsCustomColors.primary, chartJsCustomColors.yellow, chartJsCustomColors.polarChartWarning, chartJsCustomColors.polarChartInfo, chartJsCustomColors.polarChartGrey, chartJsCustomColors.polarChartGreen],
-            },
-          ],
-        }
-
+      //👉 - countStudentsByProgram
+      const labels = Object.keys(data.value.countStudentsByProgram)
+      const values = Object.values(data.value.countStudentsByProgram)
+      statisticsPolarAreaCharData.value = {
+        labels: labels,
+        datasets: [
+          {
+            borderWidth: 0,
+            label: 'Total Students ',
+            data: values.map(v => v[0]),
+            backgroundColor: [chartJsCustomColors.primary, chartJsCustomColors.yellow, chartJsCustomColors.polarChartWarning, chartJsCustomColors.polarChartInfo, chartJsCustomColors.polarChartGrey, chartJsCustomColors.polarChartGreen],
+          },
+        ],
       }
+
+      //👉 - paymentsCountByMonth
+      const monthss = Object.keys(data.value.paymentsCountByMonth)
+      const valuess = Object.values(data.value.paymentsCountByMonth)
+
+      statisticsBarCharData.value = {
+        labels: monthss,
+        datasets: [
+          {
+            maxBarThickness: 15,
+            backgroundColor: chartJsCustomColors.lineChartPrimary,
+            borderColor: 'transparent',
+            borderRadius: { topRight: 15, topLeft: 15 },
+            data: valuess,
+          },
+        ],
+      }
+
+
+
       loading.value = isFetching.value
       error.value = hasError.value
     } catch (error) {
       console.log(error)
     }
   }
+
+
+
   return {
-    statisticsBarCharData, statisticsPolarAreaCharData, error, loading, getStatisticsByAmount, getStatisticsByProgram
+    statisticsBarCharData, statisticsPolarAreaCharData, error, loading, onLoginFetchData
   }
 })

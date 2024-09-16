@@ -134,7 +134,7 @@ const deconnect = async () => {
 
           <VBtn variant="tonal" color="error" :loading="loading" @click="deconnect">
             Logout
-          </VBtn>{{authStore.loading}}
+          </VBtn>
         </VCardText>
       </VCard>
     </VCol>

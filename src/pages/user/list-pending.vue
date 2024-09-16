@@ -23,8 +23,6 @@ const headers = [
 
 // 👉 methods
 const resolveProgram = (program: string) => {
-  console.log(program);
-
   if (program === PROGRAM.SMA)
     return { text: PROGRAM.SMA, color: 'success' }
   if (program === PROGRAM.SMC)
@@ -33,12 +31,12 @@ const resolveProgram = (program: string) => {
     return { text: PROGRAM.SMI, color: 'info' }
   if (program === PROGRAM.SMP)
     return { text: PROGRAM.SMP, color: 'secondary' }
-  if (program === PROGRAM.SMP)
+  if (program === PROGRAM.SVT)
     return { text: PROGRAM.SVT, color: 'warning' }
   return { text: 'null', color: '#768' }
 }
 
-const options = ref({ page: 1, itemsPerPage: 5, sortBy: [''], sortDesc: [false] })
+const options = ref({ page: 1, itemsPerPage: 10, sortBy: [''], sortDesc: [false] })
 
 
 
@@ -46,14 +44,13 @@ if (error.value)
   console.error(error.value)
 
 function addStatusFields() {
-  pendingStudents.value.forEach(user => {
+  pendingStudents.value.content.forEach(user => {
     if (!('isApproved' in user)) user.isApproved = false;
     if (!('isDeclined' in user)) user.isDeclined = false;
     if (!('isBanned' in user)) user.isBanned = false;
   });
 }
 function approveUser(email) {
-  console.log(email);
   approveRegistration(email).then(() => {
     updateUserStatus(email, { isApproved: true, isDeclined: false, isBanned: false });
   }).finally(() => {
@@ -68,7 +65,6 @@ function declineUser(email) {
   })
 }
 function banUser(email) {
-  console.log(email);
   banRegistration(email).then(() => {
     updateUserStatus(email, { isApproved: false, isDeclined: false, isBanned: true });
   }).finally(() => {
@@ -76,7 +72,7 @@ function banUser(email) {
   })
 }
 function updateUserStatus(email, status) {
-  const user = pendingStudents.value.find(user => user.email === email);
+  const user = pendingStudents.value.content.find(user => user.email === email);
   if (user) {
     Object.assign(user, status);
   }
@@ -99,7 +95,7 @@ console.table(pendingStudents.value)
     </VCardText>
 
     <!-- 👉 Data Table  -->
-    <VDataTable v-if="pendingStudents" :headers="headers" :items="pendingStudents || []" :search="search" :items-per-page="options.itemsPerPage" :page="options.page" :options="options" class="text-no-wrap">
+    <VDataTable v-if="pendingStudents" :headers="headers" :items="pendingStudents.content || []" :search="search" :items-per-page="options.itemsPerPage" :page="options.page" :options="options" class="text-no-wrap">
 
       <template #item.registerDate="{ item }">
         <span class="customer-title"> {{ new Date(item.registerDate).toDateString() }}</span>
@@ -200,7 +196,7 @@ console.table(pendingStudents.value)
           <div class="d-flex flex-wrap justify-center justify-sm-space-between gap-y-2 mt-2">
             <VTextField v-model="options.itemsPerPage" label="Rows per page:" type="number" min="-1" max="15" hide-details variant="underlined" style="max-inline-size: 8rem;min-inline-size: 5rem;" />
 
-            <VPagination v-model="options.page" :total-visible="$vuetify.display.smAndDown ? 3 : 5" :length="Math.ceil(pendingStudents?.length / options.itemsPerPage)" />
+            <VPagination v-model="options.page" :total-visible="$vuetify.display.smAndDown ? 3 : 5" :length="Math.ceil(pendingStudents?.totalElements / options.itemsPerPage)" />
           </div>
         </VCardText>
       </template>

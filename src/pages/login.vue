@@ -73,16 +73,12 @@ const LogIn = async () => {
         // }, 1000)
 
         const userData = jwtDecode(token?.toString()) || {}
-        console.table(userData)
         if (!userData?.isPasswordChanged) {
-          console.log(userData?.isPasswordChanged);
-
           router.push(route.query.to ? String(route.query.to) : "/force-change-password");
         }
         else {
           const userDataa = await getCurrentUser();
           setCurrentUser(userDataa);
-          console.log(userDataa);
           let userAbilityRules = [];
           if (userData?.scope.includes("ROLE_ADMIN")) {
             userAbilityRules = [

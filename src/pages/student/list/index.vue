@@ -12,7 +12,7 @@ const options = ref({ page: 1, itemsPerPage: 5, sortBy: [''], orderBy: '' })
 
 
 const studentStore = useStudentStore()
-const { getAllStudents, deleteUserByEmail, updateOne } = studentStore
+const { getAllStudents, deleteUserByEmail, updateOne, toggleEnableUserAccount } = studentStore
 const { studentsList, loading, error } = storeToRefs(studentStore)
 
 
@@ -22,10 +22,10 @@ const page = ref(1)
 const sortBy = ref()
 const orderBy = ref()
 
-getAllStudents(page.value, itemsPerPage.value)
+
 // const students = computed(() => studentsList.value)
 const router = useRouter()
-const students = computed(() => studentsList.value?.content)
+const students = computed(() => accountStates.value)
 const totalStudents = computed(() => studentsList.value?.totalElements)
 
 
@@ -57,7 +57,7 @@ const updateStudent = (item) => {
   console.log(item);
   updateOne(item).then(() => {
     getAllStudents(page.value, itemsPerPage.value).then(() => {
-      toast.success('Student successfully updated ✔', {
+      toast.success('Student successfully updated ✅', {
         "theme": useCookie('EduPayment-theme').value || 'auto'
       })
     }).catch(() => toast.error('Student not Updated  🧨❌', {
@@ -97,6 +97,39 @@ const changeTotalData = (val) => {
 watch(itemsPerPage, (newVal) => {
   getAllStudents(page.value, itemsPerPage.value);
 })
+
+
+const toggleAccount = (item) => {
+  toggleEnableUserAccount(item.email).then(() => {
+    accountStates.value = accountStates.value.map((student) =>
+      student.email === item.email
+        ? { ...student, accountActive: item.accountActive }  // Toggle the accountActive state
+        : student
+    )
+  }
+  ).then(() => {
+    if (item.accountActive)
+      toast.error('Student Account is Disabled  🧨❌', {
+        "theme": useCookie('EduPayment-theme').value || 'auto'
+      })
+    else
+      toast.success('Student Account is Enabled ✅', {
+        "theme": useCookie('EduPayment-theme').value || 'auto'
+      })
+  })
+}
+const accountStates = ref(null)
+onMounted(() => {
+  getAllStudents(page.value, itemsPerPage.value).then(() => {
+    accountStates.value = studentsList.value.content.map((s) => {
+      return { ...s, accountActive: false }
+    })
+  }).then(() => console.log(accountStates.value))
+
+
+})
+// const accountStates = computed(()=>studentsList.value?.reduce((prev,acc)=>))
+
 </script>
 
 <template>
@@ -148,7 +181,7 @@ watch(itemsPerPage, (newVal) => {
           <VDivider />
           <!-- <AppDataTableServer :headers="headers" :data="students" :totalData = "totalStudents" :loading="loading" v-model:itemsPerPage = "itemsPerPage" v-model:page="page" :search="searchQuery" :error="error" @edit-status="editStatus" :actions="actions"></AppDataTableServer> -->
 
-          <AppDataTableServer v-if="students" :headers="[
+          <AppDataTableServer v-if="accountStates" :headers="[
               {
                 key: 'code',
                 title: 'Code',
@@ -169,12 +202,16 @@ watch(itemsPerPage, (newVal) => {
               {
                 key: 'actions',
                 title : 'Actions'
+              },
+              {
+                key: 'account',
+                title : 'toogle Account'
               }
             ]" :data="students" :totalData="totalStudents" :actions="[
               { icon: 'tabler-eye',color:'secondary', handler: (item) => viewStudent(item) },
               { icon: 'tabler-edit',color:'warning' ,handler: (item) => edit(item) },
               { icon: 'tabler-trash',color:'error', handler: (item) => deleteOne(item) },
-            ]" @update:items-per-page="changeSize" @update:total-data="changeTotalData" />
+            ]" @update:items-per-page="changeSize" @update:total-data="changeTotalData" @toggleAccount="toggleAccount" />
 
         </div>
         <div v-else>

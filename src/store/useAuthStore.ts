@@ -1,19 +1,10 @@
-import { ChangePWDTO, DtoNewStudent } from './../@core/types';
-
-
 import axios from 'axios';
+import { ChangePWDTO, DtoNewStudent } from './../@core/types';
 
 interface Credentials {
   email: string,
   password: string
 }
-
-
-// interface User{
-//   email : string,
-//   role : string,
-//   email : string
-//   }
 
 export const useAuthStore = defineStore('auth', () => {
   const currentUser = ref(null)
@@ -21,7 +12,6 @@ export const useAuthStore = defineStore('auth', () => {
   const error = ref('')
   const accessToken = ref(null)
 
-  // Watch for changes and update cookies
   watch(accessToken, (newToken) => {
     useCookie('accessToken').value = newToken;
   });
@@ -35,20 +25,17 @@ export const useAuthStore = defineStore('auth', () => {
     let response;
     try {
       response = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/auth/login?username=${credentials.email}&password=${credentials.password}`)
-      console.log(response.data);
       setToken(response.data.access_token)
       return response.data.access_token
     } catch (err) {
       if (axios.isAxiosError(err)) {
-        // Handle AxiosError and display backend error message
+        //👉 -  Handle AxiosError and display backend error message
         console.error('AxiosError: ', err.response?.data || 'An error occurred.');
         error.value = err.response?.data
       } else {
-        // Handle non-Axios errors
+        //❗ -  Handle non-Axios errors
         console.error('Error: ', err.message);
-
       }
-
     }
   }
 
@@ -68,8 +55,6 @@ export const useAuthStore = defineStore('auth', () => {
   }
   //👉 - Register new Student
   async function register(payload: DtoNewStudent) {
-    console.log("hi");
-
     return await useApi('/user/register').post(payload)
   }
 
@@ -80,7 +65,6 @@ export const useAuthStore = defineStore('auth', () => {
 
       setCurrentUser(null);
       useCookie('userData').value = null;
-
       return await useApi('/auth/logout').post()
     } catch (err) {
       error.value = err?.message;
@@ -94,8 +78,6 @@ export const useAuthStore = defineStore('auth', () => {
 
   //👉 - Change user password
   async function changePassword(changePWDTO: ChangePWDTO) {
-    console.log(changePWDTO);
-
     return await useApi(`/user/change-pw`).put(changePWDTO);
   }
 

@@ -1,16 +1,20 @@
 <script setup lang="ts">
+import WebSocketService from '@/services/websocketService';
+import { useNotificationStore } from '@/store/useNotificationStore';
 import { useStatisticsStore } from '@/store/useStatisticsStore';
 import type { ChartJsCustomColors } from '@/views/charts/chartjs/types';
 import { getLatestBarChartConfig, getPolarChartConfig } from '@core/libs/chartjs/chartjsConfig';
 import BarChart from '@core/libs/chartjs/components/BarChart';
 import PolarAreaChart from '@core/libs/chartjs/components/PolarAreaChart';
-import { ref, watch } from 'vue';
+import { ref } from 'vue';
 import { useTheme } from 'vuetify';
 
 // Get the statistics store
+const notificationStore = useNotificationStore();
+const { onLoginNotifications } = notificationStore;
 const statisticsStore = useStatisticsStore();
 const { statisticsBarCharData, statisticsPolarAreaCharData, error, loading } = storeToRefs(statisticsStore);
-const { getStatisticsByAmount, getStatisticsByProgram } = statisticsStore
+const { onLoginFetchData } = statisticsStore
 const vuetifyTheme = useTheme()
 
 const chartOptions = computed(() => getLatestBarChartConfig(vuetifyTheme.current.value))
@@ -59,18 +63,27 @@ const items = [
 
 watch(selectedOption, async (val) => {
   if (val == null) {
-    await getStatisticsByAmount();
+    await onLoginFetchData();
   } else {
-    await getStatisticsByAmount(val.pos);
+    await onLoginFetchData(val.pos);
   }
 
 });
 
-onMounted(() => {
-  getStatisticsByAmount()
-  getStatisticsByProgram()
+
+// function sendMessage() {
+//   WebSocketService.send('/app/myEndpoint', { content: 'Hello, WebSocket!' });
+// }
+
+WebSocketService.connect(useCookie('accessToken').value)
+onMounted(async () => {
+
+  await onLoginFetchData()
 })
 
+onBeforeUnmount(() => {
+  WebSocketService.disconnect();
+})
 </script>
 
 <template>

@@ -18,12 +18,16 @@
       <div v-else-if="header.key === 'actions'">
         <IconBtn v-for="(action, index) in actions" :key="index" @click="() => action.handler(item)">
           <VIcon :color="action?.color || 'secondary'" :size="action.size || 23" :icon="action.icon" />
+          <VTooltip activator="parent" top>{{ action?.icon == 'tabler-eye' ? 'View details' : action?.icon==='tabler-edit' ? " Edit Infos ": "Delete Student"  }}</VTooltip>
         </IconBtn>
       </div>
       <div v-else-if="header.key==='receipt'">
         <VBtn variant="outlined" color="info" prepend-icon="tabler-stereo-glasses" size="small" @click="viewPDF(item)">
           Pdf
         </VBtn>
+      </div>
+      <div v-else-if="header.key==='account'">
+        <VSwitch v-model="item.accountActive" @change="$emit('toggleAccount',item)" />
       </div>
       <span v-else>
         <!-- Render plain text for other headers -->
@@ -54,13 +58,14 @@ const props = defineProps({
   itemsPerPage: Number,
   page: Number,
   actions: Array,
+  accountActive: Boolean
 });
 
 const { headers, data, totalData, actions } = toRefs(props);
 
 
 // Emits
-const emit = defineEmits(['edit-status', 'update:itemsPerPage', 'update:page', 'viewPDF']);
+const emit = defineEmits(['edit-status', 'update:itemsPerPage', 'update:page', 'viewPDF', 'toggleAccount']);
 const resolvePaymentStatus = (status: string) => {
   if (status === PAYMENT_STATUS.CREATED)
     return { text: PAYMENT_STATUS.CREATED, color: 'primary' }
@@ -100,7 +105,7 @@ const page = ref(1);
 // Watchers to sync props with local state
 watch(() => props.itemsPerPage, (newVal) => emit('update:itemsPerPage', newVal));
 watch(() => props.page, (newVal) => emit('update:page', newVal));
-watch(() => props.totalData, (newVal) => emit('update:totalData', newVal));
+// watch(() => props.totalData, (newVal) => emit('update:totalData', newVal));
 // Methods
 const updateOptions = (options) => {
   emit('update:itemsPerPage', options.itemsPerPage);

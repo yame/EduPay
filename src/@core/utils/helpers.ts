@@ -30,3 +30,27 @@ export const isToday = (date: Date) => {
     && date.getFullYear() === today.getFullYear()
   )
 }
+
+
+export function getNotificationTime(dateString) {
+  const now = new Date();
+  const date = new Date(dateString);
+
+  // Helper function to format dates as "Today", "Yesterday", etc.
+  const formatDateDifference = (diffDays) => {
+    if (diffDays === 0) {
+      return "Today";
+    } else if (diffDays === 1) {
+      return "Yesterday";
+    } else {
+      return `${diffDays} days ago`;
+    }
+  };
+
+  // Calculate the difference in days
+  const timeDiff = now - date;
+  const diffDays = Math.floor(timeDiff / (1000 * 60 * 60 * 24)); // Convert milliseconds to days
+
+  // Format the time as "Today", "Yesterday", or "X days ago"
+  return formatDateDifference(diffDays);
+}

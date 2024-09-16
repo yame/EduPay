@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { useTheme } from 'vuetify'
+// import WebSocketService from '@/services/websocketService'
 import ScrollToTop from '@core/components/ScrollToTop.vue'
 import initCore from '@core/initCore'
 import { initConfigStore, useConfigStore } from '@core/stores/config'
 import { hexToRgb } from '@core/utils/colorConverter'
+import { useTheme } from 'vuetify'
 
 const { global } = useTheme()
 
@@ -12,6 +13,21 @@ initCore()
 initConfigStore()
 
 const configStore = useConfigStore()
+
+// function sendMessage() {
+//   WebSocketService.send('/app/myEndpoint', { content: 'Hello, WebSocket!' });
+// }
+// onMounted(() => {
+//   WebSocketService.connect();
+
+//   WebSocketService.subscribe('/notifications/myTopic', (message) => {
+//     console.log('Received message:', message);
+//   });
+// })
+
+// onBeforeUnmount(() => {
+//   WebSocketService.disconnect();
+// })
 </script>
 
 <template>

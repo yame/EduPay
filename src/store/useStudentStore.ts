@@ -115,5 +115,11 @@ export const useStudentStore = defineStore('student', () => {
   }
 
 
-  return { studentsList, currentStudent, currentEmail, loading, error, updateOne, approvingStudentRegistration, banStudentRegistration, declineStudentRegistration, getPendingStudents, deleteUserByEmail, getAllStudents, addOne, getStudentByCode, getStudentsByProgram, getStudentByEmail, setCurrentStudentEmail, getCurrentStudentEmail }
+  //👉 - Toggle Account 
+  async function toggleEnableUserAccount(email: string) {
+    return await useApi('/user/toggle-account-status?email=' + email).patch()
+  }
+
+
+  return { studentsList, currentStudent, currentEmail, loading, error, updateOne, approvingStudentRegistration, banStudentRegistration, declineStudentRegistration, getPendingStudents, deleteUserByEmail, getAllStudents, addOne, getStudentByCode, getStudentsByProgram, getStudentByEmail, setCurrentStudentEmail, getCurrentStudentEmail, toggleEnableUserAccount }
 })

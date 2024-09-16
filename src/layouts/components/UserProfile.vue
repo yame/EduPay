@@ -35,8 +35,6 @@ const transformObject = (original) => {
 }
 
 const userData = transformObject(currentUser.value)
-console.log(userData.email);
-
 provide('currentEmail', userData.email)
 const loading = ref(false)
 const deconnecter = async () => {
@@ -52,12 +50,10 @@ const deconnecter = async () => {
 
   logout().then(() => setTimeout(() => {
     loading.value = false
-  }, 1000)).then(async () => {
-    await nextTick(() => {
-      router.replace(route.query.to ? String(route.query.to) : '/login').then(() => {
-        setToken(null);
-        useCookie('accessToken').value = null;
-      })
+  }, 1000)).then(() => {
+    router.push('/login').then(() => {
+      setToken(null);
+      useCookie('accessToken').value = null;
     })
   })
 };

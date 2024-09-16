@@ -185,6 +185,7 @@ const afterSubmit = (statusCode: number) => {
               {
                 key: 'amount',
                 title: 'Amount',
+                format: (item) => item.amount + ' DH '
               },
               {
                 key: 'status',
