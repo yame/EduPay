@@ -24,12 +24,12 @@ interface Emit {
 
 const paymentStore = usePaymentStore();
 const { addOne } = paymentStore
-
+const route = useRoute()
 const props = defineProps<Props>()
 const emit = defineEmits<Emit>()
 
 const newPayment = ref<DtoNewPayment>({
-  studentCode: props.studentCode ? props.studentCode : "",
+  studentCode: !route.params.code ? props.studentCode : route.params.code,
   amount: 0,
   date: new Date(),
   paymentType: PAYMENT_TYPE.CASH
@@ -81,7 +81,7 @@ const dialogModelValueUpdate = (val: boolean) => {
 
 const onFormReset = () => {
   newPayment.value = {
-    studentCode: !props.studentCode ? '' : props.studentCode,
+    studentCode: !route.params.code ? props.studentCode : route.params.code,
     amount: 0,
     date: new Date(),
     paymentType: PAYMENT_TYPE.CASH

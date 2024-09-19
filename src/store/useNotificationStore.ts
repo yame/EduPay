@@ -4,13 +4,21 @@ export const useNotificationStore = defineStore("notification", () => {
   const notificationsList = ref<Notification[]>([])
 
   function pushNotification(message: Notification) {
-    console.log(message);
     const jsonObject = JSON.parse(message);
-    console.log(jsonObject);
-    const notification: Notification = {
-      id: jsonObject.email,
+    const notification: Notification = message.includes('payment') ? {
+      id: jsonObject.notificationId,
+      paymentId: jsonObject.paymentId,
+      icon: 'tabler-coin',
+      title: `New Payment 💸💰`,
+      subtitle: jsonObject.message,
+      time: getNotificationTime(jsonObject.registerDate),
+      isSeen: jsonObject.seen,
+      color: 'success'
+    } : {
+      id: jsonObject.notificationId,
+      email: jsonObject.email,
       icon: 'tabler-school',
-      title: `New Registration ⚡`,
+      title: `New Registration 💁🏼‍♂️`,
       subtitle: jsonObject.message,
       time: getNotificationTime(jsonObject.registerDate),
       isSeen: jsonObject.seen,
@@ -18,9 +26,16 @@ export const useNotificationStore = defineStore("notification", () => {
     };
 
     // //👉 - Check if a notification has the same id already exists
-    // const exists = notificationsList.value.some((n) => n.id === notification.id)
-    // if (!exists)
-    notificationsList.value.push(notification)
+    const exists = notificationsList.value.some((n) => n.id === notification.id)
+    if (!exists)
+      notificationsList.value.unshift(notification)
+  }
+
+  function removeNotification(id) {
+    const index = notificationsList.value.findIndex(notification => notification.id === id);
+    if (index !== -1) {
+      notificationsList.value.splice(index, 1);
+    }
   }
 
   async function markAllAsRead() {
@@ -50,7 +65,17 @@ export const useNotificationStore = defineStore("notification", () => {
 
   }
 
+  //👉 - Delete Notification
+  async function deleteNotification(id: number) {
+    return await useApi('/notifications/delete?id=' + id).post()
+  }
 
-  return { notificationsList, pushNotification, onLoginNotifications, markAllAsRead }
+  //👉 - Toggle Seen Notification
+  async function toggleSeen(id: number) {
+    return await useApi('/notifications/toggle-seen?id=' + id).patch().data.value
+  }
+
+
+  return { notificationsList, pushNotification, onLoginNotifications, markAllAsRead, removeNotification, deleteNotification, toggleSeen }
 }
 ) 

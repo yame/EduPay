@@ -4,7 +4,7 @@ import { PROGRAM } from './../@core/types';
 export const useStudentStore = defineStore('student', () => {
 
   const studentsList = ref<Student[]>()
-  const currentEmail = ref(null)
+  const currentEmail = ref('')
   const currentStudent = ref<Student>()
   const loading = ref(true)
   const error = ref('')
@@ -25,7 +25,6 @@ export const useStudentStore = defineStore('student', () => {
       )
       studentsList.value = data.value as Student[]
       loading.value = isFetching.value
-      console.log(loading.value);
 
       error.value = hasError.value
     } catch (error) {
@@ -104,13 +103,22 @@ export const useStudentStore = defineStore('student', () => {
     return await useApi(`/user/pending-students`).get();
   }
 
+  //👉 - Get List student pending by email
+  async function getPendingStudentsByEmail(email: string) {
+    return await useApi(`/user/pending-student/${email}`).get();
+  }
+
   //👉 - Set Current Email
   function setCurrentStudentEmail(email: string) {
+    console.log(currentEmail.value);
+
     currentEmail.value = email
   }
 
   //👉 - Set Current Email
   function getCurrentStudentEmail() {
+    console.log(currentEmail.value);
+
     return currentEmail.value
   }
 
@@ -121,5 +129,5 @@ export const useStudentStore = defineStore('student', () => {
   }
 
 
-  return { studentsList, currentStudent, currentEmail, loading, error, updateOne, approvingStudentRegistration, banStudentRegistration, declineStudentRegistration, getPendingStudents, deleteUserByEmail, getAllStudents, addOne, getStudentByCode, getStudentsByProgram, getStudentByEmail, setCurrentStudentEmail, getCurrentStudentEmail, toggleEnableUserAccount }
+  return { studentsList, currentStudent, currentEmail, loading, error, updateOne, approvingStudentRegistration, banStudentRegistration, declineStudentRegistration, getPendingStudents, deleteUserByEmail, getAllStudents, addOne, getStudentByCode, getStudentsByProgram, getStudentByEmail, setCurrentStudentEmail, getCurrentStudentEmail, toggleEnableUserAccount, getPendingStudentsByEmail }
 })

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useAuthStore } from "@/store/useAuthStore";
+import { useStudentStore } from "@/store/useStudentStore";
 import { PerfectScrollbar } from "vue3-perfect-scrollbar";
 
 const router = useRouter();
@@ -30,28 +31,30 @@ const transformObject = (original) => {
   return {
     fullName: nameParts,
     email: original.sub,
-    role: original.scope.includes('ROLE_ADMIN') ? "ADMIN" : "STUDENT" // Remove 'ROLE_' prefix and capitalize
+    role: original.scope.includes('ROLE_ADMIN') ? "ADMIN" : "STUDENT"
   };
 }
 
 const userData = transformObject(currentUser.value)
+useStudentStore().currentEmail = userData.email
 provide('currentEmail', userData.email)
 const loading = ref(false)
 const deconnecter = async () => {
-  setCurrentUser(null);
-  useCookie("userData").value = null;
-  // ℹ️ We had to remove abilities in then block because if we don't nav menu items mutation is visible while redirecting user to login page
-  // Remove "userAbilities" from cookie
-  useCookie("userAbilityRules").value = null;
 
-  // Reset ability to initial ability
-  ability.update([]);
   loading.value = true
 
-  logout().then(() => setTimeout(() => {
+  logout().then(() =>
     loading.value = false
-  }, 1000)).then(() => {
+  ).then(() => {
     router.push('/login').then(() => {
+      setCurrentUser(null);
+      useCookie("userData").value = null;
+      // ℹ️ We had to remove abilities in then block because if we don't nav menu items mutation is visible while redirecting user to login page
+      // Remove "userAbilities" from cookie
+      useCookie("userAbilityRules").value = null;
+
+      // Reset ability to initial ability
+      ability.update([]);
       setToken(null);
       useCookie('accessToken').value = null;
     })

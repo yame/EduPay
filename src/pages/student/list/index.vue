@@ -25,7 +25,7 @@ const orderBy = ref()
 
 // const students = computed(() => studentsList.value)
 const router = useRouter()
-const students = computed(() => accountStates.value)
+const students = computed(() => studentsList.value?.content)
 const totalStudents = computed(() => studentsList.value?.totalElements)
 
 

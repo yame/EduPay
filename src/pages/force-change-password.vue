@@ -68,8 +68,8 @@ const LogIn = async () => {
     // Fetch user data
     console.table(credentials.value);
 
-    const token = await login(credentials.value);
-    setToken(token);
+    const data = await login(credentials.value);
+    setToken(data.access_token);
     loader.value = true
     const userData = await getCurrentUser();
     setCurrentUser(userData);

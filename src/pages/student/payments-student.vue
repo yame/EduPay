@@ -34,7 +34,6 @@ const search = ref('')
 const studentStore = useStudentStore()
 const { getStudentByEmail, getCurrentStudentEmail } = studentStore
 const { currentStudent, currentEmail } = storeToRefs(studentStore)
-const email = ref(currentEmail.value)
 
 const isViewReceiptPDFVisible = ref(false)
 const pdfUrl = ref(null)
@@ -159,13 +158,15 @@ definePage({
   }
 })
 
+watch(currentEmail, (newV) => {
+  console.log(newV);
 
-onMounted(() => {
-  console.log(getCurrentStudentEmail())
-  getPaymentsByStudent(page.value, itemsPerPage.value, selectedStatus.value, selectedType.value).then(() => {
-    getStudentByEmail(email.value)
-  })
 })
+
+getStudentByEmail(currentEmail.value).then(() => {
+  getPaymentsByStudent(page.value, itemsPerPage.value, selectedStatus.value, selectedType.value)
+})
+
 
 </script>
 
@@ -260,7 +261,7 @@ onMounted(() => {
 
   <EditStatusPaymentDrawer v-if="editPayment" :edit-payment="editPayment" v-model:isDrawerOpen="isEditStatusDialogVisible" @on-update="updateStatus" />
 
-  <AddPaymentDialog v-model:is-dialog-visible="isAddPayementDialogVisible" :student-code="route.params?.code " @onSubmit="afterSubmit" />
+  <AddPaymentDialog v-if="currentStudent" v-model:is-dialog-visible="isAddPayementDialogVisible" :student-code="currentStudent.code" @onSubmit="afterSubmit" />
   <ViewReceiptDialog v-if="isViewReceiptPDFVisible" v-model:is-dialog-visible="isViewReceiptPDFVisible" :url="pdfUrl" />
 
 </template>

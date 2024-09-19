@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import WebSocketService from '@/services/websocketService';
 import { useNotificationStore } from '@/store/useNotificationStore';
 import { useStatisticsStore } from '@/store/useStatisticsStore';
 import type { ChartJsCustomColors } from '@/views/charts/chartjs/types';
@@ -75,15 +74,14 @@ watch(selectedOption, async (val) => {
 //   WebSocketService.send('/app/myEndpoint', { content: 'Hello, WebSocket!' });
 // }
 
-WebSocketService.connect(useCookie('accessToken').value)
 onMounted(async () => {
+  onLoginFetchData().then(() => {
+    console.log(notificationStore.notificationsList);
 
-  await onLoginFetchData()
+  })
 })
 
-onBeforeUnmount(() => {
-  WebSocketService.disconnect();
-})
+
 </script>
 
 <template>

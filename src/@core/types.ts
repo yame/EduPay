@@ -95,11 +95,11 @@ export interface DtoNewStudent {
 
 export interface Student {
   code: string,
-  programId: PROGRAM,
+  programID: PROGRAM,
   firstName: string,
   lastName: string,
   email: string,
-  passwordChanged?: boolean
+  registerDate?: string | Date
 }
 
 export interface Payment {

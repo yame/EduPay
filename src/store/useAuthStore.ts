@@ -26,7 +26,7 @@ export const useAuthStore = defineStore('auth', () => {
     try {
       response = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/auth/login?username=${credentials.email}&password=${credentials.password}`)
       setToken(response.data.access_token)
-      return response.data.access_token
+      return response.data
     } catch (err) {
       if (axios.isAxiosError(err)) {
         //👉 -  Handle AxiosError and display backend error message

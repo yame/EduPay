@@ -25,12 +25,7 @@ export const setupGuards = (router: _RouterTyped<RouteNamedMap & { [key: string]
 
 
 
-    // if (!canNavigate(to) && to.matched.length) {
-    //   // Prevent infinite redirection loop by checking the current route
 
-    //   return isLoggedIn ? { name: 'not-authorized' } : { name: 'login', query: { to: to.fullPath !== '/' ? to.path : undefined } };
-
-    // }
 
 
 

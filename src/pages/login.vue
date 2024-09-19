@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useAuthStore } from "@/store/useAuthStore";
+import { useStudentStore } from "@/store/useStudentStore";
 import { useGenerateImageVariant } from "@core/composable/useGenerateImageVariant";
 import authV2LoginIllustrationBorderedDark from "@images/pages/auth-v2-login-illustration-bordered-dark.png";
 import authV2LoginIllustrationBorderedLight from "@images/pages/auth-v2-login-illustration-bordered-light.png";
@@ -17,7 +18,8 @@ definePage({
   meta: {
     layout: "blank",
     unauthenticatedOnly: true,
-  },
+  }
+
 });
 const credentials = ref({
   email: "hamza@damiri.com",
@@ -56,12 +58,16 @@ const refVForm = ref<VForm>();
 const authStore = useAuthStore();
 const { login, getCurrentUser, setCurrentUser, setToken } = authStore;
 const { loading, error } = storeToRefs(authStore);
+const studentStore = useStudentStore()
+const { setCurrentStudentEmail } = (studentStore)
+const { currentEmail } = storeToRefs(studentStore)
 const loader = ref(false)
 
 const LogIn = async () => {
   try {
     loader.value = true
-    const token = await login(credentials.value);
+    const data = await login(credentials.value);
+    const token = data.access_token
     setToken(token);
 
     // Redirect

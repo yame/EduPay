@@ -7,6 +7,7 @@ export const usePaymentStore = defineStore('payment', () => {
 
   const paymentsList = ref<Payment[]>()
   const currentPayment = ref<Payment>()
+  const currentEmail = ref(null)
   const currentReceipt = ref<File>()
   const loading = ref(true)
   const error = ref('')

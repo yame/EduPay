@@ -280,7 +280,7 @@ onMounted(() => {
 
   <EditStatusPaymentDrawer v-if="editPayment" :edit-payment="editPayment" v-model:isDrawerOpen="isEditStatusDialogVisible" @on-update="updateStatus" />
 
-  <AddPaymentDialog v-model:is-dialog-visible="isAddPayementDialogVisible" :student-code="route.params?.code " @onSubmit="afterSubmit" />
+  <AddPaymentDialog v-model:is-dialog-visible="isAddPayementDialogVisible" :student-code="route.params?.code" @onSubmit="afterSubmit" />
   <ViewReceiptDialog v-if="isViewReceiptPDFVisible" v-model:is-dialog-visible="isViewReceiptPDFVisible" :url="pdfUrl" />
 
 </template>

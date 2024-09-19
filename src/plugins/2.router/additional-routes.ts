@@ -23,7 +23,6 @@ export const redirects: RouteRecordRaw[] = [
       const userRole = ref((roles.value?.includes('ROLE_ADMIN')) ? 'admin' : 'student')
       console.log("😍 user role", userRole.value);
       const studentStore = useStudentStore();
-      studentStore.setCurrentStudentEmail(userData?.sub);
       if (userRole.value === 'admin')
         return { name: 'root' }
       if (userRole.value === 'student')
