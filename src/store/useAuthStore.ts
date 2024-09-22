@@ -1,3 +1,4 @@
+import { Rule } from '@/plugins/casl/ability';
 import axios from 'axios';
 import { ChangePWDTO, DtoNewStudent } from './../@core/types';
 
@@ -6,27 +7,53 @@ interface Credentials {
   password: string
 }
 
+interface EduPayUser {
+  departmentName: string,
+  firstName: string,
+  lastName: string,
+  role: string,
+  email: string
+}
+
+
+
+
 export const useAuthStore = defineStore('auth', () => {
-  const currentUser = ref(null)
+  const currentUser = ref<EduPayUser | null>(null)
+  const userAbilityRules = ref<Rule[]>()
   const loading = ref(false)
   const error = ref('')
-  const accessToken = ref(null)
+  const accessToken = ref<string | null>(null)
 
   watch(accessToken, (newToken) => {
     useCookie('accessToken').value = newToken;
   });
 
-  watch(currentUser, (newUser) => {
-    useCookie('userData').value = newUser;
+  watch(currentUser, (newUser: EduPayUser) => {
+    useCookie('userData').value = JSON.stringify(newUser);
   });
 
   //👉 - Get All Student 
   async function login(credentials: Credentials) {
+    loading.value = true;
     let response;
     try {
       response = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/auth/login?username=${credentials.email}&password=${credentials.password}`)
+
+      //👉 - Set TokenAccess
       setToken(response.data.access_token)
+
+      //👉 - Set CurrentUser
+      const { access_token, ...userData } = response.data
+      setCurrentUser(userData)
+
+      //👉 - Set UserAbilityRules
+      setUserAbilityRules()
+
+      loading.value = false;
+
       return response.data
+
     } catch (err) {
       if (axios.isAxiosError(err)) {
         //👉 -  Handle AxiosError and display backend error message
@@ -53,6 +80,9 @@ export const useAuthStore = defineStore('auth', () => {
       console.log(err);
     }
   }
+
+
+
   //👉 - Register new Student
   async function register(payload: DtoNewStudent) {
     return await useApi('/user/register').post(payload)
@@ -62,9 +92,6 @@ export const useAuthStore = defineStore('auth', () => {
   //👉 - Get All Student 
   async function logout() {
     try {
-
-      setCurrentUser(null);
-      useCookie('userData').value = null;
       return await useApi('/auth/logout').post()
     } catch (err) {
       error.value = err?.message;
@@ -83,11 +110,32 @@ export const useAuthStore = defineStore('auth', () => {
 
 
   function setCurrentUser(currUser) {
-    currentUser.value = currUser
+    if (currUser) {
+      const { roles, ...userWithoutRoles } = currUser;
+      currentUser.value = currUser;
+      userWithoutRoles.role = isAdmin(roles) ? "ADMIN" : "STUDENT";
+    } else {
+      console.warn("currUser is null, cannot set user role.");
+      currentUser.value = null;
+    }
+
   }
 
-  function setToken(token) {
+  function setToken(token: string | null) {
     accessToken.value = token
+  }
+
+  function setUserAbilityRules() {
+    if (currentUser.value?.role === 'ADMIN') {
+      userAbilityRules.value = [
+        { action: "manage", subject: "all" },
+        { action: "manage", subject: "ADMIN" },
+        { action: "manage", subject: "STUDENT" },
+      ];
+    }
+    else {
+      userAbilityRules.value = [{ action: "manage", subject: "STUDENT" }];
+    }
   }
 
   function getUserData() {
@@ -113,12 +161,12 @@ export const useAuthStore = defineStore('auth', () => {
     return await useApi('/user/ban?email=' + email).post()
   }
 
-  //👉 - 
+  //👉 - Toggle Account Status
   async function toogleAccountStatus(email: string) {
     return await useApi('/toggle-account-status?email=' + email).put()
   }
 
   return {
-    currentUser, loading, error, accessToken, register, setCurrentUser, setToken, login, logout, getUserData, getToken, getCurrentUser, resetPasswordToDefault, changePassword, approveRegistration, declineRegistration, banRegistration, toogleAccountStatus
+    currentUser, loading, error, accessToken, userAbilityRules, register, setUserAbilityRules, setCurrentUser, setToken, login, logout, getUserData, getToken, getCurrentUser, resetPasswordToDefault, changePassword, approveRegistration, declineRegistration, banRegistration, toogleAccountStatus
   }
 })

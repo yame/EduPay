@@ -54,3 +54,7 @@ export function getNotificationTime(dateString) {
   // Format the time as "Today", "Yesterday", or "X days ago"
   return formatDateDifference(diffDays);
 }
+
+export function isAdmin(roles: string) {
+  return roles.includes('ROLE_ADMIN')
+}

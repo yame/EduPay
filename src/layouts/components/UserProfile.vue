@@ -1,7 +1,5 @@
 <script setup lang="ts">
-import websocketService from "@/services/websocketService";
 import { useAuthStore } from "@/store/useAuthStore";
-import { useStudentStore } from "@/store/useStudentStore";
 import { PerfectScrollbar } from "vue3-perfect-scrollbar";
 
 const router = useRouter();
@@ -9,39 +7,15 @@ const ability = useAbility();
 
 // TODO: Get type from backend
 const authStore = useAuthStore();
-const { accessToken } = storeToRefs(authStore);
+const { currentUser, userAbilityRules } = storeToRefs(authStore)
 const { setCurrentUser, setToken, getUserData, logout } = authStore;
 getUserData()
-const currentUser = ref(useCookie('userData').value)
 const route = useRoute();
 
 const toCamelCase = (part: string) => {
   return part.charAt(0).toUpperCase() + part.slice(1);
 }
 
-
-//  "departmentName": "PHYSICS",
-//     "firstName": "Hamza",
-//     "lastName": "Damiri",
-//     "roles": "ROLE_ADMIN ROLE_STUDENT",
-//     "email": "hamza@damiri.com"
-const transformObject = (original) => {
-  // Split the email to get the name part
-  const emailParts = original.sub.split('@');
-
-  // Capitalize the first letter of each part of the name
-  const firstNamePart = toCamelCase(emailParts[0]);
-  const lastNamePart = toCamelCase(emailParts[1].split('.')[0]);
-  const nameParts = firstNamePart + ' ' + lastNamePart
-  return {
-    fullName: nameParts,
-    email: original.sub,
-    role: original.scope.includes('ROLE_ADMIN') ? "ADMIN" : "STUDENT"
-  };
-}
-
-const userData = transformObject(currentUser.value)
-useStudentStore().currentEmail = userData.email
 
 const loading = ref(false)
 const deconnecter = async () => {
@@ -53,16 +27,14 @@ const deconnecter = async () => {
   ).then(() => {
     router.push('/login').then(() => {
       setCurrentUser(null);
+      useCookie('accessToken').value = null;
       useCookie("userData").value = null;
       // ℹ️ We had to remove abilities in then block because if we don't nav menu items mutation is visible while redirecting user to login page
-      // Remove "userAbilities" from cookie
       useCookie("userAbilityRules").value = null;
-
-      // Reset ability to initial ability
+      userAbilityRules.value = null
       ability.update([]);
       setToken(null);
-      useCookie('accessToken').value = null;
-      websocketService.disconnect()
+      getCurrentInstance()?.appContext.config.globalProperties.$disconnectWebSocket()
     })
   })
 };
@@ -95,13 +67,12 @@ const userProfileList = [
 ];
 
 
-
 </script>
 
 <template>
-  <VBadge v-if="userData" dot bordered location="bottom right" offset-x="1" offset-y="2" color="success">
-    <VAvatar :color=" (userData)  ? resolveUserRoleVariant(userData?.role)?.color : undefined">
-      <VIcon :icon=" (userData)  ? resolveUserRoleVariant(userData?.role)?.icon : undefined" />
+  <VBadge v-if="currentUser" dot bordered location="bottom right" offset-x="1" offset-y="2" color="success">
+    <VAvatar :color=" (currentUser)  ? resolveUserRoleVariant(currentUser?.role)?.color : undefined">
+      <VIcon :icon=" (currentUser)  ? resolveUserRoleVariant(currentUser?.role)?.icon : undefined" />
 
       <!-- SECTION Menu -->
       <VMenu activator="parent" width="240" location="bottom end" offset="12px">
@@ -110,17 +81,23 @@ const userProfileList = [
             <div class="d-flex gap-2 align-center">
               <VListItemAction>
                 <VBadge dot location="bottom right" offset-x="3" offset-y="3" color="success" bordered>
-                  <VAvatar :icon="resolveUserRoleVariant(userData?.role)?.icon" :color="resolveUserRoleVariant(userData?.role)?.color" />
+                  <VAvatar :icon="resolveUserRoleVariant(currentUser?.role)?.icon" :color="resolveUserRoleVariant(currentUser?.role)?.color" />
                 </VBadge>
               </VListItemAction>
 
               <div>
                 <h6 class="text-h6 font-weight-medium">
-                  {{ userData?.fullName }}
+                  {{ currentUser?.lastName }} {{ currentUser?.firstName }}
                 </h6>
                 <VListItemSubtitle class="text-capitalize text-disabled">
-                  {{ userData?.role }}
+                  {{ currentUser?.role }}
+
                 </VListItemSubtitle>
+                <VChip class="ml-2 float-right" color="info" size="x-small">
+                  <VIcon start icon="tabler-building-skyscraper" />
+                  {{ currentUser?.departmentName }}
+                </VChip>
+
               </div>
             </div>
           </VListItem>

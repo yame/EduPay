@@ -94,10 +94,10 @@ const onSubmit = () => {
       <VCard flat :max-width="500" class="mt-12 mt-sm-0 pa-4">
         <VCardText>
           <h4 class="text-h4 mb-1">
-            Adventure starts here 🚀
+            Create an Account ✍️
           </h4>
           <p class="mb-0">
-            Make your app management easy and fun!
+            Register to simplify your app management.
           </p>
         </VCardText>
 
@@ -110,7 +110,7 @@ const onSubmit = () => {
               </VCol>
               <!-- FirstName -->
               <VCol cols="12">
-                <AppTextField v-model="form.code" :rules="[requiredValidator]" label="Student Code" placeholder="Student Code" />
+                <AppTextField v-model="form.code" :rules="[requiredValidator,studentCodeValidator]" label="Student Code" placeholder="Student Code" />
               </VCol>
               <!-- LastName -->
               <VCol cols="12">
@@ -138,7 +138,7 @@ const onSubmit = () => {
               <!-- create account -->
               <VCol cols="12" class="text-center text-base">
                 <span>Already have an account?</span>
-                <RouterLink class="text-secondary ms-1 d-inline-block font-weight-bold" :to="{ name: 'login' }">
+                <RouterLink class="text-secondary ms-1  font-weight-bold" :to="{ name: 'login' }">
                   <li>Sign in instead</li>
                 </RouterLink>
               </VCol>

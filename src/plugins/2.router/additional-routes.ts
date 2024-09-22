@@ -1,5 +1,3 @@
-import { useStudentStore } from '@/store/useStudentStore';
-import { jwtDecode } from 'jwt-decode';
 import type { RouteRecordRaw } from 'vue-router/auto';
 
 
@@ -11,24 +9,17 @@ export const redirects: RouteRecordRaw[] = [
     path: '/',
     name: 'index',
     redirect: to => {
+
       // TODO: Get type from backend
+      const userData = useCookie<Record<string, unknown> | null | undefined>('userData')
+      const userRole = userData.value?.role
 
-      // console.log(jwtDecode((useCookie('accessToken').value)?.toString()));
-
-      const accessToken = ref<string>(useCookie('accessToken').value)
-      const userData = jwtDecode(accessToken.value)
-      const roles = ref(userData?.scope.split(' '));
-      console.log("😍 user role", roles.value);
-
-      const userRole = ref((roles.value?.includes('ROLE_ADMIN')) ? 'admin' : 'student')
-      console.log("😍 user role", userRole.value);
-      const studentStore = useStudentStore();
-      if (userRole.value === 'admin')
+      if (userRole === 'ADMIN')
         return { name: 'root' }
-      if (userRole.value === 'student')
+      if (userRole === 'STUDENT')
         return { name: 'student-payments-student' }
-      if (to.meta.public)
-        return
+      return { name: 'login' }
+
     },
   },
 

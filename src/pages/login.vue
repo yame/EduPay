@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { useAuthStore } from "@/store/useAuthStore";
-import { useStudentStore } from "@/store/useStudentStore";
 import { useGenerateImageVariant } from "@core/composable/useGenerateImageVariant";
 import authV2LoginIllustrationBorderedDark from "@images/pages/auth-v2-login-illustration-bordered-dark.png";
 import authV2LoginIllustrationBorderedLight from "@images/pages/auth-v2-login-illustration-bordered-light.png";
@@ -10,73 +9,23 @@ import authV2MaskDark from "@images/pages/misc-mask-dark.png";
 import authV2MaskLight from "@images/pages/misc-mask-light.png";
 import { VNodeRenderer } from "@layouts/components/VNodeRenderer";
 import { themeConfig } from "@themeConfig";
-import { jwtDecode } from 'jwt-decode';
-import { toast } from 'vue3-toastify';
+import { jwtDecode } from "jwt-decode";
+import { toast } from "vue3-toastify";
+// import { toast } from 'vue3-toastify';
 import { VForm } from "vuetify/components/VForm";
-
-// //NOTE - WEB SOCKET SETTING HERE
-// //👉 - Variables For WEBSOCKET
-// const notificationStore = useNotificationStore()
-// const { pushNotification } = notificationStore
-// const { notificationsList } = storeToRefs(notificationStore)
-// //👉 - Inject Counter Store for unseen Notification
-// const counterStore = inject('counterStore');
-// //👉 -  Function to check if the notification is unseen
-// function isNotificationUnseen(jsonString: string) {
-//   const notification = JSON.parse(jsonString);
-//   return !notification.seen;
-// }
-
-// //👉 -  InitWebSocketConnection
-// async function initWebSocketConnection() {
-//   try {
-//     await WebSocketService.connect(useCookie('accessToken').value);
-
-//     WebSocketService.client?.subscribe('/notifications/pending-registration', (message) => {
-//       {
-//         pushNotification(message.body);
-//         if (isNotificationUnseen(message.body)) {
-//           pushNotification(message.body);
-//           counterStore.increment();
-//         } else {
-//           console.log("This notification has already been seen.");
-//         }
-
-//       }
-//     });
-
-//     WebSocketService.client?.subscribe('/notifications/new-payment', (message) => {
-//       if (useCookie('userData').value?.scope.includes('ROLE_ADMIN')) {
-//         pushNotification(message.body);
-
-//         if (isNotificationUnseen(message.body)) {
-//           counterStore.increment();
-//         } else {
-//           console.log("This notification has already been seen.");
-//         }
-
-
-//       }
-//     });
-//   } catch (error) {
-//     console.error('WebSocket connection error:', error);
-//   }
-// }
 
 definePage({
   meta: {
     layout: "blank",
     unauthenticatedOnly: true,
   }
-
 });
+
 const credentials = ref({
   email: "hamza@damiri.com",
   password: "123321",
 });
-
 const isPasswordVisible = ref(false);
-
 const authThemeImg = useGenerateImageVariant(
   authV2LoginIllustrationLight,
   authV2LoginIllustrationDark,
@@ -84,94 +33,59 @@ const authThemeImg = useGenerateImageVariant(
   authV2LoginIllustrationBorderedDark,
   true
 );
-
 const authThemeMask = useGenerateImageVariant(authV2MaskLight, authV2MaskDark);
-
-//******************************************************************************************* */
-
 const route = useRoute();
 const router = useRouter();
-
 const ability = useAbility();
-
-const errors = ref<Record<string, string | undefined>>({
-  email: undefined,
-  password: undefined,
-});
-//  const notify = () => {
-//       Vue3Toastify("Wow so easy !", {
-//         autoClose: 1000,
-//       }); // ToastOptions
-//     }
 const refVForm = ref<VForm>();
 const authStore = useAuthStore();
-const { login, getCurrentUser, setCurrentUser, setToken } = authStore;
-const { loading, error, currentUser } = storeToRefs(authStore);
-const studentStore = useStudentStore()
-const { setCurrentStudentEmail } = (studentStore)
-const { currentEmail } = storeToRefs(studentStore)
+const { login } = authStore;
+const { loading, error, currentUser, userAbilityRules, accessToken } = storeToRefs(authStore);
+
 const loader = ref(false)
 
+const isAdmin = (roles: string) => {
+  return roles.includes('ROLE_ADMIN')
+}
+
 const LogIn = async () => {
+  loader.value = true;
+
   try {
-    loader.value = true
-    const data = await login(credentials.value);
-    const token = data.access_token
-    setToken(token);
+    await login(credentials.value);
 
-    // Redirect
-    if (token) {
-      const isLoggedIn = !!(useCookie('accessToken').value)
-      if (isLoggedIn) {
-        // setTimeout(() => {
-        //   loader.value = false
-        // }, 1000)
+    if (!accessToken) {
+      toast.error('You are Not Authorized 💔', {
+        theme: useCookie('EduPayment-theme').value || 'auto'
+      });
+    }
+    //👉 -  Update Cookies for each User
+    useCookie('accessToken').value = accessToken.value;
+    useCookie('userData').value = currentUser.value ? JSON.stringify(currentUser.value) : null;
+    useCookie('userAbilityRules').value = userAbilityRules.value ? JSON.stringify(userAbilityRules.value) : null;
+    ability.update(userAbilityRules.value || []);
 
-        const userData = jwtDecode(token?.toString()) || {}
-        if (!userData?.isPasswordChanged) {
-          router.push(route.query.to ? String(route.query.to) : "/force-change-password");
-        }
-        else {
-          const userDataa = await getCurrentUser();
-          setCurrentUser(userDataa);
-          let userAbilityRules = [];
-          if (userData?.scope.includes("ROLE_ADMIN")) {
-            userAbilityRules = [
-              { action: "manage", subject: "all" },
-              { action: "manage", subject: "ADMIN" },
-              { action: "manage", subject: "STUDENT" },
-            ];
-          } else {
-            userAbilityRules = [{ action: "manage", subject: "STUDENT" }];
-          }
+    //👉 -  Check if the user has already changed their password.
+    const userData = jwtDecode(accessToken.value!);
+    console.log(userData);
 
-          useCookie("userAbilityRules").value = userAbilityRules;
-          ability.update(userAbilityRules);
-
-          router.push(route.query.to ? String(route.query.to) : "/").finally(() => {
-            loader.value = false
-            toast.success('Login successful ✔', {
-              "theme": useCookie('EduPayment-theme').value || 'auto'
-            })
-          })
-        }
-      }
-      else {
-        toast.error(error.value + ' 🧨❌', {
-          "theme": useCookie('EduPayment-theme').value || 'auto'
+    if (userData?.isPasswordChanged) {
+      await router.push(route.query.to ? String(route.query.to) : "/").then(() => {
+        toast.success('Login successful ✅⚡', {
+          theme: useCookie('EduPayment-theme').value || 'auto'
         })
-        loader.value = false
-      }
-    }
-    else {
-      toast.error(error.value + ' 🧨❌', {
-        "theme": useCookie('EduPayment-theme').value || 'auto'
       })
-      loader.value = false
-
+    } else {
+      await router.push(route.query.to ? String(route.query.to) : "/force-change-password");
     }
+
   } catch (err) {
-    console.error(err);
+    toast.error(error.value + ' 🧨❌' || 'An error occurred 🧨❌', {
+      theme: useCookie('EduPayment-theme').value || 'auto'
+    });
+  }
+  finally {
+    loader.value = false;
   }
 };
 
@@ -232,7 +146,7 @@ const onLoginSubmit = () => {
 
               <!-- password -->
               <VCol cols="12">
-                <AppTextField v-model="credentials.password" label="Password" placeholder="Password" :error-messages="errors.password" :type="isPasswordVisible ? 'text' : 'password'" :append-inner-icon="
+                <AppTextField v-model="credentials.password" label="Password" placeholder="Password" :type="isPasswordVisible ? 'text' : 'password'" :append-inner-icon="
                     isPasswordVisible ? 'tabler-eye-off' : 'tabler-eye'
                   " @click:append-inner="isPasswordVisible = !isPasswordVisible" :rules="[requiredValidator]" />
                 <div class="d-flex align-center flex-wrap justify-space-between mt-3">

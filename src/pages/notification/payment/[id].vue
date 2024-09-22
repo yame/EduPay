@@ -1,7 +1,7 @@
   
   <script setup lang="ts">
 import { Payment, PAYMENT_STATUS, PAYMENT_TYPE } from '@/@core/types';
-import { router } from '@/plugins/2.router';
+import { router } from '@/plugins/3.router';
 import { usePaymentStore } from '@/store/usePaymentStore';
 import pdf from '@jbtje/vite-vue3pdf';
 import { toast } from 'vue3-toastify';

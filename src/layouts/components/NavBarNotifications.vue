@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { router } from '@/plugins/2.router';
+import { router } from '@/plugins/3.router';
 import { useNotificationStore } from '@/store/useNotificationStore';
 import type { Notification } from '@layouts/types';
 

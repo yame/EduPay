@@ -13,12 +13,28 @@ export const emailValidator = (value: unknown) => {
   if (isEmpty(value))
     return true
 
-  const re = /^(?:[^<>()[\]\\.,;:\s@"]+(?:\.[^<>()[\]\\.,;:\s@"]+)*|".+")@(?:\[\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\]|(?:[a-z\-\d]+\.)+[a-z]{2,})$/i
-
+  // const re = /^(?:[^<>()[\]\\.,;:\s@"]+(?:\.[^<>()[\]\\.,;:\s@"]+)*|".+")@(?:\[\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\]|(?:[a-z\-\d]+\.)+[a-z]{2,})$/i
+  const re = /^[a-z]{4}[a-z0-9._%+-]*@[a-z]{2,6}(\.[a-z]{2,3}){1}$/
   if (Array.isArray(value))
     return value.every(val => re.test(String(val))) || 'The Email field must be a valid email'
 
   return re.test(String(value)) || 'The Email field must be a valid email'
+}
+
+//👉 - eduPayValidator
+export const studentCodeValidator = (value: unknown) => {
+  if (isEmpty(value))
+    return true
+
+  var re = /^[a-z]{1,2}[0-9]{4,8}[a-z]?$/;
+
+
+  if (Array.isArray(value))
+    return value.every(val => re.test(String(val))) || 'The StudentCode field must be a valid code'
+
+  return re.test(String(value)) || 'The StudentCode field must be a valid code'
+
+
 }
 
 // 👉 Password Validator
@@ -105,7 +121,8 @@ export const alphaDashValidator = (value: unknown) => {
 }
 
 
-export const fileValidator = (value: FileList) => {   
+export const fileValidator = (value: FileList) => {
   if (isEmpty(value[0]))
     return true
-  return value[0].type === 'application/pdf' || 'Only PDF files are allowed!'}
+  return value[0].type === 'application/pdf' || 'Only PDF files are allowed!'
+}
