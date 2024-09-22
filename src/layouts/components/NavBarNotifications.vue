@@ -6,6 +6,7 @@ import type { Notification } from '@layouts/types';
 const notificationStore = useNotificationStore()
 const { notificationsList } = storeToRefs(notificationStore)
 const { markAllAsRead, toggleSeen } = notificationStore
+const counterStore = inject('counterStore')
 
 // const notifications = ref<Notification[]>([
 //   {
@@ -25,13 +26,12 @@ const router = useRouter();
 badgeProps.value.content = notificationsList.value.length
 
 
-const removeNotification = (notificationId: number) => {
+const remNotification = (notificationId: number) => {
   notificationsList.value.forEach((item, index) => {
     if (notificationId === item.id)
-      (item.icon) === 'tabler-school' ? notificationStore.deleteNotification(notificationId).then(() => notificationStore.removeNotification(notificationId)) : notificationStore.deleteNotification(notificationId).then(() => notificationStore.removeNotification(notificationId))
-
-    // notificationsList.value.splice(index, 1)
-
+      notificationStore.deleteNotification(notificationId).then(() => notificationStore.removeNotification(notificationId)).then(() => {
+        counterStore.decrement()
+      })
   })
 }
 
@@ -80,11 +80,12 @@ const markUnRead = (notificationId: number[]) => {
 }
 
 const handleNotificationClick = (notification: Notification) => {
-  if (!notification.isSeen) {
-    markRead([notification.id])
-    notification.icon === 'tabler-school' ? router.push(`/notification/registration/${notification.email}`) : router.push(`/notification/payment/${notification.paymentId}`)
-    toggle(false)
-  }
+
+  markRead([notification.id])
+  counterStore.decrement()
+  notification.paymentId === undefined ? router.push(`/notification/registration/${notification.email}`) : router.push(`/notification/payment/${notification.paymentId}`)
+  toggle(false)
+
 }
 
 const toggle = (val) => {
@@ -92,9 +93,16 @@ const toggle = (val) => {
 
   badgeProps.value.showMenu = val
 }
+console.log(notificationsList.value);
+
+
+const displayedNotifications = computed(() => {
+  return notificationsList.value.slice(0, 10);
+});
+
 // notificationsList.sort((a,b)=>a.isSeen - b.isSeen)
 </script>
 
 <template>
-  <Notifications :notifications="notificationsList" :badge-props="badgeProps" @mark-all-read="markAllRead" @remove="removeNotification" @read="markRead" @unread="markUnRead" @click:notification="handleNotificationClick" @toggle-menu="toggle" />
+  <Notifications :notifications="displayedNotifications" :badge-props="badgeProps" @mark-all-read="markAllRead" @remove="remNotification" @read="markRead" @unread="markUnRead" @click:notification="handleNotificationClick" @toggle-menu="toggle" />
 </template>

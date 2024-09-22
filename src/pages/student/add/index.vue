@@ -45,10 +45,13 @@ const addStudent = () => {
 
 <template>
   <v-card>
-    <VForm class="pa-6" ref="refForm" @submit.prevent="addStudent">
+    <VCardTitle class="pa-5 text-h4">
+      Student Enrollment Form :
+    </VCardTitle>
+    <VForm class="pt-0 px-5 pb-5" ref="refForm" @submit.prevent="addStudent">
       <VRow>
         <VCol cols="12" md="6">
-          <AppTextField v-model="newStudent.code" label="Code" type="number" placeholder="Your Code" :rules="[requiredValidator]" />
+          <AppTextField v-model="newStudent.code" label="Code" placeholder="Your Code" :rules="[requiredValidator]" />
         </VCol>
         <VCol cols="12" md="6">
           <AppTextField v-model="newStudent.firstName" label="FirstName" placeholder="Your FirstName" :rules="[requiredValidator]" />

@@ -1,9 +1,11 @@
 import { DtoNewStudent, Student } from "@/@core/types";
+import axios from 'axios';
 import { PROGRAM } from './../@core/types';
 
 export const useStudentStore = defineStore('student', () => {
 
   const studentsList = ref<Student[]>()
+  const pendingStudents = ref<Student[]>()
   const currentEmail = ref('')
   const currentStudent = ref<Student>()
   const loading = ref(true)
@@ -80,7 +82,7 @@ export const useStudentStore = defineStore('student', () => {
 
   //👉 - Delete student by his Email
   async function deleteUserByEmail(email: string) {
-    return await useApi(`/user/delete`).delete(email)
+    return await useApi(`/user/delete?email=${email}`).delete()
   }
 
   //👉 - Ban student registration
@@ -99,14 +101,74 @@ export const useStudentStore = defineStore('student', () => {
   }
 
   //👉 - Get List student pending
-  async function getPendingStudents() {
-    return await useApi(`/user/pending-students`).get();
+  async function getPendingStudents(currentPage?: Number, itemsPerPage?: Number, email?: String) {
+    try {
+      const { data, error: hasError, isFetching } = await useApi(createUrl('/user/pending-students', {
+        query: {
+          page: (currentPage - 1),
+          size: itemsPerPage,
+          email: email
+          // programID: programId,
+          // code: code,
+          // lastName: lastName,
+          // firstName: firstName
+        }
+      })
+      )
+      pendingStudents.value = data.value as Student[]
+      loading.value = isFetching.value
+
+      error.value = hasError.value
+    } catch (error) {
+      console.log(error)
+    }
   }
+
 
   //👉 - Get List student pending by email
   async function getPendingStudentsByEmail(email: string) {
     return await useApi(`/user/pending-student/${email}`).get();
   }
+
+
+  //👉 - Load Students From Excel
+  async function uploadStudentFile(file: File) {
+    console.log(file);
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+      const res = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/user/students/load-from-excel`, formData, {
+        headers: {
+          Authorization: `Bearer ${useCookie('accessToken').value}`,
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      return res.data;
+
+    } catch (error) {
+      console.error('Error uploading file:');
+
+      if (error.response && error.response.data) {
+        console.log(error);
+        console.warn(error.response);
+
+        const errorMessage = error.response.data.message
+        if (!errorMessage)
+          throw error.response.data
+        else
+          throw errorMessage
+      } else {
+        console.error('Error message:', error.message);
+      }
+    }
+  }
+
+
+
+
+
 
   //👉 - Set Current Email
   function setCurrentStudentEmail(email: string) {
@@ -123,11 +185,13 @@ export const useStudentStore = defineStore('student', () => {
   }
 
 
+
+
   //👉 - Toggle Account 
   async function toggleEnableUserAccount(email: string) {
     return await useApi('/user/toggle-account-status?email=' + email).patch()
   }
 
 
-  return { studentsList, currentStudent, currentEmail, loading, error, updateOne, approvingStudentRegistration, banStudentRegistration, declineStudentRegistration, getPendingStudents, deleteUserByEmail, getAllStudents, addOne, getStudentByCode, getStudentsByProgram, getStudentByEmail, setCurrentStudentEmail, getCurrentStudentEmail, toggleEnableUserAccount, getPendingStudentsByEmail }
+  return { studentsList, currentStudent, currentEmail, loading, error, pendingStudents, updateOne, approvingStudentRegistration, banStudentRegistration, declineStudentRegistration, getPendingStudents, deleteUserByEmail, getAllStudents, addOne, getStudentByCode, getStudentsByProgram, getStudentByEmail, setCurrentStudentEmail, getCurrentStudentEmail, toggleEnableUserAccount, getPendingStudentsByEmail, uploadStudentFile }
 })

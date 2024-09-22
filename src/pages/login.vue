@@ -14,6 +14,55 @@ import { jwtDecode } from 'jwt-decode';
 import { toast } from 'vue3-toastify';
 import { VForm } from "vuetify/components/VForm";
 
+// //NOTE - WEB SOCKET SETTING HERE
+// //👉 - Variables For WEBSOCKET
+// const notificationStore = useNotificationStore()
+// const { pushNotification } = notificationStore
+// const { notificationsList } = storeToRefs(notificationStore)
+// //👉 - Inject Counter Store for unseen Notification
+// const counterStore = inject('counterStore');
+// //👉 -  Function to check if the notification is unseen
+// function isNotificationUnseen(jsonString: string) {
+//   const notification = JSON.parse(jsonString);
+//   return !notification.seen;
+// }
+
+// //👉 -  InitWebSocketConnection
+// async function initWebSocketConnection() {
+//   try {
+//     await WebSocketService.connect(useCookie('accessToken').value);
+
+//     WebSocketService.client?.subscribe('/notifications/pending-registration', (message) => {
+//       {
+//         pushNotification(message.body);
+//         if (isNotificationUnseen(message.body)) {
+//           pushNotification(message.body);
+//           counterStore.increment();
+//         } else {
+//           console.log("This notification has already been seen.");
+//         }
+
+//       }
+//     });
+
+//     WebSocketService.client?.subscribe('/notifications/new-payment', (message) => {
+//       if (useCookie('userData').value?.scope.includes('ROLE_ADMIN')) {
+//         pushNotification(message.body);
+
+//         if (isNotificationUnseen(message.body)) {
+//           counterStore.increment();
+//         } else {
+//           console.log("This notification has already been seen.");
+//         }
+
+
+//       }
+//     });
+//   } catch (error) {
+//     console.error('WebSocket connection error:', error);
+//   }
+// }
+
 definePage({
   meta: {
     layout: "blank",
@@ -57,7 +106,7 @@ const errors = ref<Record<string, string | undefined>>({
 const refVForm = ref<VForm>();
 const authStore = useAuthStore();
 const { login, getCurrentUser, setCurrentUser, setToken } = authStore;
-const { loading, error } = storeToRefs(authStore);
+const { loading, error, currentUser } = storeToRefs(authStore);
 const studentStore = useStudentStore()
 const { setCurrentStudentEmail } = (studentStore)
 const { currentEmail } = storeToRefs(studentStore)
@@ -131,7 +180,7 @@ const onLoginSubmit = () => {
     ?.validate()
     .then(({ valid }) => {
       if (valid) {
-        LogIn();
+        LogIn()
       }
     })
     .catch((err) => console.log(err));
@@ -139,9 +188,6 @@ const onLoginSubmit = () => {
 
 
 
-// toast.success('Login successful!', {
-//               "theme": useCookie('EduPayment-theme').value || 'auto'
-//             })
 </script>
 
 <template>
@@ -173,11 +219,11 @@ const onLoginSubmit = () => {
             <span class="text-capitalize">{{ themeConfig.app.title }}</span>! 👋🏻
           </h4>
           <p class="mb-0">
-            Please sign-in to your account and start the adventure
+            Please log in to access your account and explore our services.
           </p>
         </VCardText>
         <VCardText>
-          <VForm ref="refVForm" @submit.prevent="LogIn">
+          <VForm ref="refVForm" @submit.prevent="onLoginSubmit">
             <VRow>
               <!-- email -->
               <VCol cols="12">
@@ -202,10 +248,10 @@ const onLoginSubmit = () => {
               <!-- create account -->
               <VCol cols="12" class="text-body-1 text-center">
                 <VDivider class="mb-5" />
-                <span class="d-block">New on our platform?</span>
+                <span>New on our platform?</span>
 
-                <RouterLink class="text-secondary" :to="{ name: 'register' }">
-                  Create an account
+                <RouterLink class="font-weight-bold text-secondary" :to="{ name: 'register' }">
+                  <li>Create an account</li>
                 </RouterLink>
               </VCol>
             </VRow>
@@ -219,6 +265,6 @@ const onLoginSubmit = () => {
 <style lang="scss" scoped>
 @use "@core/scss/template/pages/page-auth.scss";
 ::v-deep(.text-secondary:hover) {
-  color: red !important;
+  color: rgb(var(--v-theme-primary)) !important;
 }
 </style>

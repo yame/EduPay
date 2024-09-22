@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import websocketService from "@/services/websocketService";
 import { useAuthStore } from "@/store/useAuthStore";
 
 
@@ -52,6 +53,8 @@ const deconnect = async () => {
     router.push('/login').then(() => {
       setToken(null);
       useCookie('accessToken').value = null;
+      websocketService.disconnect()
+
     })
   })
 }

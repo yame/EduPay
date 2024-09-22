@@ -73,11 +73,11 @@ watch(selectedOption, async (val) => {
 // function sendMessage() {
 //   WebSocketService.send('/app/myEndpoint', { content: 'Hello, WebSocket!' });
 // }
-
+const instance = getCurrentInstance()
 onMounted(async () => {
+  instance?.appContext.config.globalProperties.$initWebSocketConnection();
   onLoginFetchData().then(() => {
     console.log(notificationStore.notificationsList);
-
   })
 })
 

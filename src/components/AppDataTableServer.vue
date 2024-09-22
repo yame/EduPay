@@ -1,5 +1,5 @@
-<template>
-  <VDataTableServer v-model:items-per-page="itemsPerPage" v-model:page="page" :headers="headers" :items="data || []" :items-length="totalData" class="text-no-wrap" @update:options="updateOptions">
+<template>{{ selectedRows }}
+  <VDataTableServer v-model:model-value="selectedRows" item-value="notificationId" show-select v-model:items-per-page="itemsPerPage" v-model:page="page" :headers="headers" :items="data || []" :items-length="totalData" class="text-no-wrap" @update:options="updateOptions">
     <!-- Dynamic Item Templates -->
     <template v-for="header in headers" :key="header.key" #[`item.${header.key}`]="{ item }">
       <span v-if="header.format">
@@ -15,10 +15,13 @@
       <VChip v-else-if="header.key === 'programId'" :color="resolveProgram(item.programId)?.color" label size="small">
         {{ resolveProgram(item.programId).text }}
       </VChip>
+      <VChip v-else-if="header.key === 'programID'" :color="resolveProgram(item.programID)?.color" label size="small">
+        {{ resolveProgram(item.programID).text }}
+      </VChip>
       <div v-else-if="header.key === 'actions'">
         <IconBtn v-for="(action, index) in actions" :key="index" @click="() => action.handler(item)">
           <VIcon :color="action?.color || 'secondary'" :size="action.size || 23" :icon="action.icon" />
-          <VTooltip activator="parent" top>{{ action?.icon == 'tabler-eye' ? 'View details' : action?.icon==='tabler-edit' ? " Edit Infos ": "Delete Student"  }}</VTooltip>
+          <VTooltip activator="parent">{{action?.icon == 'tabler-circle-check' ? "Approve Student": action?.icon == 'tabler-xbox-x' ? "Decline Student": action?.icon == 'tabler-ban' ? "Ban Student": action?.icon == 'tabler-eye' ? 'View details' : action?.icon==='tabler-edit' ? " Edit Infos ":  (action?.icon==='tabler-trash' && actions && actions?.length>1 ) ?"Delete Student":"Delete Notification" }}</VTooltip>
         </IconBtn>
       </div>
       <div v-else-if="header.key==='receipt'">
@@ -26,8 +29,11 @@
           Pdf
         </VBtn>
       </div>
-      <div v-else-if="header.key==='account'">
-        <VSwitch v-model="item.accountActive" @change="$emit('toggleAccount',item)" />
+      <div v-else-if="header.key==='enabled'">
+        <VSwitch v-model="item.enabled" @change="$emit('toggleAccount',item)" />
+      </div>
+      <div v-else-if="header.key==='seen'">
+        <VSwitch v-model="item.seen" @change="$emit('toggleRead',item)" />
       </div>
       <span v-else>
         <!-- Render plain text for other headers -->
@@ -57,6 +63,7 @@ const props = defineProps({
   totalData: Number,
   itemsPerPage: Number,
   page: Number,
+  selectedRows: Array,
   actions: Array,
   accountActive: Boolean
 });
@@ -65,7 +72,7 @@ const { headers, data, totalData, actions } = toRefs(props);
 
 
 // Emits
-const emit = defineEmits(['edit-status', 'update:itemsPerPage', 'update:page', 'viewPDF', 'toggleAccount']);
+const emit = defineEmits(['edit-status', 'update:itemsPerPage', 'update:page', 'viewPDF', 'toggleAccount', 'toggleRead']);
 const resolvePaymentStatus = (status: string) => {
   if (status === PAYMENT_STATUS.CREATED)
     return { text: PAYMENT_STATUS.CREATED, color: 'primary' }
@@ -101,6 +108,7 @@ const resolveProgram = (type: string) => {
 // Local State
 const itemsPerPage = ref(10);
 const page = ref(1);
+const selectedRows = ref([])
 
 // Watchers to sync props with local state
 watch(() => props.itemsPerPage, (newVal) => emit('update:itemsPerPage', newVal));

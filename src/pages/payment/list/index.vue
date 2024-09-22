@@ -127,7 +127,9 @@ const afterSubmit = (statusCode: number) => {
         <VCol cols="12" sm="4">
           <AppSelect v-model="selectedType" label="Type" placeholder="Select Type" :items="typeItems" clearable clear-icon="tabler-x" />
         </VCol>
-
+        <VCol cols="12" md="4" align-self="end" class="d-flex justify-end">
+          <VBtn color="primary" prepend-icon="tabler-new-section" text="New Payment" @click="isAddPayementDialogVisible = true" />
+        </VCol>
         <!-- 👉 Select Stock Status -->
         <!-- <VCol
             cols="12"
@@ -143,13 +145,13 @@ const afterSubmit = (statusCode: number) => {
           </VCol> -->
       </VRow>
     </VCardText>
-    <VCardText>
+    <!-- <VCardText>
       <div class="d-flex justify-sm-end justify-end flex-wrap gap-4">
-        <VBtn class="mr-3" color="primary" prepend-icon="tabler-new-section" text="New Payment" @click="isAddPayementDialogVisible = true" />
+       
 
-        <VBtn color="success" prepend-icon="tabler-upload" text="Export" />
-      </div>
-    </VCardText>
+        <!-- <VBtn color="success" prepend-icon="tabler-upload" text="Export" /> -->
+    <!-- </div> -->
+    <!-- </VCardText>  -->
 
     <VDivider />
     <!-- 👉 Payments Table -->

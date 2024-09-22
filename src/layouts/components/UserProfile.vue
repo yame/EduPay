@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import websocketService from "@/services/websocketService";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useStudentStore } from "@/store/useStudentStore";
 import { PerfectScrollbar } from "vue3-perfect-scrollbar";
@@ -19,7 +20,11 @@ const toCamelCase = (part: string) => {
 }
 
 
-
+//  "departmentName": "PHYSICS",
+//     "firstName": "Hamza",
+//     "lastName": "Damiri",
+//     "roles": "ROLE_ADMIN ROLE_STUDENT",
+//     "email": "hamza@damiri.com"
 const transformObject = (original) => {
   // Split the email to get the name part
   const emailParts = original.sub.split('@');
@@ -37,7 +42,7 @@ const transformObject = (original) => {
 
 const userData = transformObject(currentUser.value)
 useStudentStore().currentEmail = userData.email
-provide('currentEmail', userData.email)
+
 const loading = ref(false)
 const deconnecter = async () => {
 
@@ -57,6 +62,7 @@ const deconnecter = async () => {
       ability.update([]);
       setToken(null);
       useCookie('accessToken').value = null;
+      websocketService.disconnect()
     })
   })
 };

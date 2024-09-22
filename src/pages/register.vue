@@ -110,7 +110,7 @@ const onSubmit = () => {
               </VCol>
               <!-- FirstName -->
               <VCol cols="12">
-                <AppTextField v-model="form.code" type="number" :rules="[requiredValidator]" label="Student Code" placeholder="Student Code" />
+                <AppTextField v-model="form.code" :rules="[requiredValidator]" label="Student Code" placeholder="Student Code" />
               </VCol>
               <!-- LastName -->
               <VCol cols="12">
@@ -137,9 +137,9 @@ const onSubmit = () => {
 
               <!-- create account -->
               <VCol cols="12" class="text-center text-base">
-                <span class="d-inline-block">Already have an account?</span>
-                <RouterLink class="text-secondary ms-1 d-inline-block" :to="{ name: 'login' }">
-                  Sign in instead
+                <span>Already have an account?</span>
+                <RouterLink class="text-secondary ms-1 d-inline-block font-weight-bold" :to="{ name: 'login' }">
+                  <li>Sign in instead</li>
                 </RouterLink>
               </VCol>
 
@@ -164,6 +164,6 @@ const onSubmit = () => {
 <style lang="scss" scoped>
 @use "@core/scss/template/pages/page-auth.scss";
 ::v-deep(.text-secondary:hover) {
-  color: red !important;
+  color: rgb(var(--v-theme-primary)) !important;
 }
 </style>

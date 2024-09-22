@@ -6,7 +6,7 @@ export const setupGuards = (router: _RouterTyped<RouteNamedMap & { [key: string]
     const isLoggedIn = !!(useCookie('userData').value && useCookie('accessToken').value);
     // console.log(isLoggedIn);
     // console.log(to);
-    const isAdmin = (useCookie('userData').value?.scope.includes('ROLE_ADMIN'));
+    // const isAdmin = (useCookie('userData').value?.scope.includes('ROLE_ADMIN'));
 
     // Check if the route is public or if it's the login route
     // if (to.name === 'login' || to.name === 'not-authorized') {
@@ -21,14 +21,6 @@ export const setupGuards = (router: _RouterTyped<RouteNamedMap & { [key: string]
       else
         return undefined
     }
-
-
-
-
-
-
-
-
   })
 
 }

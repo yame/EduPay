@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { PROGRAM, PROGRAM_ITEMS, Student } from '@/@core/types';
+import { PROGRAM_ITEMS, Student } from '@/@core/types';
 import { useStudentStore } from '@/store/useStudentStore';
 
 import { toast } from 'vue3-toastify';
@@ -12,7 +12,7 @@ const options = ref({ page: 1, itemsPerPage: 5, sortBy: [''], orderBy: '' })
 
 
 const studentStore = useStudentStore()
-const { getAllStudents, deleteUserByEmail, updateOne, toggleEnableUserAccount } = studentStore
+const { getAllStudents, deleteUserByEmail, updateOne, toggleEnableUserAccount, uploadStudentFile } = studentStore
 const { studentsList, loading, error } = storeToRefs(studentStore)
 
 
@@ -45,7 +45,7 @@ const emailStudent = ref('')
 const isDeleteDialogVisible = ref(false)
 const deleteStudent = (item) => {
   deleteUserByEmail(item).then(() => {
-    getAllStudents()
+    getAllStudents(page.value, itemsPerPage.value)
   })
 }
 const deleteOne = (item) => {
@@ -65,16 +65,6 @@ const updateStudent = (item) => {
     }))
   })
 }
-
-
-const programItems = ref([
-  { title: PROGRAM.SMP, value: PROGRAM.SMP },
-  { title: PROGRAM.SMA, value: PROGRAM.SMA },
-  { title: PROGRAM.SMI, value: PROGRAM.SMI },
-  { title: PROGRAM.SMC, value: PROGRAM.SMC },
-  { title: PROGRAM.SVT, value: PROGRAM.SVT }
-
-])
 
 const selectedProgram = ref('')
 const searchedCode = ref('')
@@ -100,35 +90,77 @@ watch(itemsPerPage, (newVal) => {
 
 
 const toggleAccount = (item) => {
-  toggleEnableUserAccount(item.email).then(() => {
-    accountStates.value = accountStates.value.map((student) =>
-      student.email === item.email
-        ? { ...student, accountActive: item.accountActive }  // Toggle the accountActive state
-        : student
-    )
+  console.log(item)
+  toggleEnableUserAccount(item.email).then((res) => {
+    return (res.data.value);
+
   }
-  ).then(() => {
-    if (item.accountActive)
-      toast.error('Student Account is Disabled  🧨❌', {
+  ).then((res) => {
+    if (!item.enabled)
+      toast.error(res + ' 🧨❌', {
         "theme": useCookie('EduPayment-theme').value || 'auto'
       })
     else
-      toast.success('Student Account is Enabled ✅', {
+      toast.success(res + ' ✅', {
         "theme": useCookie('EduPayment-theme').value || 'auto'
       })
+  }).then(() => {
+    getAllStudents(page.value, itemsPerPage.value);
   })
 }
-const accountStates = ref(null)
+
 onMounted(() => {
-  getAllStudents(page.value, itemsPerPage.value).then(() => {
-    accountStates.value = studentsList.value.content.map((s) => {
-      return { ...s, accountActive: false }
-    })
-  }).then(() => console.log(accountStates.value))
-
-
+  getAllStudents(page.value, itemsPerPage.value)
 })
-// const accountStates = computed(()=>studentsList.value?.reduce((prev,acc)=>))
+
+//👉 - File options
+interface FileData {
+  file: File
+  url: string
+}
+
+const fileData = ref<FileData[]>([])
+const blob = ref(null)
+const file = ref([])
+
+const selectFile = (e) => {
+  console.log(file.value[0]);
+
+  // if (file.value.length > 0) {
+  //   const originalFile = file.value[0];
+  //   // const newFileName = `${originalFile.name.split('.')[0]}${Date.now()}.${originalFile.name.split('.').pop()}`;
+  //   const newFileName = `p.pdf`;
+
+  //   const renamedFile = new File([originalFile], newFileName, { type: originalFile.type });
+
+  //   fileData.value[0] = {
+  //     file: renamedFile,
+  //     url: useObjectUrl(renamedFile).value ?? '',
+  //   };
+  //   file.value[0] = renamedFile
+  //   blob.value = fileData.value[0].url;
+  //   console.log(fileData.value[0]);
+  // }
+};
+const isLoading = ref(false)
+const loadStudents = () => {
+  isLoading.value = true
+  uploadStudentFile(file.value[0]).then(res => {
+    console.log(res.status);
+    toast.success(res.split('.')[0] + ' ✅', {
+      "theme": useCookie('EduPayment-theme').value || 'auto'
+    })
+
+  }).then(() => {
+    getAllStudents(page.value, itemsPerPage.value).then(() => { isLoading.value = false })
+  }).catch(err => {
+    isLoading.value = false
+    toast.error(err + '⛔❌', {
+      "theme": useCookie('EduPayment-theme').value || 'auto'
+    })
+  })
+}
+
 
 </script>
 
@@ -139,6 +171,24 @@ onMounted(() => {
       Students List
     </VCardTitle>
     <!-- 👉 Filters -->
+    <VCardText>
+      <div class="d-flex justify-space-between">
+
+        <div class="d-flex  gap-x-4">
+          <VCol cols="12">
+            <VFileInput label="Load Students from file" v-model="file" @change="selectFile" accept=".xlsx" placeholder="Load Students from an excel file" />
+          </VCol>
+          <VCol>
+            <VBtn :loading="isLoading" @click="loadStudents" color="success" prepend-icon="tabler-upload" text="Load Students" :disabled=" file.length < 1" />
+
+          </VCol>
+        </div>
+
+        <VBtn color="primary" prepend-icon="tabler-plus" text="New Student" @click="$router.push('/student/add')" />
+
+      </div>
+    </VCardText>
+    <v-divider></v-divider>
     <VCardText>
       <VRow>
         <!-- 👉 Select Status -->
@@ -158,12 +208,6 @@ onMounted(() => {
         </VCol>
       </VRow>
     </VCardText>
-    <VCardText>
-      <div class="d-flex justify-sm-end  flex-wrap gap-4">
-        <VBtn color="primary" prepend-icon="tabler-plus" text="New Student" @click="$router.push('/student/add')" />
-        <VBtn color="success" prepend-icon="tabler-upload" text="Export" />
-      </div>
-    </VCardText>
 
     <VDivider />
     <!-- 👉 students Table -->
@@ -181,7 +225,7 @@ onMounted(() => {
           <VDivider />
           <!-- <AppDataTableServer :headers="headers" :data="students" :totalData = "totalStudents" :loading="loading" v-model:itemsPerPage = "itemsPerPage" v-model:page="page" :search="searchQuery" :error="error" @edit-status="editStatus" :actions="actions"></AppDataTableServer> -->
 
-          <AppDataTableServer v-if="accountStates" :headers="[
+          <AppDataTableServer :headers="[
               {
                 key: 'code',
                 title: 'Code',
@@ -204,7 +248,7 @@ onMounted(() => {
                 title : 'Actions'
               },
               {
-                key: 'account',
+                key: 'enabled',
                 title : 'toogle Account'
               }
             ]" :data="students" :totalData="totalStudents" :actions="[
@@ -247,7 +291,7 @@ onMounted(() => {
 }
 
 ::v-deep(.v-table > .v-table__wrapper > table) {
-  padding: 0 30px;
+  padding: 0 0 30px 30px;
 }
 </style>
 

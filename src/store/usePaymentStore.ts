@@ -105,7 +105,7 @@ export const usePaymentStore = defineStore('payment', () => {
     const formData = new FormData()
     formData.append('studentCode', newPayment.studentCode.toString());
     formData.append('paymentType', newPayment.paymentType.toString());
-    formData.append('date', newPayment.date.toString());
+    formData.append('date', newPayment.date.toISOString());
     formData.append('amount', newPayment.amount.toString());
     formData.append('file', file);
 

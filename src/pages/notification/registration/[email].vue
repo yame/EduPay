@@ -75,7 +75,7 @@ onMounted(() => {
 
           <!-- 👉 Student Code -->
           <VCol cols="12" md="6">
-            <AppTextField v-model="currentStudent.code" type="number" label="Student Code" placeholder="Student Code" :readonly="true" />
+            <AppTextField v-model="currentStudent.code" label="Student Code" placeholder="Student Code" :readonly="true" />
           </VCol>
 
           <!-- 👉 Student First Name -->

@@ -213,7 +213,7 @@ onMounted(() => {
     <VCardText>
       <div class="d-flex justify-sm-end justify-end flex-wrap gap-4">
         <VBtn class="mr-3" color="primary" prepend-icon="tabler-new-section" text="New Payment" @click="isAddPayementDialogVisible = true" />
-        <VBtn color="success" prepend-icon="tabler-upload" text="Export" />
+
       </div>
     </VCardText>
 
