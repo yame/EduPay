@@ -49,6 +49,8 @@ const isAdmin = (roles: string) => {
 }
 
 const LogIn = async () => {
+  console.log("Login from the client ");
+
   loader.value = true;
 
   try {
