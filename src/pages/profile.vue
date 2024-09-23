@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import websocketService from "@/services/websocketService";
 import { useAuthStore } from "@/store/useAuthStore";
 
 
@@ -19,45 +18,59 @@ const toCamelCase = (part: string) => {
 }
 
 
-const transformObject = (original) => {
-  // Split the email to get the name part
-  const emailParts = original.sub.split('@');
+// const transformObject = (original) => {
+//   // Split the email to get the name part
+//   const emailParts = original.sub.split('@');
 
-  // Capitalize the first letter of each part of the name
-  const firstNamePart = toCamelCase(emailParts[0]);
-  const lastNamePart = toCamelCase(emailParts[1].split('.')[0]);
-  const nameParts = firstNamePart + ' ' + lastNamePart
-  return {
-    fullName: nameParts,
-    email: original.sub,
-    role: original.scope.includes('ROLE_ADMIN') ? "ADMIN" : "STUDENT" // Remove 'ROLE_' prefix and capitalize
-  };
-}
+//   // Capitalize the first letter of each part of the name
+//   const firstNamePart = toCamelCase(emailParts[0]);
+//   const lastNamePart = toCamelCase(emailParts[1].split('.')[0]);
+//   const nameParts = firstNamePart + ' ' + lastNamePart
+//   return {
+//     fullName: nameParts,
+//     email: original.sub,
+//     role: original.scope.includes('ROLE_ADMIN') ? "ADMIN" : "STUDENT" // Remove 'ROLE_' prefix and capitalize
+//   };
+// }
 
-const userData = transformObject(useCookie('userData').value)
+// const userData = transformObject(useCookie('userData').value)
 
 
 const authStore = useAuthStore();
-const { logout, setToken } = authStore
+const { logout, setToken, setCurrentUser, setUserAbilityRules } = authStore
 const { loading } = storeToRefs(authStore);
+const instance = getCurrentInstance()
+const ability = useAbility();
+const router = useRouter();
+const userData = useCookie('userData').value
 
-
-const router = useRouter()
 //👉 - Log Out 
+const resetCookies = async () => {
+  setCurrentUser(null)
+  setToken(null)
+  setUserAbilityRules(null)
+  useCookie('accessToken').value = null;
+  useCookie("userData").value = null;
+  await router.push('/login')
+  // ℹ️ We had to remove abilities in then block because if we don't nav menu items mutation is visible while redirecting user to login page  
+  useCookie("userAbilityRules").value = null;
+  ability.update([]);
+  instance?.appContext.config.globalProperties.$disconnectWebSocket();
+  authStore.ws_state = null
+
+  // getCurrentInstance()?.appContext.config.globalProperties.$disconnectWebSocket()
+}
+
 const deconnect = async () => {
   loading.value = true
 
   logout().then(() => setTimeout(() => {
     loading.value = false
   }, 1000)).then(() => {
-    router.push('/login').then(() => {
-      setToken(null);
-      useCookie('accessToken').value = null;
-      websocketService.disconnect()
-
-    })
+    resetCookies();
   })
 }
+
 
 </script>
 
@@ -73,7 +86,7 @@ const deconnect = async () => {
 
             <!-- 👉 User fullName -->
             <h5 class="text-h5 mt-4">
-              {{ userData?.fullName }}
+              {{ userData?.lastName }} {{ userData?.firstName }}
             </h5>
 
             <!-- 👉 Role chip -->
@@ -125,6 +138,21 @@ const deconnect = async () => {
                   </h6>
                 </VListItemTitle>
               </VListItem>
+
+              <VListItem>
+                <VListItemTitle>
+                  <h6 class="text-h6">
+                    Department Name:
+                    <div class="d-inline-block text-capitalize text-body-1">
+                      <VChip class="ml-2 text-small" color="info" size="x-small">
+                        <VIcon start size="12" icon="tabler-building-skyscraper" />
+                        {{ userData?.departmentName }}
+                      </VChip>
+                    </div>
+                  </h6>
+                </VListItemTitle>
+              </VListItem>
+
             </VList>
           </VCardText>
         </div>

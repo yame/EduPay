@@ -94,7 +94,7 @@ export const useNotificationStore = defineStore("notification", () => {
       })
       )
       notificationsFromPagination.value = data.value
-      console.log(notificationsFromPagination.value);
+      // console.log(notificationsFromPagination.value);
 
       loading.value = isFetching.value
       console.log(loading.value);

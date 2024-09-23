@@ -43,16 +43,9 @@ const { login } = authStore;
 const { loading, error, currentUser, userAbilityRules, accessToken } = storeToRefs(authStore);
 
 const loader = ref(false)
-
-const isAdmin = (roles: string) => {
-  return roles.includes('ROLE_ADMIN')
-}
+const instance = getCurrentInstance()
 
 const LogIn = async () => {
-  console.log("Login from the client ");
-
-  loader.value = true;
-
   try {
     await login(credentials.value);
 
@@ -60,7 +53,9 @@ const LogIn = async () => {
       toast.error('You are Not Authorized 💔', {
         theme: useCookie('EduPayment-theme').value || 'auto'
       });
+      return;
     }
+
     //👉 -  Update Cookies for each User
     useCookie('accessToken').value = accessToken.value;
     useCookie('userData').value = currentUser.value ? JSON.stringify(currentUser.value) : null;
@@ -69,26 +64,31 @@ const LogIn = async () => {
 
     //👉 -  Check if the user has already changed their password.
     const userData = jwtDecode(accessToken.value!);
-    console.log(userData);
-
     if (userData?.isPasswordChanged) {
-      await router.push(route.query.to ? String(route.query.to) : "/").then(() => {
-        toast.success('Login successful ✅⚡', {
-          theme: useCookie('EduPayment-theme').value || 'auto'
+      await nextTick(() => {
+        router.replace(route.query.to ? String(route.query.to) : '/').then(() => {
+          toast.success('Login successful ✅⚡', {
+            theme: useCookie('EduPayment-theme').value || 'auto'
+          })
+
+          //❗ -  👉 - INIT WEBSOCKET PLUGIN
+          console.error('login ws');
+
+          instance?.appContext.config.globalProperties.$initWebSocketConnection(accessToken.value);
         })
       })
-    } else {
-      await router.push(route.query.to ? String(route.query.to) : "/force-change-password");
     }
-
+    else {
+      await nextTick(() => {
+        router.replace(route.query.to ? String(route.query.to) : "/force-change-password")
+      })
+    }
   } catch (err) {
     toast.error(error.value + ' 🧨❌' || 'An error occurred 🧨❌', {
       theme: useCookie('EduPayment-theme').value || 'auto'
     });
   }
-  finally {
-    loader.value = false;
-  }
+
 };
 
 const onLoginSubmit = () => {
@@ -156,7 +156,7 @@ const onLoginSubmit = () => {
                     Forgot Password?
                   </RouterLink>
                 </div>
-                <VBtn class="mt-5" block type="submit" :loading="loader">
+                <VBtn class="mt-5" block type="submit" :loading="loading">
                   Login
                 </VBtn>
               </VCol>

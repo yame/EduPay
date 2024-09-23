@@ -1,3 +1,4 @@
+import { useAuthStore } from '@/store/useAuthStore';
 import { Client } from '@stomp/stompjs';
 
 class WebSocketService {
@@ -17,6 +18,8 @@ class WebSocketService {
         onConnect: (frame) => {
           // console.log('Connected:', frame);
           console.warn('Connected to web Server ✅⚡', frame);
+          useAuthStore().ws_state = frame.command
+          console.log(frame.command)
           resolve();
         },
         onStompError: (frame) => {

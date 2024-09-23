@@ -5,38 +5,35 @@ import { PerfectScrollbar } from "vue3-perfect-scrollbar";
 const router = useRouter();
 const ability = useAbility();
 
-// TODO: Get type from backend
+// TODO: Get DATA from backend
 const authStore = useAuthStore();
-const { currentUser, userAbilityRules } = storeToRefs(authStore)
-const { setCurrentUser, setToken, getUserData, logout } = authStore;
-getUserData()
-const route = useRoute();
+const { setCurrentUser, setToken, setUserAbilityRules, logout } = authStore;
 
-const toCamelCase = (part: string) => {
-  return part.charAt(0).toUpperCase() + part.slice(1);
-}
-
+const userData = useCookie('userData').value
 
 const loading = ref(false)
+
+const instance = getCurrentInstance()
+const resetCookies = async () => {
+  setCurrentUser(null)
+  setToken(null)
+  setUserAbilityRules(null)
+  useCookie('accessToken').value = null;
+  useCookie("userData").value = null;
+  await router.push('/login')
+  // ℹ️ We had to remove abilities in then block because if we don't nav menu items mutation is visible while redirecting user to login page  
+  useCookie("userAbilityRules").value = null;
+  ability.update([]);
+  instance?.appContext.config.globalProperties.$disconnectWebSocket();
+  authStore.ws_state = null
+  // getCurrentInstance()?.appContext.config.globalProperties.$disconnectWebSocket()
+}
+
 const deconnecter = async () => {
-
   loading.value = true
-
   logout().then(() =>
-    loading.value = false
-  ).then(() => {
-    router.push('/login').then(() => {
-      setCurrentUser(null);
-      useCookie('accessToken').value = null;
-      useCookie("userData").value = null;
-      // ℹ️ We had to remove abilities in then block because if we don't nav menu items mutation is visible while redirecting user to login page
-      useCookie("userAbilityRules").value = null;
-      userAbilityRules.value = null
-      ability.update([]);
-      setToken(null);
-      getCurrentInstance()?.appContext.config.globalProperties.$disconnectWebSocket()
-    })
-  })
+    resetCookies()
+  ).finally(() => loading.value = false)
 };
 
 
@@ -70,9 +67,9 @@ const userProfileList = [
 </script>
 
 <template>
-  <VBadge v-if="currentUser" dot bordered location="bottom right" offset-x="1" offset-y="2" color="success">
-    <VAvatar :color=" (currentUser)  ? resolveUserRoleVariant(currentUser?.role)?.color : undefined">
-      <VIcon :icon=" (currentUser)  ? resolveUserRoleVariant(currentUser?.role)?.icon : undefined" />
+  <VBadge v-if="userData" dot bordered location="bottom right" offset-x="1" offset-y="2" color="success">
+    <VAvatar :color=" (userData)  ? resolveUserRoleVariant(userData?.role)?.color : undefined">
+      <VIcon :icon=" (userData)  ? resolveUserRoleVariant(userData?.role)?.icon : undefined" />
 
       <!-- SECTION Menu -->
       <VMenu activator="parent" width="240" location="bottom end" offset="12px">
@@ -81,22 +78,24 @@ const userProfileList = [
             <div class="d-flex gap-2 align-center">
               <VListItemAction>
                 <VBadge dot location="bottom right" offset-x="3" offset-y="3" color="success" bordered>
-                  <VAvatar :icon="resolveUserRoleVariant(currentUser?.role)?.icon" :color="resolveUserRoleVariant(currentUser?.role)?.color" />
+                  <VAvatar :icon="resolveUserRoleVariant(userData?.role)?.icon" :color="resolveUserRoleVariant(userData?.role)?.color" />
                 </VBadge>
               </VListItemAction>
 
               <div>
                 <h6 class="text-h6 font-weight-medium">
-                  {{ currentUser?.lastName }} {{ currentUser?.firstName }}
+                  {{ userData?.lastName }} {{ userData?.firstName }}
                 </h6>
-                <VListItemSubtitle class="text-capitalize text-disabled">
-                  {{ currentUser?.role }}
+                <div class="d-flex justify-content-between mt-1">
+                  <VListItemSubtitle class="text-capitalize text-disabled">
+                    {{ userData?.role }}
 
-                </VListItemSubtitle>
-                <VChip class="ml-2 float-right" color="info" size="x-small">
-                  <VIcon start icon="tabler-building-skyscraper" />
-                  {{ currentUser?.departmentName }}
-                </VChip>
+                  </VListItemSubtitle>
+                  <VChip class="ml-2 text-small" color="info" size="x-small">
+                    <VIcon start size="12" icon="tabler-building-skyscraper" />
+                    {{ userData?.departmentName }}
+                  </VChip>
+                </div>
 
               </div>
             </div>

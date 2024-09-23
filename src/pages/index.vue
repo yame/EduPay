@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { useAuthStore } from '@/store/useAuthStore';
 import { useNotificationStore } from '@/store/useNotificationStore';
 import { useStatisticsStore } from '@/store/useStatisticsStore';
 import type { ChartJsCustomColors } from '@/views/charts/chartjs/types';
@@ -69,15 +70,30 @@ watch(selectedOption, async (val) => {
 
 });
 
-
+definePage({
+  meta: {
+    action: 'manage',
+    subject: 'ADMIN'
+  }
+})
 // function sendMessage() {
 //   WebSocketService.send('/app/myEndpoint', { content: 'Hello, WebSocket!' });
 // }
-const instance = getCurrentInstance()
+
+const authStore = useAuthStore()
+
+
+
+// if (!authStore.ws_state) {
+//   console.log("Ez Pz");
+
+//   const instance = getCurrentInstance()
+//   instance?.appContext.config.globalProperties.$initWebSocketConnection(authStore.accessToken);
+// }
+
 onMounted(async () => {
-  instance?.appContext.config.globalProperties.$initWebSocketConnection();
   onLoginFetchData().then(() => {
-    console.log(notificationStore.notificationsList);
+    // console.log(notificationStore.notificationsList);
   })
 })
 

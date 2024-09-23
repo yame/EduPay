@@ -93,8 +93,6 @@ const toggle = (val) => {
 
   badgeProps.value.showMenu = val
 }
-console.log(notificationsList.value);
-
 
 const displayedNotifications = computed(() => {
   return notificationsList.value.slice(0, 10);

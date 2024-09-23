@@ -24,6 +24,7 @@ export const useAuthStore = defineStore('auth', () => {
   const loading = ref(false)
   const error = ref('')
   const accessToken = ref<string | null>(null)
+  const ws_state = ref<string | null>(null)
 
   watch(accessToken, (newToken) => {
     useCookie('accessToken').value = newToken;
@@ -48,9 +49,19 @@ export const useAuthStore = defineStore('auth', () => {
       setCurrentUser(userData)
 
       //👉 - Set UserAbilityRules
-      setUserAbilityRules()
+      if (userData.roles.includes('ADMIN'))
+        setUserAbilityRules([
+          { action: "manage", subject: "all" },
+          { action: "manage", subject: "ADMIN" },
+          { action: "manage", subject: "STUDENT" },
+        ])
+      else if (userData.roles.includes("STUDENT"))
+        setUserAbilityRules([
+          { action: "manage", subject: "STUDENT" },
+        ])
+      else
+        setUserAbilityRules([])
 
-      loading.value = false;
 
       return response.data
 
@@ -63,6 +74,9 @@ export const useAuthStore = defineStore('auth', () => {
         //❗ -  Handle non-Axios errors
         console.error('Error: ', err.message);
       }
+    }
+    finally {
+      loading.value = false;
     }
   }
 
@@ -80,8 +94,6 @@ export const useAuthStore = defineStore('auth', () => {
       console.log(err);
     }
   }
-
-
 
   //👉 - Register new Student
   async function register(payload: DtoNewStudent) {
@@ -109,41 +121,26 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
 
+  //👉 - Set CurrentUser
   function setCurrentUser(currUser) {
     if (currUser) {
       const { roles, ...userWithoutRoles } = currUser;
-      currentUser.value = currUser;
-      userWithoutRoles.role = isAdmin(roles) ? "ADMIN" : "STUDENT";
+      userWithoutRoles.role = isAdmin(roles);
+      currentUser.value = userWithoutRoles;
     } else {
       console.warn("currUser is null, cannot set user role.");
       currentUser.value = null;
     }
-
   }
 
+  //👉 - Set AccessToken
   function setToken(token: string | null) {
     accessToken.value = token
   }
 
-  function setUserAbilityRules() {
-    if (currentUser.value?.role === 'ADMIN') {
-      userAbilityRules.value = [
-        { action: "manage", subject: "all" },
-        { action: "manage", subject: "ADMIN" },
-        { action: "manage", subject: "STUDENT" },
-      ];
-    }
-    else {
-      userAbilityRules.value = [{ action: "manage", subject: "STUDENT" }];
-    }
-  }
-
-  function getUserData() {
-    return currentUser.value
-  }
-
-  function getToken() {
-    return accessToken.value
+  //👉 - Set UserAbilityRules
+  function setUserAbilityRules(newUserAbilityRules) {
+    userAbilityRules.value = newUserAbilityRules;
   }
 
   //👉 - Approve Registration
@@ -167,6 +164,6 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   return {
-    currentUser, loading, error, accessToken, userAbilityRules, register, setUserAbilityRules, setCurrentUser, setToken, login, logout, getUserData, getToken, getCurrentUser, resetPasswordToDefault, changePassword, approveRegistration, declineRegistration, banRegistration, toogleAccountStatus
+    currentUser, ws_state, loading, error, accessToken, userAbilityRules, register, setUserAbilityRules, setCurrentUser, setToken, login, logout, getCurrentUser, resetPasswordToDefault, changePassword, approveRegistration, declineRegistration, banRegistration, toogleAccountStatus
   }
 })
