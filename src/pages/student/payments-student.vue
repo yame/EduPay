@@ -1,8 +1,8 @@
 
 <script setup lang="ts">
 import { Payment, PAYMENT_STATUS, PAYMENT_TYPE } from '@/@core/types';
+import { useAuthStore } from '@/store/useAuthStore';
 import { usePaymentStore } from '@/store/usePaymentStore';
-import { useStudentStore } from '@/store/useStudentStore';
 import { useConfigStore } from '@core/stores/config';
 import { toast } from 'vue3-toastify';
 import { VCardText, VCardTitle } from 'vuetify/components';
@@ -31,9 +31,9 @@ const search = ref('')
 // Fetch Orders
 
 
-const studentStore = useStudentStore()
-const { getStudentByEmail, getCurrentStudentEmail } = studentStore
-const { currentStudent, currentEmail } = storeToRefs(studentStore)
+const authStore = useAuthStore();
+const { currentUser } = storeToRefs(authStore);
+
 
 const isViewReceiptPDFVisible = ref(false)
 const pdfUrl = ref(null)
@@ -174,10 +174,10 @@ getStudentByEmail(currentEmail.value).then(() => {
   <VCard>
     <VCardTitle class="pt-9 pl-10 text-h5 mb-5"> <span class="letter-spacing font-weight-bold">Student Infos : <span>
           <VAvatar size="34" icon="tabler-school" color="warning" />
-          <span class="text-white ms-2 text-warning text-underline text-uppercase mb-5">{{ currentStudent?.lastName }} {{ currentStudent?.firstName }} </span>
+          <span class="text-white ms-2 text-warning text-underline text-uppercase mb-5">{{ currentUser?.lastName }} {{ currentUser?.firstName }} </span>
         </span>
       </span>
-      <StudentDetails v-if="currentStudent" :student="currentStudent" />
+      <StudentDetails v-if="currentUser" :student="currentUser" />
       <div v-else>
         <VSkeletonLoader v-for="i in 1" :key="i" type="card-avatar" />
       </div>

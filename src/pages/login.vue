@@ -55,7 +55,6 @@ const LogIn = async () => {
       });
       return;
     }
-
     //👉 -  Update Cookies for each User
     useCookie('accessToken').value = accessToken.value;
     useCookie('userData').value = currentUser.value ? JSON.stringify(currentUser.value) : null;
@@ -65,23 +64,22 @@ const LogIn = async () => {
     //👉 -  Check if the user has already changed their password.
     const userData = jwtDecode(accessToken.value!);
     if (userData?.isPasswordChanged) {
-      await nextTick(() => {
-        router.replace(route.query.to ? String(route.query.to) : '/').then(() => {
-          toast.success('Login successful ✅⚡', {
-            theme: useCookie('EduPayment-theme').value || 'auto'
-          })
 
-          //❗ -  👉 - INIT WEBSOCKET PLUGIN
-          console.error('login ws');
-
-          instance?.appContext.config.globalProperties.$initWebSocketConnection(accessToken.value);
+      router.push(route.query.to ? String(route.query.to) : '/').then(() => {
+        toast.success('Login successful ✅⚡', {
+          theme: useCookie('EduPayment-theme').value || 'auto'
         })
+
+        //❗ -  👉 - INIT WEBSOCKET PLUGIN
+        // console.error('login ws');
+
+        instance?.appContext.config.globalProperties.$initWebSocketConnection(accessToken.value);
       })
+
     }
     else {
-      await nextTick(() => {
-        router.replace(route.query.to ? String(route.query.to) : "/force-change-password")
-      })
+      router.push(route.query.to ? String(route.query.to) : "/force-change-password")
+
     }
   } catch (err) {
     toast.error(error.value + ' 🧨❌' || 'An error occurred 🧨❌', {

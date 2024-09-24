@@ -2,12 +2,12 @@ import { canNavigate } from '@/@layouts/plugins/casl';
 import type { RouteNamedMap, _RouterTyped } from 'unplugin-vue-router';
 export const setupGuards = (router: _RouterTyped<RouteNamedMap & { [key: string]: any }>) => {
   router.beforeEach(to => {
-    console.log(" 🚓🚓🚓🚓👮🏼‍♂️👮🏼‍♀️🚓🚓🚨🚔🚨🚔 GUARD ");
+    console.log(" 🚨 GUARD 🚨");
     /*
         * If it's a public route, continue navigation. This kind of pages are allowed to visited by login & non-login users. Basically, without any restrictions.
         * Examples of public routes are, 404, under maintenance, etc.
         */
-    if (to.meta.public)
+    if (to.meta.unauthenticatedOnly)
       return
 
     /**

@@ -12,13 +12,13 @@ export const redirects: RouteRecordRaw[] = [
 
 
       // TODO: Get type from backend
-      const userData = useCookie<Record<string, unknown> | undefined>('userData')
+      const userData = useCookie<Record<string, unknown>>('userData')
       const userRole = userData.value?.role
-      console.log("🚩THE ADDITIONAL ROUTES got a userRole 😍 => ", userRole);
+      console.log("🚩THE ADDITIONAL ROUTES got a userRole 😍 🚩 => ", userRole);
 
-      if (userRole === 'ADMIN')
+      if (userRole === "ADMIN")
         return { name: 'root' }
-      else if (userRole === 'STUDENT')
+      else if (userRole === "STUDENT")
         return { name: 'student-payments-student' }
       return { name: 'login' }
 

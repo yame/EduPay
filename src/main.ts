@@ -25,12 +25,19 @@ app.use(Vue3Toastify, {
 // Check for existing token and initialize WebSocket connection
 const token = (useCookie('accessToken').value);
 
-if (token && !useAuthStore().ws_state) {
-  console.error('main ws');
+// if (token && !useAuthStore().ws_state) {
+//   console.error('main ws');
 
-  console.warn('💥💥💥💥' + token + '💥💥💥')
-  app.config.globalProperties.$initWebSocketConnection(token);
-}
+//   console.warn('💥💥💥💥' + token + '💥💥💥')
+//   app.config.globalProperties.$initWebSocketConnection(token);
+// }if (!authStore.ws_state) {
+
+const authStore = useAuthStore()
+console.error("MAIN");
+
+const instance = getCurrentInstance()
+instance?.appContext.config.globalProperties.$initWebSocketConnection(authStore.accessToken);
+
 app.use(webSocketPlugin);
 // Mount Vue app
 app.mount('#app');

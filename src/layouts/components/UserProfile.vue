@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import { useAuthStore } from "@/store/useAuthStore";
+import { useCounterStore } from "@/store/useCounterStore";
 import { PerfectScrollbar } from "vue3-perfect-scrollbar";
 
 const router = useRouter();
+const route = useRoute();
 const ability = useAbility();
 
 // TODO: Get DATA from backend
@@ -20,12 +22,16 @@ const resetCookies = async () => {
   setUserAbilityRules(null)
   useCookie('accessToken').value = null;
   useCookie("userData").value = null;
-  await router.push('/login')
-  // ℹ️ We had to remove abilities in then block because if we don't nav menu items mutation is visible while redirecting user to login page  
-  useCookie("userAbilityRules").value = null;
-  ability.update([]);
-  instance?.appContext.config.globalProperties.$disconnectWebSocket();
   authStore.ws_state = null
+  useCounterStore().clear();
+  instance?.appContext.config.globalProperties.$disconnectWebSocket();
+
+  await router.push('/login')
+  // ℹ️ We had to remove abilities in then block because if we don't nav menu items mutation is visible while redirecting user to login page
+  // Remove "userAbilities" from cookie
+  useCookie('userAbilityRules').value = null
+  // Reset ability to initial ability
+  ability.update([])
   // getCurrentInstance()?.appContext.config.globalProperties.$disconnectWebSocket()
 }
 
@@ -91,7 +97,7 @@ const userProfileList = [
                     {{ userData?.role }}
 
                   </VListItemSubtitle>
-                  <VChip class="ml-2 text-small" color="info" size="x-small">
+                  <VChip v-if="userData?.role==='ADMIN'" class="ml-2 text-small" color="info" size="x-small">
                     <VIcon start size="12" icon="tabler-building-skyscraper" />
                     {{ userData?.departmentName }}
                   </VChip>

@@ -9,7 +9,7 @@ import authV2ForgotPasswordIllustrationDark from '@images/pages/auth-v2-forgot-p
 import authV2ForgotPasswordIllustrationLight from '@images/pages/auth-v2-forgot-password-illustration-light.png'
 import authV2MaskDark from '@images/pages/misc-mask-dark.png'
 import authV2MaskLight from '@images/pages/misc-mask-light.png'
-import { jwtDecode } from 'jwt-decode'
+import { toast } from 'vue3-toastify'
 import { VForm } from "vuetify/components/VForm"
 
 const authThemeImg = useGenerateImageVariant(authV2ForgotPasswordIllustrationLight, authV2ForgotPasswordIllustrationDark)
@@ -19,7 +19,7 @@ const authThemeMask = useGenerateImageVariant(authV2MaskLight, authV2MaskDark)
 definePage({
   meta: {
     layout: "blank",
-    unauthenticatedOnly: true,
+    unauthenticatedOnly: true
   },
 });
 
@@ -51,76 +51,50 @@ const credentials = ref({
   password: "",
 });
 const authStore = useAuthStore();
-const { login, changePassword, getCurrentUser, setCurrentUser, setToken } = authStore;
+const { login, changePassword } = authStore;
+const { error, currentUser, userAbilityRules, accessToken } = storeToRefs(authStore);
+
 const loader = ref(false)
-
-
-function decodeToken() {
-  const accessToken = ref<string>(useCookie('accessToken').value)
-  const userData = jwtDecode(accessToken.value.toString()) || {}
-  return userData.sub
-}
-console.log(decodeToken());
 
 const LogIn = async () => {
   try {
     loader.value = true
-    // Fetch user data
+    //👉 -  Fetch user data
     console.table(credentials.value);
 
-    const data = await login(credentials.value);
-    setToken(data.access_token);
-    loader.value = true
-    const userData = await getCurrentUser();
-    setCurrentUser(userData);
-    console.log(userData);
+    await login(credentials.value);
 
+    //👉 -  Update Cookies for each User
+    useCookie('accessToken').value = accessToken.value;
+    useCookie('userData').value = currentUser.value ? JSON.stringify(currentUser.value) : null;
+    useCookie('userAbilityRules').value = userAbilityRules.value ? JSON.stringify(userAbilityRules.value) : null;
+    ability.update(userAbilityRules.value || []);
 
-    let userAbilityRules = [];
-    if (userData?.scope.includes("ROLE_ADMIN")) {
-      userAbilityRules = [
-        { action: "manage", subject: "all" },
-        { action: "manage", subject: "ADMIN" },
-        { action: "manage", subject: "STUDENT" },
-      ];
-    } else {
-      userAbilityRules = [{ action: "manage", subject: "STUDENT" }];
-    }
-
-    useCookie("userAbilityRules").value = userAbilityRules;
-    ability.update(userAbilityRules);
-
-    // Redirect
-    const isLoggedIn = !!(useCookie('userData').value && useCookie('accessToken').value)
-    if (isLoggedIn) {
-      setTimeout(() => {
-        loader.value = false
-      }, 1000)
-      router.push(route.query.to ? String(route.query.to) : "/");
-
-    }
-    else
-      alert('Credentials Not Match')
-    loader.value = false
-    // await nextTick(() => {
-    //   router.push(route.query.to ? String(route.query.to) : "/");
-    // });
+    //👉 -  Redirect  
+    await nextTick(() => {
+      router.push(route.query.to ? String(route.query.to) : "/").then(() => {
+        toast.success('Login successful ✅⚡', {
+          theme: useCookie('EduPayment-theme').value || 'auto'
+        })
+      })
+    })
   } catch (err) {
     console.error(err);
   }
-};
+  finally {
+    loader.value = false
+  }
+}
 
 
 //👉 - Change Password
 const updatePassword = () => {
-
-
   refVForm.value?.validate().then(({ valid }) => {
     if (valid) {
 
       if (confirmPassword.value == changePWDTO.value.newPassword)
         changePassword(changePWDTO.value).then(() => {
-          credentials.value.email = decodeToken()
+          credentials.value.email = currentUser.value?.email
           credentials.value.password = changePWDTO.value.newPassword
           LogIn()
         })

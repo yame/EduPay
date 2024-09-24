@@ -9,7 +9,7 @@ definePage({
   alias: '/pages/misc/not-authorized',
   meta: {
     layout: 'blank',
-    public: true,
+    unauthenticatedOnly: true,
   },
 })
 

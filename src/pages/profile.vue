@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useAuthStore } from "@/store/useAuthStore";
+import { useCounterStore } from "@/store/useCounterStore";
 
 
 
@@ -42,6 +43,7 @@ const { loading } = storeToRefs(authStore);
 const instance = getCurrentInstance()
 const ability = useAbility();
 const router = useRouter();
+const route = useRoute();
 const userData = useCookie('userData').value
 
 //👉 - Log Out 
@@ -51,19 +53,21 @@ const resetCookies = async () => {
   setUserAbilityRules(null)
   useCookie('accessToken').value = null;
   useCookie("userData").value = null;
-  await router.push('/login')
-  // ℹ️ We had to remove abilities in then block because if we don't nav menu items mutation is visible while redirecting user to login page  
-  useCookie("userAbilityRules").value = null;
-  ability.update([]);
-  instance?.appContext.config.globalProperties.$disconnectWebSocket();
   authStore.ws_state = null
+  useCounterStore().clear();
+  instance?.appContext.config.globalProperties.$disconnectWebSocket();
 
+  await router.push('/login')
+  // ℹ️ We had to remove abilities in then block because if we don't nav menu items mutation is visible while redirecting user to login page
+  // Remove "userAbilities" from cookie
+  useCookie('userAbilityRules').value = null
+  // Reset ability to initial ability
+  ability.update([])
   // getCurrentInstance()?.appContext.config.globalProperties.$disconnectWebSocket()
 }
 
 const deconnect = async () => {
   loading.value = true
-
   logout().then(() => setTimeout(() => {
     loading.value = false
   }, 1000)).then(() => {

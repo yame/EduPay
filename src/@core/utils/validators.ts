@@ -26,7 +26,7 @@ export const studentCodeValidator = (value: unknown) => {
   if (isEmpty(value))
     return true
 
-  var re = /^[a-z]{1,2}[0-9]{4,8}[a-z]?$/;
+  var re = /^[a-zA-Z]{1,2}[0-9]{4,8}[a-z]?$/;
 
 
   if (Array.isArray(value))

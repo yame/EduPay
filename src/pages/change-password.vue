@@ -3,6 +3,12 @@ import { ChangePWDTO } from "@/@core/types";
 import { useAuthStore } from "@/store/useAuthStore";
 import { VForm } from "vuetify/components/VForm";
 
+definePage({
+  meta: {
+    layout: "blank",
+    unauthenticatedOnly: true,
+  },
+});
 
 
 const refVForm = ref<VForm>()

@@ -84,12 +84,14 @@ const authStore = useAuthStore()
 
 
 
-// if (!authStore.ws_state) {
-//   console.log("Ez Pz");
+if (!authStore.ws_state) {
+  console.log("Ez Pz");
 
-//   const instance = getCurrentInstance()
-//   instance?.appContext.config.globalProperties.$initWebSocketConnection(authStore.accessToken);
-// }
+  const instance = getCurrentInstance()
+  instance?.appContext.config.globalProperties.$initWebSocketConnection(authStore.accessToken);
+}
+
+
 
 onMounted(async () => {
   onLoginFetchData().then(() => {
