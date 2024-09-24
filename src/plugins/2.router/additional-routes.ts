@@ -12,8 +12,8 @@ export const redirects: RouteRecordRaw[] = [
 
 
       // TODO: Get type from backend
-      const userData = useCookie<Record<string, unknown>>('userData')
-      const userRole = userData.value?.role
+      const userData = useCookie('userData').value
+      const userRole = userData?.role
       console.log("🚩THE ADDITIONAL ROUTES got a userRole 😍 🚩 => ", userRole);
 
       if (userRole === "ADMIN")

@@ -56,6 +56,7 @@ const LogIn = async () => {
       return;
     }
     //👉 -  Update Cookies for each User
+
     useCookie('accessToken').value = accessToken.value;
     useCookie('userData').value = currentUser.value ? JSON.stringify(currentUser.value) : null;
     useCookie('userAbilityRules').value = userAbilityRules.value ? JSON.stringify(userAbilityRules.value) : null;
@@ -73,7 +74,7 @@ const LogIn = async () => {
         //❗ -  👉 - INIT WEBSOCKET PLUGIN
         // console.error('login ws');
 
-        instance?.appContext.config.globalProperties.$initWebSocketConnection(accessToken.value);
+        // instance?.appContext.config.globalProperties.$initWebSocketConnection(accessToken.value);
       })
 
     }
@@ -86,6 +87,7 @@ const LogIn = async () => {
       theme: useCookie('EduPayment-theme').value || 'auto'
     });
   }
+
 
 };
 

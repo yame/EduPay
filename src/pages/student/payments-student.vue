@@ -3,6 +3,7 @@
 import { Payment, PAYMENT_STATUS, PAYMENT_TYPE } from '@/@core/types';
 import { useAuthStore } from '@/store/useAuthStore';
 import { usePaymentStore } from '@/store/usePaymentStore';
+import { useStudentStore } from '@/store/useStudentStore';
 import { useConfigStore } from '@core/stores/config';
 import { toast } from 'vue3-toastify';
 import { VCardText, VCardTitle } from 'vuetify/components';
@@ -33,6 +34,11 @@ const search = ref('')
 
 const authStore = useAuthStore();
 const { currentUser } = storeToRefs(authStore);
+
+
+const studentStore = useStudentStore();
+const { currentStudent } = storeToRefs(studentStore);
+const { getStudentByEmail } = (studentStore);
 
 
 const isViewReceiptPDFVisible = ref(false)
@@ -69,6 +75,8 @@ const afterSubmit = (statusCode: number) => {
 
 
 const viewPDF = (item: Payment) => {
+  console.table(item);
+
   usePaymentStore().getPaymentFile(item.id).then(response => {
     const url = URL.createObjectURL(new Blob([response?.data], { type: 'application/pdf' }));
     pdfUrl.value = url
@@ -158,13 +166,15 @@ definePage({
   }
 })
 
-watch(currentEmail, (newV) => {
+watch(() => currentUser.value?.email, (newV) => {
   console.log(newV);
 
 })
-
-getStudentByEmail(currentEmail.value).then(() => {
-  getPaymentsByStudent(page.value, itemsPerPage.value, selectedStatus.value, selectedType.value)
+const userData = useCookie("userData").value
+onMounted(() => {
+  getStudentByEmail(userData.email).then(() => {
+    getPaymentsByStudent(page.value, itemsPerPage.value, selectedStatus.value, selectedType.value)
+  })
 })
 
 
@@ -174,10 +184,10 @@ getStudentByEmail(currentEmail.value).then(() => {
   <VCard>
     <VCardTitle class="pt-9 pl-10 text-h5 mb-5"> <span class="letter-spacing font-weight-bold">Student Infos : <span>
           <VAvatar size="34" icon="tabler-school" color="warning" />
-          <span class="text-white ms-2 text-warning text-underline text-uppercase mb-5">{{ currentUser?.lastName }} {{ currentUser?.firstName }} </span>
+          <span class="text-white ms-2 text-warning text-underline text-uppercase mb-5">{{ userData?.lastName }} {{ userData?.firstName }} </span>
         </span>
       </span>
-      <StudentDetails v-if="currentUser" :student="currentUser" />
+      <StudentDetails v-if="userData" :student="userData" />
       <div v-else>
         <VSkeletonLoader v-for="i in 1" :key="i" type="card-avatar" />
       </div>

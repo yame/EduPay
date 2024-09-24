@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useAuthStore } from '@/store/useAuthStore';
+import { useCounterStore } from '@/store/useCounterStore';
 import { useNotificationStore } from '@/store/useNotificationStore';
 import { useStatisticsStore } from '@/store/useStatisticsStore';
 import type { ChartJsCustomColors } from '@/views/charts/chartjs/types';
@@ -85,6 +86,7 @@ const authStore = useAuthStore()
 
 
 if (!authStore.ws_state) {
+  useCounterStore().clear()
   console.log("Ez Pz");
 
   const instance = getCurrentInstance()

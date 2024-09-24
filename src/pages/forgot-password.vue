@@ -1,14 +1,20 @@
 <script setup lang="ts">
+import { useAuthStore } from '@/store/useAuthStore'
 import { useGenerateImageVariant } from '@core/composable/useGenerateImageVariant'
-import { VNodeRenderer } from '@layouts/components/VNodeRenderer'
-import { themeConfig } from '@themeConfig'
-
 import authV2ForgotPasswordIllustrationDark from '@images/pages/auth-v2-forgot-password-illustration-dark.png'
 import authV2ForgotPasswordIllustrationLight from '@images/pages/auth-v2-forgot-password-illustration-light.png'
 import authV2MaskDark from '@images/pages/misc-mask-dark.png'
 import authV2MaskLight from '@images/pages/misc-mask-light.png'
+import { VNodeRenderer } from '@layouts/components/VNodeRenderer'
+import { themeConfig } from '@themeConfig'
+import { VForm } from 'vuetify/components'
 
-const email = ref('')
+const authStore = useAuthStore()
+const { resetPasswordToDefault } = authStore
+const email = ref('john@doe.com')
+const isReset = ref(false)
+const refVForm = ref<VForm>()
+
 
 const authThemeImg = useGenerateImageVariant(authV2ForgotPasswordIllustrationLight, authV2ForgotPasswordIllustrationDark)
 
@@ -20,6 +26,22 @@ definePage({
     unauthenticatedOnly: true,
   },
 })
+
+
+//👉 - Reset Password
+const resetPassword = () => {
+  refVForm.value?.validate().then(({ valid }) => {
+    if (valid) {
+      resetPasswordToDefault(email.value).then((res) => {
+        console.log(res.data.value);
+        isReset.value = true
+      })
+    }
+  })
+}
+
+
+
 </script>
 
 <template>
@@ -50,16 +72,16 @@ definePage({
             Forgot Password? 🔒
           </h4>
           <p class="mb-0">
-            Enter your email and we'll send you instructions to reset your password
+            Enter your email and we'll reset your password to default .
           </p>
         </VCardText>
 
         <VCardText>
-          <VForm @submit.prevent="() => {}">
+          <VForm v-if="!isReset" ref="refVForm" @submit.prevent="resetPassword">
             <VRow>
               <!-- email -->
               <VCol cols="12">
-                <AppTextField v-model="email" autofocus label="Email" type="email" placeholder="johndoe@email.com" />
+                <AppTextField v-model="email" :rules="[requiredValidator,emailValidator]" autofocus label="Email" type="email" placeholder="Email" />
               </VCol>
 
               <!-- Reset link -->
@@ -78,6 +100,16 @@ definePage({
               </VCol>
             </VRow>
           </VForm>
+          <div v-else>
+            <VCol cols="12">
+              <Alert title="Password Reset Confirmation" text="Your password has been successfully reset." type="success" />
+            </VCol>
+            <VCol cols="12">
+              <VBtn block color="primary" @click="router.push('/login')">
+                You Can Login from here
+              </VBtn>
+            </VCol>
+          </div>
         </VCardText>
       </VCard>
     </VCol>

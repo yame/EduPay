@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { usePaymentStore } from '@/store/usePaymentStore';
 import pdf from '@jbtje/vite-vue3pdf';
 
 
@@ -15,23 +14,19 @@ interface Emit {
 const props = defineProps<Props>()
 const emit = defineEmits<Emit>()
 
-const currentPage =  ref(0)
-const pageCount =  ref(0)
+const currentPage = ref(0)
+const pageCount = ref(0)
 
 const dialogModelValueUpdate = (val: boolean) => {
   emit('update:isDialogVisible', val)
 }
 
+console.log(props.url);
 
 </script>
 
 <template>
-  <VDialog
-    persistent
-    :width="$vuetify.display.smAndDown ? 'auto' : 900"
-    :model-value="props.isDialogVisible"
-    @update:model-value="dialogModelValueUpdate"
-  >
+  <VDialog persistent :width="$vuetify.display.smAndDown ? 'auto' : 900" :model-value="props.isDialogVisible" @update:model-value="dialogModelValueUpdate">
     <!-- Dialog close btn -->
     <DialogCloseBtn @click="dialogModelValueUpdate(false)" />
 
@@ -39,31 +34,22 @@ const dialogModelValueUpdate = (val: boolean) => {
       <VCardText>
         <!-- 👉 Title -->
         <h4 class="text-h4 text-center mb-2">
-         Receipt 
+          Receipt
         </h4>
         <p class="text-body-1 text-center mb-6">
           Updating user details will receive a privacy audit.
         </p>
-          
-          <VCol cols="12"
-          md="12">
-          <pdf  v-if="url" :src="url"  @num-pages="pageCount = $event"
-          @page-loaded="currentPage = $event"></pdf>
+
+        <VCol cols="12" md="12">
+          <pdf v-if="url" :src="url" @num-pages="pageCount = $event" @page-loaded="currentPage = $event"></pdf>
         </VCol>
         <!-- 👉 Submit and Cancel -->
-      <VCol
-        cols="12"
-        class="d-flex flex-wrap justify-center gap-4"
-        >
+        <VCol cols="12" class="d-flex flex-wrap justify-center gap-4">
 
-        <VBtn
-          color="error"
-          variant="tonal"
-          @click="dialogModelValueUpdate(false)"
-        >
-          Cancel
-        </VBtn>
-      </VCol>
+          <VBtn color="error" variant="tonal" @click="dialogModelValueUpdate(false)">
+            Cancel
+          </VBtn>
+        </VCol>
       </VCardText>
     </VCard>
   </VDialog>

@@ -36,7 +36,7 @@ const authStore = useAuthStore()
 console.error("MAIN");
 
 const instance = getCurrentInstance()
-instance?.appContext.config.globalProperties.$initWebSocketConnection(authStore.accessToken);
+// instance?.appContext.config.globalProperties.$initWebSocketConnection(authStore.accessToken);
 
 app.use(webSocketPlugin);
 // Mount Vue app

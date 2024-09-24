@@ -21,12 +21,12 @@ export const setupGuards = (router: _RouterTyped<RouteNamedMap & { [key: string]
       else allow visiting the page
       (WARN: Don't allow executing further by return statement because next code will check for permissions)
      */
-    if (to.meta.unauthenticatedOnly) {
-      if (isLoggedIn)
-        return '/'
-      else
-        return undefined
-    }
+    // if (to.meta.unauthenticatedOnly) {
+    //   if (isLoggedIn)
+    //     return '/'
+    //   else
+    //     return undefined
+    // }
 
     if (!canNavigate(to)) {
       /* eslint-disable indent */

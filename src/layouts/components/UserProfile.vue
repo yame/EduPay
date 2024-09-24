@@ -17,11 +17,12 @@ const loading = ref(false)
 
 const instance = getCurrentInstance()
 const resetCookies = async () => {
-  setCurrentUser(null)
-  setToken(null)
+
   setUserAbilityRules(null)
   useCookie('accessToken').value = null;
   useCookie("userData").value = null;
+  setCurrentUser(null)
+  setToken(null)
   authStore.ws_state = null
   useCounterStore().clear();
   instance?.appContext.config.globalProperties.$disconnectWebSocket();
@@ -97,7 +98,7 @@ const userProfileList = [
                     {{ userData?.role }}
 
                   </VListItemSubtitle>
-                  <VChip v-if="userData?.role==='ADMIN'" class="ml-2 text-small" color="info" size="x-small">
+                  <VChip v-show="userData?.role =='ADMIN'" class="ml-2 text-small" color="info" size="x-small">
                     <VIcon start size="12" icon="tabler-building-skyscraper" />
                     {{ userData?.departmentName }}
                   </VChip>

@@ -147,10 +147,10 @@ const onSubmit = () => {
           </VForm>
           <div v-else>
             <VCol cols="12">
-              <Alert :title="msgRegistration" text="Registration successful! Your account is under review. You'll receive an email once it's approved and ready for login." type="info" />
+              <Alert :title="msgRegistration" text="Registration successful! Your account is under review. You'll receive an email once it's approved and ready for login." type="success" />
             </VCol>
             <VCol cols="12">
-              <VBtn block color="info" @click="router.push('/login')">
+              <VBtn block color="primary" @click="router.push('/login')">
                 You Can Login from here
               </VBtn>
             </VCol>
