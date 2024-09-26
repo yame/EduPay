@@ -99,7 +99,7 @@ onMounted(async () => {
             <VDivider />
             <!-- <AppDataTableServer :headers="headers" :data="students" :totalData = "totalStudents" :loading="loading" v-model:itemsPerPage = "itemsPerPage" v-model:page="page" :search="searchQuery" :error="error" @edit-status="editStatus" :actions="actions"></AppDataTableServer> -->
 
-            <AppDataTableServer :headers="[
+            <AppDataTableServer :selected-item="'email'" :headers="[
               {
                 key: 'code',
                 title: 'Code',

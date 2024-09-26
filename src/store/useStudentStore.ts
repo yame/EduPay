@@ -6,7 +6,6 @@ export const useStudentStore = defineStore('student', () => {
 
   const studentsList = ref<Student[]>()
   const pendingStudents = ref<Student[]>()
-  const currentEmail = ref('')
   const currentStudent = ref<Student>()
   const loading = ref(true)
   const error = ref('')
@@ -130,7 +129,6 @@ export const useStudentStore = defineStore('student', () => {
     return await useApi(`/user/pending-student/${email}`).get();
   }
 
-
   //👉 - Load Students From Excel
   async function uploadStudentFile(file: File) {
     console.log(file);
@@ -165,33 +163,59 @@ export const useStudentStore = defineStore('student', () => {
     }
   }
 
-
-
-
-
-
-  //👉 - Set Current Email
-  function setCurrentStudentEmail(email: string) {
-    console.log(currentEmail.value);
-
-    currentEmail.value = email
-  }
-
-  //👉 - Set Current Email
-  function getCurrentStudentEmail() {
-    console.log(currentEmail.value);
-
-    return currentEmail.value
-  }
-
-
-
-
   //👉 - Toggle Account 
   async function toggleEnableUserAccount(email: string) {
     return await useApi('/user/toggle-account-status?email=' + email).patch()
   }
 
+  //👉 - Approve multiple users
+  async function approveMultipleUsers(listEmails: string[]) {
+    return await useApi('/user/pending-students/approve-selection').post(listEmails)
+  }
 
-  return { studentsList, currentStudent, currentEmail, loading, error, pendingStudents, updateOne, approvingStudentRegistration, banStudentRegistration, declineStudentRegistration, getPendingStudents, deleteUserByEmail, getAllStudents, addOne, getStudentByCode, getStudentsByProgram, getStudentByEmail, setCurrentStudentEmail, getCurrentStudentEmail, toggleEnableUserAccount, getPendingStudentsByEmail, uploadStudentFile }
+  //👉 - Decline multiple users
+  async function declineMultipleUsers(listEmails: string[]) {
+    return await useApi('/user/pending-students/decline-selection').post(listEmails)
+  }
+
+  //👉 - Ban multiple users
+  async function banMultipleUsers(listEmails: string[]) {
+    return await useApi('/user/pending-students/ban-selection').post(listEmails)
+  }
+
+  //👉 - Reset pw multiple students
+  async function resetPasswordToMultipleStudents(listEmails: string[]) {
+    return await $api(`/user/multiple/reset-pw`, {
+      method: 'PUT',
+      body: listEmails,
+    })
+  }
+
+  //👉 - Toggle multiple students
+  async function toggleMultipleStudents(listEmails: string[]) {
+    return await $api(`/user/toggle-selection`, {
+      method: 'PATCH',
+      body: listEmails,
+    })
+  }
+
+  //👉 - Delete multiple students
+  async function deleteMultipleStudents(listEmails: String[]) {
+    console.log(listEmails);
+
+    return await $api(`/user/delete-selection`, {
+      method: 'DELETE',
+      body: listEmails,
+    })
+
+  }
+
+
+  return {
+    studentsList, currentStudent, loading, error, pendingStudents, updateOne, approvingStudentRegistration, banStudentRegistration, declineStudentRegistration, getPendingStudents, deleteUserByEmail, getAllStudents, addOne, getStudentByCode, getStudentsByProgram, getStudentByEmail, toggleEnableUserAccount, getPendingStudentsByEmail, uploadStudentFile, approveMultipleUsers,
+    declineMultipleUsers,
+    banMultipleUsers,
+    resetPasswordToMultipleStudents,
+    deleteMultipleStudents, toggleMultipleStudents
+  }
 })

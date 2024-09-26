@@ -1,5 +1,5 @@
-<template>{{ selectedRows }}
-  <VDataTableServer v-model:model-value="selectedRows" item-value="notificationId" show-select v-model:items-per-page="itemsPerPage" v-model:page="page" :headers="headers" :items="data || []" :items-length="totalData" class="text-no-wrap" @update:options="updateOptions">
+<template>
+  <VDataTableServer v-model:model-value="selectedRows" :item-value="selectedItem" show-select v-model:items-per-page="itemsPerPage" v-model:page="page" :headers="headers" :items="data || []" :items-length="totalData" class="text-no-wrap" @update:options="updateOptions">
     <!-- Dynamic Item Templates -->
     <template v-for="header in headers" :key="header.key" #[`item.${header.key}`]="{ item }">
       <span v-if="header.format">
@@ -58,6 +58,7 @@
 import { PAYMENT_STATUS, PAYMENT_TYPE, PROGRAM } from '@/@core/types';
 // Props
 const props = defineProps({
+  selectedItem: String,
   headers: Array,
   data: Array,
   totalData: Number,
@@ -68,11 +69,10 @@ const props = defineProps({
   accountActive: Boolean
 });
 
-const { headers, data, totalData, actions } = toRefs(props);
-
+const { headers, data, totalData, actions, selectedItem } = toRefs(props);
 
 // Emits
-const emit = defineEmits(['edit-status', 'update:itemsPerPage', 'update:page', 'viewPDF', 'toggleAccount', 'toggleRead']);
+const emit = defineEmits(['edit-status', 'update:itemsPerPage', 'update:page', 'viewPDF', 'toggleAccount', 'toggleRead', 'update:selectedRows']);
 const resolvePaymentStatus = (status: string) => {
   if (status === PAYMENT_STATUS.CREATED)
     return { text: PAYMENT_STATUS.CREATED, color: 'primary' }
@@ -113,6 +113,7 @@ const selectedRows = ref([])
 // Watchers to sync props with local state
 watch(() => props.itemsPerPage, (newVal) => emit('update:itemsPerPage', newVal));
 watch(() => props.page, (newVal) => emit('update:page', newVal));
+watch(selectedRows, (newVal) => emit('update:selectedRows', newVal));
 // watch(() => props.totalData, (newVal) => emit('update:totalData', newVal));
 // Methods
 const updateOptions = (options) => {

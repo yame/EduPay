@@ -12,7 +12,7 @@ const options = ref({ page: 1, itemsPerPage: 5, sortBy: [''], orderBy: '' })
 
 
 const studentStore = useStudentStore()
-const { getAllStudents, deleteUserByEmail, updateOne, toggleEnableUserAccount, uploadStudentFile } = studentStore
+const { getAllStudents, deleteUserByEmail, updateOne, toggleEnableUserAccount, uploadStudentFile, deleteMultipleStudents, resetPasswordToMultipleStudents, toggleMultipleStudents } = studentStore
 const { studentsList, loading, error } = storeToRefs(studentStore)
 
 
@@ -152,12 +152,84 @@ const loadStudents = () => {
     })
 
   }).then(() => {
-    getAllStudents(page.value, itemsPerPage.value).then(() => { isLoading.value = false })
+    getAllStudents(page.value, itemsPerPage.value).then(() => {
+      file.value = []
+      isLoading.value = false
+    })
   }).catch(err => {
     isLoading.value = false
     toast.error(err + '⛔❌', {
       "theme": useCookie('EduPayment-theme').value || 'auto'
     })
+  })
+}
+
+
+//👉 - Selected Rows Implementation here
+const isSelected = ref(false)
+const selectedRows = ref<String[]>([])
+const toggleOrDeleteSelection = (listEmails) => {
+  isSelected.value = true
+  selectedRows.value = listEmails
+}
+
+const deleteSelection = () => {
+  console.table(selectedRows.value);
+  deleteMultipleStudents(selectedRows.value).then((res) => {
+    console.warn(res)
+    toast.success(res + '✅', {
+      "theme": useCookie('EduPayment-theme').value || 'auto'
+    })
+    getAllStudents(page.value, itemsPerPage.value)
+  }).catch((err) => {
+    toast.error(err + '⛔❌', {
+      "theme": useCookie('EduPayment-theme').value || 'auto'
+    })
+  }
+  ).finally(() => {
+    selectedRows.value = []
+    isSelected.value = false
+
+  })
+}
+
+const resetPwSelection = () => {
+  console.table(selectedRows.value);
+  resetPasswordToMultipleStudents(selectedRows.value).then((res) => {
+    console.warn(res)
+    toast.success(res + '✅', {
+      "theme": useCookie('EduPayment-theme').value || 'auto'
+    })
+    getAllStudents(page.value, itemsPerPage.value)
+  }).catch((err) => {
+    toast.error(err + '⛔❌', {
+      "theme": useCookie('EduPayment-theme').value || 'auto'
+    })
+  }
+  ).finally(() => {
+    selectedRows.value = []
+    isSelected.value = false
+
+  })
+}
+
+const toggleSelection = () => {
+  console.table(selectedRows.value);
+  toggleMultipleStudents(selectedRows.value).then((res) => {
+    console.warn(res)
+    toast.success('Accounts were toggled ✅', {
+      "theme": useCookie('EduPayment-theme').value || 'auto'
+    })
+    getAllStudents(page.value, itemsPerPage.value)
+  }).catch((err) => {
+    toast.error(err + '⛔❌', {
+      "theme": useCookie('EduPayment-theme').value || 'auto'
+    })
+  }
+  ).finally(() => {
+    selectedRows.value = []
+    isSelected.value = false
+
   })
 }
 
@@ -172,21 +244,23 @@ const loadStudents = () => {
     </VCardTitle>
     <!-- 👉 Filters -->
     <VCardText>
-      <div class="d-flex justify-space-between">
+      <VRow>
 
-        <div class="d-flex  gap-x-4">
-          <VCol cols="12">
-            <VFileInput label="Load Students from file" v-model="file" @change="selectFile" accept=".xlsx" placeholder="Load Students from an excel file" />
-          </VCol>
-          <VCol>
-            <VBtn :loading="isLoading" @click="loadStudents" color="success" prepend-icon="tabler-upload" text="Load Students" :disabled=" file.length < 1" />
+        <VCol cols="12" sm="6" md="6" lg="5">
+          <VFileInput label="Load Students from file" v-model="file" @change="selectFile" accept=".xlsx" placeholder="Load Students from an excel file" />
+        </VCol>
+        <VCol cols="12" sm="6" md="3" lg="6">
+          <VBtn :loading="isLoading" @click="loadStudents" color="success" prepend-icon="tabler-upload" text="Load Students" :disabled=" file.length < 1" />
 
-          </VCol>
-        </div>
+        </VCol>
+        <VCol cols="12" class="d-flex flex-row-reverse gap-x-4 flex-wrap gap-y-2">
+          <VBtn color="primary" prepend-icon="tabler-plus" text="New Student" @click="$router.push('/student/add')" />
+          <VBtn v-show="isSelected" color="error" prepend-icon="tabler-trash" text="Delete selection" @click="deleteSelection" />
+          <VBtn v-show="isSelected" color="secondary" prepend-icon="tabler-switch-horizontal" text="Toggle selection" @click="toggleSelection" />
+          <VBtn v-show="isSelected" color="warning" prepend-icon="tabler-restore" text="Reset password selection" @click="resetPwSelection" />
+        </VCol>
 
-        <VBtn color="primary" prepend-icon="tabler-plus" text="New Student" @click="$router.push('/student/add')" />
-
-      </div>
+      </VRow>
     </VCardText>
     <v-divider></v-divider>
     <VCardText>
@@ -225,7 +299,7 @@ const loadStudents = () => {
           <VDivider />
           <!-- <AppDataTableServer :headers="headers" :data="students" :totalData = "totalStudents" :loading="loading" v-model:itemsPerPage = "itemsPerPage" v-model:page="page" :search="searchQuery" :error="error" @edit-status="editStatus" :actions="actions"></AppDataTableServer> -->
 
-          <AppDataTableServer :headers="[
+          <AppDataTableServer v-model:model-value="selectedRows" :selected-item="'email'" :headers="[
               {
                 key: 'code',
                 title: 'Code',
@@ -255,7 +329,7 @@ const loadStudents = () => {
               { icon: 'tabler-eye',color:'secondary', handler: (item) => viewStudent(item) },
               { icon: 'tabler-edit',color:'warning' ,handler: (item) => edit(item) },
               { icon: 'tabler-trash',color:'error', handler: (item) => deleteOne(item) },
-            ]" @update:items-per-page="changeSize" @update:total-data="changeTotalData" @toggleAccount="toggleAccount" />
+            ]" @update:items-per-page="changeSize" @update:total-data="changeTotalData" @toggleAccount="toggleAccount" @update:model-value="toggleOrDeleteSelection" />
 
         </div>
         <div v-else>

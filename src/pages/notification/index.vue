@@ -128,7 +128,7 @@ const toggle = (item) => {
 
           <VDivider />
 
-          <AppDataTableServer v-if="notifications" @update:page="changePage" @update:items-per-page="changeSize" :headers="[
+          <AppDataTableServer v-if="notifications" :selected-item="'notificationId'" @update:page="changePage" @update:items-per-page="changeSize" :headers="[
               {
                 key: 'notificationId',
                 title: 'Notification Id',
