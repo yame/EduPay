@@ -4,7 +4,7 @@ import { useNotificationStore } from '@/store/useNotificationStore';
 import type { Notification } from '@layouts/types';
 
 const notificationStore = useNotificationStore()
-const { notificationsList } = storeToRefs(notificationStore)
+const { notificationsList, NonSeenNotificationsCount } = storeToRefs(notificationStore)
 const { markAllAsRead, toggleSeen, toggleLocalNotification, deleteNotification, removeNotification, readAllNotifications } = notificationStore
 
 const badgeProps = ref({ content: notificationsList.value.length, max: '99', showMenu: false })
@@ -12,6 +12,7 @@ const router = useRouter();
 
 badgeProps.value.content = notificationsList.value.length
 
+console.log(NonSeenNotificationsCount.value);
 
 //👉 - Delete from BD and from local notificationList Data
 const remNotification = (notificationId: number) => {
@@ -29,6 +30,7 @@ watch(notificationsList, (newNotificationsList: Notification[]) => {
 const markAllRead = (allNotificationsIds: number[]) => {
   markAllAsRead().then(() => {
     readAllNotifications(allNotificationsIds)
+
   })
 }
 
@@ -50,7 +52,9 @@ const markUnRead = (notificationId: number) => {
 const handleNotificationClick = (notification: Notification) => {
   if (!notification.isSeen)
     markRead(notification.id)
-  notification.paymentId === undefined ? router.push(`/notification/registration/${notification.email}`) : router.push(`/notification/payment/${notification.paymentId}`)
+  console.error(notification.subtitle);
+
+  notification.paymentId === undefined ? router.push(`/notification/registration/${notification.email}`) : !notification.subtitle.includes('CASH') === true ? router.push(`/student/${notification.paymentId}`) : router.push(`/notification/payment/${notification.paymentId}`)
   toggle(false)
 
 }
@@ -59,6 +63,9 @@ const handleNotificationClick = (notification: Notification) => {
 const toggle = (val) => {
   badgeProps.value.showMenu = val
 }
+
+
+
 
 // 👉 - Sort notifications before passing them to the child component
 // const sortedNotifications = computed(() => {

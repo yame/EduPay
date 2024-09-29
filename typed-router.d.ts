@@ -33,6 +33,7 @@ declare module 'vue-router/auto-routes' {
     'profile': RouteRecordInfo<'profile', '/profile', Record<never, never>, Record<never, never>>,
     'register': RouteRecordInfo<'register', '/register', Record<never, never>, Record<never, never>>,
     'second-page': RouteRecordInfo<'second-page', '/second-page', Record<never, never>, Record<never, never>>,
+    'student-id': RouteRecordInfo<'student-id', '/student/:id', { id: ParamValue<true> }, { id: ParamValue<false> }>,
     'student-add': RouteRecordInfo<'student-add', '/student/add', Record<never, never>, Record<never, never>>,
     'student-details-code': RouteRecordInfo<'student-details-code', '/student/details/:code', { code: ParamValue<true> }, { code: ParamValue<false> }>,
     'student-list': RouteRecordInfo<'student-list', '/student/list', Record<never, never>, Record<never, never>>,

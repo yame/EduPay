@@ -12,7 +12,7 @@ import { useTheme } from 'vuetify';
 const notificationStore = useNotificationStore();
 const { onLoginNotifications } = notificationStore;
 const statisticsStore = useStatisticsStore();
-const { statisticsBarCharData, statisticsPolarAreaCharData, error, loading } = storeToRefs(statisticsStore);
+const { statisticsBarCharData, statisticsPolarAreaCharData, error, loading, isDataFetched } = storeToRefs(statisticsStore);
 const { onLoginFetchData, getDashboardData } = statisticsStore
 const vuetifyTheme = useTheme()
 
@@ -75,6 +75,8 @@ definePage({
     subject: 'ADMIN'
   }
 })
+
+const route = useRoute()
 // function sendMessage() {
 //   WebSocketService.send('/app/myEndpoint', { content: 'Hello, WebSocket!' });
 // }
@@ -87,10 +89,15 @@ console.error("INDEX BABY");
 
 
 onMounted(async () => {
-  await getDashboardData()
+  if (!isDataFetched.value) {
+    await getDashboardData()
+  }
 });
 
-
+watch(() => route.path, async (newRoute) => {
+  console.log(newRoute);
+  isDataFetched.value = false
+})
 
 </script>
 

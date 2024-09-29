@@ -4,9 +4,11 @@ export const useNotificationStore = defineStore("notification", () => {
 
   const notificationsList = ref<Notification[]>([])
   const notificationsFromPagination = ref()
-  const NonSeenNotificationsCount = ref(0)
+  const NonSeenNotificationsCount = ref<number>(0)
   const loading = ref(false)
   const error = ref('')
+
+  //{"notificationId":1,"paymentId":"d739e1c3-27c8-4aa1-ac62-4b1e0b8c3651","message":"Your payment was REJECTED.","registerDate":"2024-09-29T22:20:54.000+00:00","seen":false}
 
 
   //SECTION - ACTIONS FOR MANAGING LOCAL DATA
@@ -16,12 +18,12 @@ export const useNotificationStore = defineStore("notification", () => {
     const notification: Notification = message.includes('payment') ? {
       id: jsonObject.notificationId,
       paymentId: jsonObject.paymentId,
-      icon: 'tabler-coin',
-      title: `New Payment 💸💰`,
+      icon: (jsonObject.message.includes('REJECTED') || jsonObject.message.includes('VALIDATED')) ? 'tabler-edit' : 'tabler-coin',
+      title: (jsonObject.message.includes('REJECTED') || jsonObject.message.includes('VALIDATED')) ? `Your Payment Status: Updated 📊` : `New Payment 💸💰`,
       subtitle: jsonObject.message,
       time: getNotificationTime(jsonObject.registerDate),
       isSeen: jsonObject.seen,
-      color: 'success'
+      color: (jsonObject.message.includes('REJECTED') || jsonObject.message.includes('VALIDATED')) ? 'info' : 'success'
     } : {
       id: jsonObject.notificationId,
       email: jsonObject.email,
@@ -35,8 +37,9 @@ export const useNotificationStore = defineStore("notification", () => {
 
     // //👉 - Check if a notification has the same id already exists
     const exists = notificationsList.value.some((n) => n.id === notification.id)
-    if (!exists)
+    if (!exists) {
       notificationsList.value.unshift(notification)
+    }
   }
   //👉 - Remove searched notification 
   function removeNotification(id: number) {
@@ -59,8 +62,9 @@ export const useNotificationStore = defineStore("notification", () => {
   function toggleLocalNotification(id: number) {
     // const idsSet = new Set(notificationsList.value.map(n=>n.id))
     const searchedNotification = notificationsList.value.find(n => n.id === id)
-    if (searchedNotification)
+    if (searchedNotification) {
       searchedNotification.isSeen = !searchedNotification.isSeen;
+    }
   }
   //!SECTION
 
@@ -126,6 +130,11 @@ export const useNotificationStore = defineStore("notification", () => {
     NonSeenNotificationsCount.value = count
   }
 
+  function decrement() {
+    if (NonSeenNotificationsCount.value > 0)
+      NonSeenNotificationsCount.value--;
+  }
+
 
   //SECTION SELECTION ACTIONS
 
@@ -159,7 +168,7 @@ export const useNotificationStore = defineStore("notification", () => {
   }
   //!SECTION
 
-  return { NonSeenNotificationsCount, notificationsList, notificationsFromPagination, loading, error, pageableNotifications, pushNotification, setNonSeenNotificationsCount, onLoginNotifications, markAllAsRead, removeNotification, readAllNotifications, deleteNotification, toggleSeen, toggleLocalNotification, deleteMultipleNotifications, toggleSeenMultipleNotifications, markAsReadMultipleNotifications };
+  return { NonSeenNotificationsCount, notificationsList, notificationsFromPagination, loading, error, pageableNotifications, pushNotification, setNonSeenNotificationsCount, onLoginNotifications, markAllAsRead, removeNotification, readAllNotifications, deleteNotification, toggleSeen, toggleLocalNotification, deleteMultipleNotifications, toggleSeenMultipleNotifications, markAsReadMultipleNotifications, decrement };
 }, {
   persist: true
 });

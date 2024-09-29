@@ -45,6 +45,7 @@ const { error, currentUser, userAbilityRules, accessToken } = storeToRefs(authSt
 
 const statisticsStore = useStatisticsStore();
 const { onLoginFetchData } = statisticsStore
+const { isDataFetched } = storeToRefs(statisticsStore)
 
 const loader = ref(false)
 const instance = getCurrentInstance()
@@ -72,7 +73,15 @@ const LogIn = async () => {
     if (userData?.isPasswordChanged) {
       if (currentUser.value?.role === 'ADMIN') {
         await instance?.appContext.config.globalProperties.$initWebSocketConnection(authStore.accessToken);
-        await onLoginFetchData('app/on-login-data');
+        onLoginFetchData('app/on-login-data').then(() => {
+          isDataFetched.value = true
+        });
+      }
+      else if (currentUser.value?.role === 'STUDENT') {
+        await instance?.appContext.config.globalProperties.$initWebSocketConnection(authStore.accessToken, currentUser.value.email);
+        onLoginFetchData('app/on-login-data').then(() => {
+          isDataFetched.value = true
+        });
       }
       router.push(route.query.to ? String(route.query.to) : '/').then(() => {
         toast.success('Login successful ✅⚡', {

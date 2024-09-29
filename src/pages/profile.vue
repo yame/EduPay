@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { useAuthStore } from "@/store/useAuthStore";
 import { useCounterStore } from "@/store/useCounterStore";
+import { useNotificationStore } from "@/store/useNotificationStore";
+import { useStatisticsStore } from "@/store/useStatisticsStore";
 
 
 
@@ -20,10 +22,10 @@ const toCamelCase = (part: string) => {
 
 definePage({
   meta: {
-    layout: "blank",
-    unauthenticatedOnly: true,
-  },
-});
+    action: 'manage',
+    subject: 'STUDENT'
+  }
+})
 
 
 
@@ -62,6 +64,8 @@ const deconnect = async () => {
     loading.value = false
   }, 1000)).then(() => {
     resetCookies();
+    useStatisticsStore().isDataFetched = false
+    useNotificationStore().notificationsList = []
   })
 }
 

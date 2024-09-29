@@ -169,6 +169,14 @@ const deleteSelection = () => {
     isSelected.value = false
   })
 }
+
+definePage({
+  meta: {
+    action: 'manage',
+    subject: 'STUDENT'
+  }
+})
+
 //!SECTION
 
 

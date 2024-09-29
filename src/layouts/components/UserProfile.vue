@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { useAuthStore } from "@/store/useAuthStore";
 import { useCounterStore } from "@/store/useCounterStore";
+import { useNotificationStore } from "@/store/useNotificationStore";
+import { useStatisticsStore } from "@/store/useStatisticsStore";
 import { PerfectScrollbar } from "vue3-perfect-scrollbar";
 
 const router = useRouter();
@@ -39,8 +41,11 @@ const resetCookies = async () => {
 
 const deconnecter = async () => {
   loading.value = true
-  logout().then(() =>
+  logout().then(() => {
     resetCookies()
+    useStatisticsStore().isDataFetched = false
+    useNotificationStore().notificationsList = []
+  }
   ).finally(() => loading.value = false)
 };
 

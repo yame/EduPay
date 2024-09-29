@@ -36,9 +36,9 @@ export const useStatisticsStore = defineStore('statistic', () => {
 
   const statisticsBarCharData = ref()
   const statisticsPolarAreaCharData = ref()
-  const nonSeenNotificationCount = ref(0)
   const loading = ref(true)
   const error = ref('')
+  const isDataFetched = ref(false)
 
   //👉 - Get Statistics by amount 
   async function getStatisticsByAmount(month?: number) {
@@ -82,39 +82,43 @@ export const useStatisticsStore = defineStore('statistic', () => {
     const { data, error: isError, isFetching } = await useApi(url)
 
     //👉 - Set NonSeenNotificationsCount after login Admin
-    if ((data.value as Statistics).NonSeenNotificationsCount)
-      useNotificationStore().setNonSeenNotificationsCount((data.value as Statistics).NonSeenNotificationsCount)
 
-    //👉 - Retrieve and Split the Program Statistics Object After Each Login
-    const programs = Object.keys((data.value as Statistics).countStudentsByProgram)
-    const programsValues = Object.values((data.value as Statistics).countStudentsByProgram)
-    statisticsPolarAreaCharData.value = {
-      labels: programs,
-      datasets: [
-        {
-          borderWidth: 0,
-          label: 'Total Students ',
-          data: programsValues.map(v => v[0]),
-          backgroundColor: [chartJsCustomColors.primary, chartJsCustomColors.yellow, chartJsCustomColors.polarChartWarning, chartJsCustomColors.polarChartInfo, chartJsCustomColors.polarChartGrey, chartJsCustomColors.polarChartGreen],
-        },
-      ],
-    }
+    useNotificationStore().setNonSeenNotificationsCount((data.value as Statistics).NonSeenNotificationsCount)
+    console.warn(data.value.NonSeenNotificationsCount);
 
-    //👉 - Retrieve and Split the Month Statistics Object After Each Login 
-    const months = Object.keys((data.value as Statistics).paymentsCountByMonth)
-    const monthsValues = Object.values((data.value as Statistics).paymentsCountByMonth)
-    statisticsBarCharData.value = {
-      labels: months,
-      datasets: [
-        {
-          maxBarThickness: 15,
-          backgroundColor: chartJsCustomColors.lineChartPrimary,
-          borderColor: 'transparent',
-          borderRadius: { topRight: 15, topLeft: 15 },
-          data: monthsValues,
-        },
-      ],
+    //SECTION -
+    if ((data.value as Statistics).countStudentsByProgram && (data.value as Statistics).countStudentsByProgram) {
+      //👉 - Retrieve and Split the Program Statistics Object After Each Login
+      const programs = Object.keys((data.value as Statistics).countStudentsByProgram)
+      const programsValues = Object.values((data.value as Statistics).countStudentsByProgram)
+      statisticsPolarAreaCharData.value = {
+        labels: programs,
+        datasets: [
+          {
+            borderWidth: 0,
+            label: 'Total Students ',
+            data: programsValues.map(v => v[0]),
+            backgroundColor: [chartJsCustomColors.primary, chartJsCustomColors.yellow, chartJsCustomColors.polarChartWarning, chartJsCustomColors.polarChartInfo, chartJsCustomColors.polarChartGrey, chartJsCustomColors.polarChartGreen],
+          },
+        ],
+      }
+      //👉 - Retrieve and Split the Month Statistics Object After Each Login 
+      const months = Object.keys((data.value as Statistics).paymentsCountByMonth)
+      const monthsValues = Object.values((data.value as Statistics).paymentsCountByMonth)
+      statisticsBarCharData.value = {
+        labels: months,
+        datasets: [
+          {
+            maxBarThickness: 15,
+            backgroundColor: chartJsCustomColors.lineChartPrimary,
+            borderColor: 'transparent',
+            borderRadius: { topRight: 15, topLeft: 15 },
+            data: monthsValues,
+          },
+        ],
+      }
     }
+    //!SECTION
 
     loading.value = isFetching.value
     error.value = isError.value
@@ -127,6 +131,6 @@ export const useStatisticsStore = defineStore('statistic', () => {
 
 
   return {
-    statisticsBarCharData, statisticsPolarAreaCharData, error, loading, onLoginFetchData, getDashboardData
+    statisticsBarCharData, statisticsPolarAreaCharData, error, loading, isDataFetched, onLoginFetchData, getDashboardData
   }
 })

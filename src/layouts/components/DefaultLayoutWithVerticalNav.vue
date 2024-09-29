@@ -27,7 +27,7 @@ import { VerticalNavLayout } from '@layouts'
         <VSpacer />
 
         <NavBarI18n v-if="themeConfig.app.i18n.enable && themeConfig.app.i18n.langConfig?.length" :languages="themeConfig.app.i18n.langConfig" />
-        <NavBarNotifications class="me-4" v-if="$can('manage','ADMIN')" />
+        <NavBarNotifications class="me-4" />
         <UserProfile />
       </div>
     </template>

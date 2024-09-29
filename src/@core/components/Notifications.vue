@@ -23,44 +23,47 @@ const props = withDefaults(defineProps<Props>(), {
 })
 const counterStore = useCounterStore()
 const notificationStore = useNotificationStore()
+const { notificationsList, NonSeenNotificationsCount } = storeToRefs(notificationStore)
 const emit = defineEmits<Emit>()
 
 const isAllMarkRead = computed(() => {
-  return notificationStore.notificationsList.some(item => !item.isSeen)
+  return notificationsList.value.some(item => !item.isSeen)
 })
 
 const totalUnseenNotifications = computed(() => {
-  return notificationStore.notificationsList.filter(n => !n.isSeen).length
+  return NonSeenNotificationsCount.value
 });
 
 const isNullNotifications = computed(() =>
-  notificationStore.notificationsList.some(item => item.isSeen === false)
+  notificationsList.value.some(item => item.isSeen === false)
 )
 
-watch(() => counterStore.counter, (newCounter) => {
-  counterStore.counter = newCounter
-})
-
 const markAllRead = async () => {
-  const allNotificationsIds = notificationStore.notificationsList.map(item => item.id);
+  const allNotificationsIds = notificationsList.value.map(item => item.id);
+  NonSeenNotificationsCount.value = 0;
   emit('markAllRead', allNotificationsIds);
 }
 
 const toggleReadUnread = (isSeen: boolean, Id: number) => {
   if (isSeen) {
     emit('unread', Id)
+    NonSeenNotificationsCount.value++;
   }
   else {
     emit('read', Id)
+    notificationStore.decrement()
   }
 }
 
 const handleClick = (notification) => {
+  if (!notification.isSeen)
+    notificationStore.decrement()
   emit('click:notification', notification)
   emit('toggle-menu', false)
 }
 
 const removeNotification = (notificationId: number) => {
+  notificationStore.decrement()
   emit('remove', notificationId)
 }
 
@@ -75,7 +78,7 @@ const viewAll = async () => {
 
 <template>
   <IconBtn id="notification-btn" @click="$emit('toggle-menu', true)">
-    <VBadge v-if="props.badgeProps" v-bind="props.badgeProps" :model-value="isNullNotifications" :content="totalUnseenNotifications>0 ? totalUnseenNotifications : ''" max="10" color="error" offset-x="2" offset-y="3">
+    <VBadge v-if="props.badgeProps" v-bind="props.badgeProps" :model-value="isNullNotifications" :content="totalUnseenNotifications > 0 ? totalUnseenNotifications : undefined" max="10" color="error" offset-x="2" offset-y="3">
       <VIcon icon="tabler-bell" />
     </VBadge>
 
@@ -152,7 +155,7 @@ const viewAll = async () => {
         <VDivider />
 
         <!-- 👉 Footer -->
-        <VCardText v-show="props.notifications.length>=0" class="pa-4">
+        <VCardText v-show="props.notifications.length>=0" v-if="$can('manage','ADMIN')" class="pa-4">
           <VBtn block size="small" @click="viewAll">
             View All Notifications
           </VBtn>

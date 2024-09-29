@@ -4,7 +4,6 @@ import { Payment, PAYMENT_STATUS, PAYMENT_TYPE } from '@/@core/types';
 import { router } from '@/plugins/1.router';
 import { usePaymentStore } from '@/store/usePaymentStore';
 import pdf from '@jbtje/vite-vue3pdf';
-import { toast } from 'vue3-toastify';
 const paymentStore = usePaymentStore()
 const { currentPayment, loading } = storeToRefs(paymentStore)
 const route = useRoute();
@@ -71,15 +70,16 @@ watch(() => currentPayment.value?.status, (newStatus) => {
 
 
 const updatePayment = () => {
-  console.log(currPayment.value.status);
+  router.push('/student/payments-student')
+  // console.log(currPayment.value.status);
 
-  usePaymentStore().updateOne(route.params?.id, currPayment.value.status).then(() => {
-    router.push('/').then(() => {
-      toast.success('Paymant successfully Updated ⚡✔', {
-        "theme": useCookie('EduPayment-theme').value || 'auto'
-      })
-    })
-  })
+  // usePaymentStore().updateOne(route.params?.id, currPayment.value.status).then(() => {
+  //   router.push('/').then(() => {
+  //     toast.success('Paymant successfully Updated ⚡✔', {
+  //       "theme": useCookie('EduPayment-theme').value || 'auto'
+  //     })
+  //   })
+  // })
 }
 
 definePage({
@@ -97,10 +97,10 @@ definePage({
     <VCardText>
       <!-- 👉 Title -->
       <h4 class="text-h4 text-center mb-2">
-        New Payment Added Details
+        Your Payment Details
       </h4>
       <p class="text-body-1 text-center mb-6">
-        NOTE : Update the status of this payment
+        NOTE!! : You Cannot Update the status of your payment
       </p>
 
       <!-- 👉 Form -->
@@ -123,7 +123,7 @@ definePage({
 
           <!-- 👉 Payment Status -->
           <VCol cols="12" md="6">
-            <AppSelect :rules="[requiredValidator]" v-model="currPayment.status" label="Status" placeholder="Status" :items="statusItems" item-title="title" item-value="value">
+            <AppSelect :rules="[requiredValidator]" v-model="currPayment.status" label="Status" :readonly="true" placeholder="Status" :items="statusItems" item-title="title" item-value="value">
               <template #selection="{ item }">
                 <VChip :color="resolveStatusColor(item.title)?.color">
                   <template #prepend>
@@ -161,9 +161,9 @@ definePage({
           <!-- 👉 Submit and Cancel -->
           <VCol cols="12" class="d-flex flex-wrap justify-center gap-4">
             <RouterLink to="/">
-              <v-btn color="primary">Back To Dashboard</v-btn>
+              <v-btn color="primary">Back To your payment List</v-btn>
             </RouterLink>
-            <v-btn color="warning" @click="updatePayment" :disabled="!isStatusChanged">Update Payment</v-btn>
+            <v-btn color="warning" @click="updatePayment">Download receipt</v-btn>
 
           </VCol>
         </VRow>
