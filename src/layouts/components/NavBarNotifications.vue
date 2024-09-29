@@ -61,22 +61,22 @@ const toggle = (val) => {
 }
 
 // 👉 - Sort notifications before passing them to the child component
-const sortedNotifications = computed(() => {
-  return notificationsList.value.sort((a, b) => {
-    // First, sort by isSeen (false should come before true)
-    const seenComparison = Number(a.isSeen) - Number(b.isSeen);
+// const sortedNotifications = computed(() => {
+//   return notificationsList.value.sort((a, b) => {
+//     // First, sort by isSeen (false should come before true)
+//     const seenComparison = Number(a.isSeen) - Number(b.isSeen);
 
-    // If isSeen is the same, sort by registerDate (most recent first)
-    if (seenComparison === 0) {
-      return new Date(b.registerDate).getTime() - new Date(a.registerDate).getTime();
-    }
-    return seenComparison;
-  });
-});
+//     // If isSeen is the same, sort by registerDate (most recent first)
+//     if (seenComparison === 0) {
+//       return new Date(b.registerDate).getTime() - new Date(a.registerDate).getTime();
+//     }
+//     return seenComparison;
+//   });
+// });
 
 //👉 - Passing Only 10 first notifications 
 const displayedNotifications = computed(() => {
-  return sortedNotifications.value.slice(0, 10);
+  return notificationsList.value.slice(0, 10);
 });
 
 </script>

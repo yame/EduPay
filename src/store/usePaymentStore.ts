@@ -123,16 +123,20 @@ export const usePaymentStore = defineStore('payment', () => {
   //👉 - Get PaymentFile
   async function getPaymentFile(paymentId) {
     try {
-      return axios.get(`${import.meta.env.VITE_API_BASE_URL}/payments/receipt/${paymentId}`, {
+      loading.value = true
+      const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/payments/receipt/${paymentId}`, {
         responseType: 'blob',
         headers: {
           Authorization: `Bearer ${useCookie('accessToken').value}`,
         },
       })
+      loading.value = false
+      return response
 
     } catch (error) {
       console.log(`Error: ${error.message}`);
     }
+
   }
 
   //👉 - Update Status's bulk of Payments 

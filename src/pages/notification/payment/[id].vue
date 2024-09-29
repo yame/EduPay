@@ -6,7 +6,7 @@ import { usePaymentStore } from '@/store/usePaymentStore';
 import pdf from '@jbtje/vite-vue3pdf';
 import { toast } from 'vue3-toastify';
 const paymentStore = usePaymentStore()
-const { currentPayment } = storeToRefs(paymentStore)
+const { currentPayment, loading } = storeToRefs(paymentStore)
 const route = useRoute();
 const currPayment = ref<Payment>({
   id: route.params?.id,
@@ -51,6 +51,10 @@ usePaymentStore().getPaymentById(route.params.id).then(() => {
 
 
 watch(() => route.params.id, (newValue) => {
+  usePaymentStore().getPaymentFile(newValue).then(response => {
+    const url = URL.createObjectURL(new Blob([response?.data], { type: 'application/pdf' }));
+    currentPaymentPdfUrl.value = url
+  })
   usePaymentStore().getPaymentById(newValue).then(() => {
     currPayment.value = currentPayment.value
   })
@@ -138,8 +142,12 @@ const updatePayment = () => {
           <VRow class="justify-center">
             <!-- 👉 Receipt -->
             <VCol cols="12" md="6">
-              <pdf v-if="currentPaymentPdfUrl" :src="currentPaymentPdfUrl" @num-pages="pageCount = $event" @page-loaded="currentPage = $event"></pdf>
+              <pdf v-if="currentPaymentPdfUrl && !loading" :src="currentPaymentPdfUrl" @num-pages="pageCount = $event" @page-loaded="currentPage = $event"></pdf>
+              <VCol v-else cols="12" md="12">
+                <VSkeletonLoader type="image" max-width="1800" />
+              </VCol>
             </VCol>
+
           </VRow>
 
           <!-- 👉 Submit and Cancel -->

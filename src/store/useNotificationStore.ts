@@ -49,7 +49,7 @@ export const useNotificationStore = defineStore("notification", () => {
   function readAllNotifications(ids: number[]) {
     const idSet = new Set(ids)
     notificationsList.value.forEach((n) => {
-      if (idSet.has(n.id)) {
+      if (idSet.has(n.id) && !n.isSeen) {
         n.isSeen = true
       }
     })
