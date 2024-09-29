@@ -1,4 +1,5 @@
 <template>
+
   <VDataTableServer v-model:model-value="selectedRows" :item-value="selectedItem" show-select v-model:items-per-page="itemsPerPage" v-model:page="page" :headers="headers" :items="data || []" :items-length="totalData" class="text-no-wrap" @update:options="updateOptions">
     <!-- Dynamic Item Templates -->
     <template v-for="header in headers" :key="header.key" #[`item.${header.key}`]="{ item }">
@@ -19,9 +20,9 @@
         {{ resolveProgram(item.programID).text }}
       </VChip>
       <div v-else-if="header.key === 'actions'">
-        <IconBtn v-for="(action, index) in actions" :key="index" @click="() => action.handler(item)">
-          <VIcon :color="action?.color || 'secondary'" :size="action.size || 23" :icon="action.icon" />
-          <VTooltip activator="parent">{{action?.icon == 'tabler-circle-check' ? "Approve Student": action?.icon == 'tabler-xbox-x' ? "Decline Student": action?.icon == 'tabler-ban' ? "Ban Student": action?.icon == 'tabler-eye' ? 'View details' : action?.icon==='tabler-edit' ? " Edit Infos ":  (action?.icon==='tabler-trash' && actions && actions?.length>1 ) ?"Delete Student":"Delete Notification" }}</VTooltip>
+        <IconBtn v-for="(action, index) in actions" :key="index" @click="() => action.handler(item)" :class="{ 'not-allowed' : !item.seen  }">
+          <VIcon :disabled="item.seen ? false : true" :color="action?.color || 'secondary'" :size="action.size || 23" :icon="action.icon" />
+          <VTooltip :disabled="item.seen ? false : true" activator="parent">{{action?.icon == 'tabler-circle-check' ? "Approve Student": action?.icon == 'tabler-xbox-x' ? "Decline Student": action?.icon == 'tabler-ban' ? "Ban Student": action?.icon == 'tabler-eye' ? 'View details' : action?.icon==='tabler-edit' ? " Edit Infos ":  (action?.icon==='tabler-trash' && actions && actions?.length>1 ) ?"Delete Student":"Delete Notification" }}</VTooltip>
         </IconBtn>
       </div>
       <div v-else-if="header.key==='receipt'">
@@ -147,5 +148,9 @@ const viewPDF = (val) => emit('viewPDF', val)
 
 ::v-deep(.v-table > .v-table__wrapper > table) {
   padding: 0 30px;
+}
+
+.not-allowed:hover {
+  cursor: not-allowed;
 }
 </style>

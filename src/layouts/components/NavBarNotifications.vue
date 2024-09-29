@@ -21,9 +21,9 @@ const remNotification = (notificationId: number) => {
 
 }
 
-// watch(notificationsList, (newNotificationsList: Notification[]) => {
-//   notificationsList.value = newNotificationsList
-// })
+watch(notificationsList, (newNotificationsList: Notification[]) => {
+  notificationsList.value = newNotificationsList
+})
 
 //👉 - Mark All read api and local data
 const markAllRead = (allNotificationsIds: number[]) => {

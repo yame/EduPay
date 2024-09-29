@@ -4,6 +4,7 @@ export const useNotificationStore = defineStore("notification", () => {
 
   const notificationsList = ref<Notification[]>([])
   const notificationsFromPagination = ref()
+  const NonSeenNotificationsCount = ref(0)
   const loading = ref(false)
   const error = ref('')
 
@@ -120,7 +121,45 @@ export const useNotificationStore = defineStore("notification", () => {
   //!SECTION
 
 
-  return { notificationsList, notificationsFromPagination, loading, error, pageableNotifications, pushNotification, onLoginNotifications, markAllAsRead, removeNotification, readAllNotifications, deleteNotification, toggleSeen, toggleLocalNotification };
+  //👉 - Set NonSeenNotificationsCount
+  function setNonSeenNotificationsCount(count: number) {
+    NonSeenNotificationsCount.value = count
+  }
+
+
+  //SECTION SELECTION ACTIONS
+
+  //👉 - Delete bulk of Notifications 
+  async function deleteMultipleNotifications(ids: number[]) {
+    const response = await $api('/notifications/delete-list', {
+      method: 'DELETE',
+      body: ids
+    })
+    return response
+  }
+
+  //👉 - Toggle_Seen for bulk of Notifications 
+  async function toggleSeenMultipleNotifications(ids: number[]) {
+    const response = await $api('/notifications/toggle-seen-list', {
+      method: 'PATCH',
+      body: ids
+    })
+    return response
+  }
+
+  //👉 - Mark_AS_Read bulk of Notifications 
+  async function markAsReadMultipleNotifications(ids: number[]) {
+    const response = await $api('/notifications/mark-as-read-list', {
+      method: 'PATCH',
+      body:
+        ids
+
+    })
+    return response
+  }
+  //!SECTION
+
+  return { NonSeenNotificationsCount, notificationsList, notificationsFromPagination, loading, error, pageableNotifications, pushNotification, setNonSeenNotificationsCount, onLoginNotifications, markAllAsRead, removeNotification, readAllNotifications, deleteNotification, toggleSeen, toggleLocalNotification, deleteMultipleNotifications, toggleSeenMultipleNotifications, markAsReadMultipleNotifications };
 }, {
   persist: true
 });

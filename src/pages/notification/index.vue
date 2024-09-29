@@ -7,16 +7,13 @@ import { toast } from 'vue3-toastify';
 
 const notificationStore = useNotificationStore()
 const { notificationsFromPagination, error, loading } = storeToRefs(notificationStore)
-const { pageableNotifications, toggleSeen, toggleLocalNotification } = notificationStore
+const { pageableNotifications, toggleSeen, toggleLocalNotification, readAllNotifications, removeNotification, deleteNotification, toggleSeenMultipleNotifications, deleteMultipleNotifications, markAsReadMultipleNotifications } = notificationStore
 
 // Data table options
 const itemsPerPage = ref(10)
 const page = ref(1)
 const sortBy = ref()
 const orderBy = ref()
-//👉 - Selected Rows Array state
-const selectedRows = ref([])
-
 
 const notifications = computed(() => notificationsFromPagination.value?.content)
 const totalNotifications = computed(() => notificationsFromPagination.value?.totalElements)
@@ -66,9 +63,8 @@ watch(page, (newPage) => {
   pageableNotifications(page.value, itemsPerPage.value)
 });
 
-onMounted(async () => {
-  await pageableNotifications(page.value, itemsPerPage.value)
-})
+pageableNotifications(page.value, itemsPerPage.value)
+
 
 const isSeenItems = ref([
   { title: "seen", value: true },
@@ -79,9 +75,101 @@ const toggle = (item) => {
   toggleSeen(item.notificationId).then(() => {
     toggleLocalNotification(item.notificationId)
   }).then(() => {
-    toast.info('Notification was Toggled 😜Yummy')
+    toast.info('Notification was Toggled 😜')
   })
 }
+
+
+
+//👉 - Code For delete Notification
+const remNotification = (notification) => {
+  if (notification.seen) {
+    console.table(notification);
+    deleteNotification(notification.notificationId).then((res) => {
+      removeNotification(notification.notificationId);
+    }).finally(() => {
+      pageableNotifications(page.value, itemsPerPage.value)
+      toast.info('Notification was Deleted ')
+    })
+  }
+}
+
+
+//SECTION Selection Implementation
+
+//👉 - Selected Rows Implementation here
+const isSelected = ref(false)
+const markAsReadSelected = ref(false)
+const selectedRows = ref<number[]>([])
+const toggleOrDeleteSelection = (ids) => {
+  isSelected.value = true
+  markAsReadSelected.value = true
+  selectedRows.value = ids
+}
+
+
+const toggleSelection = () => {
+  toggleSeenMultipleNotifications(selectedRows.value).then((res) => {
+
+    const ids = new Set(selectedRows.value)
+    ids.forEach(id => {
+      toggleLocalNotification(id)
+    })
+    pageableNotifications(page.value, itemsPerPage.value)
+    toast.success('notifications selection was toggled ✅', {
+      "theme": useCookie('EduPayment-theme').value || 'auto'
+    })
+  }).catch((err) => {
+    toast.error(err + '⛔❌', {
+      "theme": useCookie('EduPayment-theme').value || 'auto'
+    })
+  }
+  ).finally(() => {
+    selectedRows.value = []
+    isSelected.value = false
+  })
+}
+
+const markAsReadSelection = () => {
+  markAsReadSelected.value = false
+  markAsReadMultipleNotifications(selectedRows.value).then((res) => {
+    readAllNotifications(selectedRows.value)
+    pageableNotifications(page.value, itemsPerPage.value)
+    toast.success('notifications selection was marked as read ✅', {
+      "theme": useCookie('EduPayment-theme').value || 'auto'
+    })
+  }).catch((err) => {
+    toast.error(err + '⛔❌', {
+      "theme": useCookie('EduPayment-theme').value || 'auto'
+    })
+  }
+  ).finally(() => {
+    selectedRows.value = []
+    isSelected.value = false
+  })
+}
+
+const deleteSelection = () => {
+  deleteMultipleNotifications(selectedRows.value).then((res) => {
+    const ids = new Set(selectedRows.value)
+    ids.forEach(id => {
+      removeNotification(id)
+    })
+    pageableNotifications(page.value, itemsPerPage.value)
+    toast.success('notifications selection was deleted✅', {
+      "theme": useCookie('EduPayment-theme').value || 'auto'
+    })
+  }).catch((err) => {
+    toast.error(err + '⛔❌', {
+      "theme": useCookie('EduPayment-theme').value || 'auto'
+    })
+  }
+  ).finally(() => {
+    selectedRows.value = []
+    isSelected.value = false
+  })
+}
+//!SECTION
 
 
 </script>
@@ -98,6 +186,11 @@ const toggle = (item) => {
         <!-- 👉 Select Seen -->
         <VCol cols="12" md="2" sm="4">
           <AppSelect v-model="selectedSeen" label="Filter by Viewed" placeholder="Is Seen" :items="isSeenItems" clearable clear-icon="tabler-x" />
+        </VCol>
+        <VCol cols="12" md="10" class="d-flex flex-row-reverse gap-x-4 flex-wrap gap-y-2">
+          <VBtn v-show="isSelected" color="error" prepend-icon="tabler-trash" text="Delete selection" @click="deleteSelection" />
+          <VBtn v-show="isSelected" color="secondary" prepend-icon="tabler-switch-horizontal" text="Toggle selection" @click="toggleSelection" />
+          <VBtn v-show="isSelected" color="info" prepend-icon="tabler-eye" text="Mark As Read Selection" @click="markAsReadSelection" />
         </VCol>
 
         <!-- 👉 Select Stock Status -->
@@ -130,7 +223,7 @@ const toggle = (item) => {
 
           <VDivider />
 
-          <AppDataTableServer v-if="notifications" :selected-item="'notificationId'" @update:page="changePage" @update:items-per-page="changeSize" :headers="[
+          <AppDataTableServer v-if="notifications" :model-value="selectedRows" :selected-item="'notificationId'" @update:model-value="toggleOrDeleteSelection" @update:page="changePage" @update:items-per-page="changeSize" :headers="[
               {
                 key: 'notificationId',
                 title: 'Notification Id',
@@ -155,7 +248,7 @@ const toggle = (item) => {
                 title : 'Actions'
               }
             ]" @toggle-read="toggle" :data="notifications" :totalData="totalNotifications" :actions="[
-              { icon: 'tabler-trash',color:'error', handler: (item) => editStatus(item) }
+              { icon: 'tabler-trash',color:'error', handler: (item) => remNotification(item),class:'not-allowed' }
             ]" />
 
         </div>
@@ -193,4 +286,8 @@ const toggle = (item) => {
 ::v-deep(.v-table > .v-table__wrapper > table) {
   padding: 0 30px;
 }
+
+// ::v-deep(.v-btn .v-btn__content) {
+//   cursor: not-allowed;
+// }
 </style>

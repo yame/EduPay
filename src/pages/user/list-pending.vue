@@ -4,7 +4,7 @@ import { useStudentStore } from "@/store/useStudentStore";
 import { toast } from "vue3-toastify";
 
 const studentStore = useStudentStore()
-const { getPendingStudents } = studentStore
+const { getPendingStudents, approveMultipleUsers, banMultipleUsers, declineMultipleUsers } = studentStore
 const { loading, error, pendingStudents } = storeToRefs(studentStore)
 const authStore = useAuthStore()
 const { approveRegistration, declineRegistration, banRegistration } = authStore
@@ -65,10 +65,81 @@ watch([search], (newValue) => {
   getPendingStudents(page.value, itemsPerPage.value, newValue[0]);
 
 })
-onMounted(async () => {
-  await getPendingStudents(page.value, itemsPerPage.value)
-})
 
+getPendingStudents(page.value, itemsPerPage.value)
+
+
+//SECTION Selection Implementation
+
+//👉 - Selected Rows Implementation here
+const isSelected = ref(false)
+const selectedRows = ref<String[]>([])
+const toggleOrDeleteSelection = (listEmails) => {
+  isSelected.value = true
+  selectedRows.value = listEmails
+}
+
+
+const approveSelection = () => {
+  console.table(selectedRows.value);
+  approveMultipleUsers(selectedRows.value).then((res) => {
+    console.warn(res)
+    toast.success(res + '✅', {
+      "theme": useCookie('EduPayment-theme').value || 'auto'
+    })
+    getPendingStudents(page.value, itemsPerPage.value)
+  }).catch((err) => {
+    toast.error(err + '⛔❌', {
+      "theme": useCookie('EduPayment-theme').value || 'auto'
+    })
+  }
+  ).finally(() => {
+    selectedRows.value = []
+    isSelected.value = false
+  })
+}
+
+const declineSelection = () => {
+  console.table(selectedRows.value);
+  declineMultipleUsers(selectedRows.value).then((res) => {
+    console.warn(res)
+    toast.success('Student account was declined ❌', {
+      "theme": useCookie('EduPayment-theme').value || 'auto'
+    })
+    getPendingStudents(page.value, itemsPerPage.value)
+  }).catch((err) => {
+    toast.error(err + '⛔❌', {
+      "theme": useCookie('EduPayment-theme').value || 'auto'
+    })
+  }
+  ).finally(() => {
+    selectedRows.value = []
+    isSelected.value = false
+
+  })
+}
+
+const banSelection = () => {
+  console.table(selectedRows.value);
+  banMultipleUsers(selectedRows.value).then((res) => {
+    console.warn(res)
+    toast.success(res + ' ✅', {
+      "theme": useCookie('EduPayment-theme').value || 'auto'
+    })
+    getPendingStudents(page.value, itemsPerPage.value)
+  }).catch((err) => {
+    toast.error(err + '⛔❌', {
+      "theme": useCookie('EduPayment-theme').value || 'auto'
+    })
+  }
+  ).finally(() => {
+    selectedRows.value = []
+    isSelected.value = false
+
+  })
+}
+
+//!SECTION
 
 </script>
 
@@ -81,6 +152,11 @@ onMounted(async () => {
       <VRow>
         <VCol cols="12" md="4">
           <VTextField v-model="search" label="Email" placeholder="Search by email..." append-inner-icon="tabler-search" clearable variant="outlined" />
+        </VCol>
+        <VCol cols="12" md="8" class="d-flex gap-x-3">
+          <VBtn v-show="isSelected" color="success" append-icon="tabler-circle-check" text="Approve selection" @click="approveSelection" />
+          <VBtn v-show="isSelected" color="warning" append-icon="tabler-xbox-x" text="Decline selection" @click="declineSelection" />
+          <VBtn v-show="isSelected" color="error" append-icon="tabler-ban" text="Ban selection" @click="banSelection" />
         </VCol>
       </VRow>
     </VCardText>
@@ -99,7 +175,7 @@ onMounted(async () => {
             <VDivider />
             <!-- <AppDataTableServer :headers="headers" :data="students" :totalData = "totalStudents" :loading="loading" v-model:itemsPerPage = "itemsPerPage" v-model:page="page" :search="searchQuery" :error="error" @edit-status="editStatus" :actions="actions"></AppDataTableServer> -->
 
-            <AppDataTableServer :selected-item="'email'" :headers="[
+            <AppDataTableServer :model-value="selectedRows" :selected-item="'email'" :headers="[
               {
                 key: 'code',
                 title: 'Code',
@@ -130,7 +206,7 @@ onMounted(async () => {
               { icon: 'tabler-circle-check',color:'success', handler: (item) => approveUser(item) },
               { icon: 'tabler-xbox-x',color:'warning' ,handler: (item) => declineUser(item) },
               { icon: 'tabler-ban',color:'error', handler: (item) => banUser(item) },
-            ]" @update:items-per-page="changeSize" @update:total-data="changeTotalData" />
+            ]" @update:items-per-page="changeSize" @update:total-data="changeTotalData" @update:model-value="toggleOrDeleteSelection" />
 
           </div>
           <div v-else>

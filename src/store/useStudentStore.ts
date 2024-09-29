@@ -170,17 +170,26 @@ export const useStudentStore = defineStore('student', () => {
 
   //👉 - Approve multiple users
   async function approveMultipleUsers(listEmails: string[]) {
-    return await useApi('/user/pending-students/approve-selection').post(listEmails)
+    return await $api(`/user/pending-students/approve-selection`, {
+      method: 'POST',
+      body: listEmails,
+    })
   }
 
   //👉 - Decline multiple users
   async function declineMultipleUsers(listEmails: string[]) {
-    return await useApi('/user/pending-students/decline-selection').post(listEmails)
+    return await $api(`/user/pending-students/decline-selection`, {
+      method: 'POST',
+      body: listEmails,
+    })
   }
 
   //👉 - Ban multiple users
   async function banMultipleUsers(listEmails: string[]) {
-    return await useApi('/user/pending-students/ban-selection').post(listEmails)
+    return await $api(`/user/pending-students/ban-selection`, {
+      method: 'POST',
+      body: listEmails,
+    })
   }
 
   //👉 - Reset pw multiple students

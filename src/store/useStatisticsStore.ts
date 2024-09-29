@@ -1,3 +1,4 @@
+import { useNotificationStore } from '@/store/useNotificationStore';
 import type { ChartJsCustomColors } from '@/views/charts/chartjs/types';
 
 const chartJsCustomColors: ChartJsCustomColors = {
@@ -28,12 +29,14 @@ type Statistics = {
   paymentsCountByMonth: {
     [key: string]: number;
   };
+  NonSeenNotificationsCount: number
 };
 
 export const useStatisticsStore = defineStore('statistic', () => {
 
   const statisticsBarCharData = ref()
   const statisticsPolarAreaCharData = ref()
+  const nonSeenNotificationCount = ref(0)
   const loading = ref(true)
   const error = ref('')
 
@@ -77,6 +80,10 @@ export const useStatisticsStore = defineStore('statistic', () => {
   async function onLoginFetchData(url: string) {
     //👉 - Get Data From Hamza's Server 
     const { data, error: isError, isFetching } = await useApi(url)
+
+    //👉 - Set NonSeenNotificationsCount after login Admin
+    if ((data.value as Statistics).NonSeenNotificationsCount)
+      useNotificationStore().setNonSeenNotificationsCount((data.value as Statistics).NonSeenNotificationsCount)
 
     //👉 - Retrieve and Split the Program Statistics Object After Each Login
     const programs = Object.keys((data.value as Statistics).countStudentsByProgram)
