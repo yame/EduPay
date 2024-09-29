@@ -8,7 +8,8 @@ export const useNotificationStore = defineStore("notification", () => {
   const error = ref('')
 
 
-
+  //SECTION - ACTIONS FOR MANAGING LOCAL DATA
+  //👉 - Add A notification to our local data
   function pushNotification(message: Notification) {
     const jsonObject = JSON.parse(message);
     const notification: Notification = message.includes('payment') ? {
@@ -36,14 +37,35 @@ export const useNotificationStore = defineStore("notification", () => {
     if (!exists)
       notificationsList.value.unshift(notification)
   }
-
-  function removeNotification(id) {
-    const index = notificationsList.value.findIndex(notification => notification.id === id);
-    if (index !== -1) {
-      notificationsList.value.splice(index, 1);
+  //👉 - Remove searched notification 
+  function removeNotification(id: number) {
+    const idSet = new Set(notificationsList.value.map(notification => notification.id));
+    if (idSet.has(id)) {
+      notificationsList.value = notificationsList.value.filter(notification => notification.id !== id);
+      idSet.delete(id);
     }
   }
+  //👉 - Mark All notifications readd
+  function readAllNotifications(ids: number[]) {
+    const idSet = new Set(ids)
+    notificationsList.value.forEach((n) => {
+      if (idSet.has(n.id)) {
+        n.isSeen = true
+      }
+    })
+  }
+  //👉 - Toggle Seen Notification
+  function toggleLocalNotification(id: number) {
+    // const idsSet = new Set(notificationsList.value.map(n=>n.id))
+    const searchedNotification = notificationsList.value.find(n => n.id === id)
+    if (searchedNotification)
+      searchedNotification.isSeen = !searchedNotification.isSeen;
+  }
+  //!SECTION
 
+
+  //SECTION - ACTIONS FOR HANDLING API REQUEST
+  //👉 - Mark All read api
   async function markAllAsRead() {
     try {
       return await useApi('/notifications/mark-all-as-read').post()
@@ -51,10 +73,6 @@ export const useNotificationStore = defineStore("notification", () => {
       console.log(error)
     }
   }
-
-
-
-
   //👉 - fetch notifications after login
   async function onLoginNotifications() {
     try {
@@ -70,42 +88,40 @@ export const useNotificationStore = defineStore("notification", () => {
     }
 
   }
-
   //👉 - Delete Notification
   async function deleteNotification(id: number) {
     return await useApi('/notifications/delete?id=' + id).post()
   }
-
   //👉 - Toggle Seen Notification
   async function toggleSeen(id: number) {
-    return await useApi('/notifications/toggle-seen?id=' + id).patch().data.value
+    const response = await useApi('/notifications/toggle-seen?id=' + id).patch()
+    return response.data.value
   }
-
   //👉 - Pageable Notification
   async function pageableNotifications(page?: Number, size?: Number, seen?: Boolean) {
-    try {
-      const { data, error: hasError, isFetching } = await useApi(createUrl('/notifications/pageable', {
-        query: {
-          seen,
-          page: (page - 1),
-          size,
 
-        }
-      })
-      )
-      notificationsFromPagination.value = data.value
-      // console.log(notificationsFromPagination.value);
+    const { data, error: hasError, isFetching } = await useApi(createUrl('/notifications/pageable', {
+      query: {
+        seen,
+        page: (page - 1),
+        size,
 
-      loading.value = isFetching.value
-      console.log(loading.value);
+      }
+    })
+    )
+    notificationsFromPagination.value = data.value
+    // console.log(notificationsFromPagination.value);
 
-      error.value = hasError.value
-    }
-    catch (error) {
+    loading.value = isFetching.value
+    console.log(loading.value);
 
-    }
+    error.value = hasError.value
   }
+  //!SECTION
 
-  return { notificationsList, notificationsFromPagination, loading, error, pageableNotifications, pushNotification, onLoginNotifications, markAllAsRead, removeNotification, deleteNotification, toggleSeen }
-}
-) 
+
+  return { notificationsList, notificationsFromPagination, loading, error, pageableNotifications, pushNotification, onLoginNotifications, markAllAsRead, removeNotification, readAllNotifications, deleteNotification, toggleSeen, toggleLocalNotification };
+}, {
+  persist: true
+});
+

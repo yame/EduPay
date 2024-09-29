@@ -78,11 +78,11 @@ const onFormSubmit = async () => {
       addOne(newPayment.value, file.value[0]).then(statusCode => {
         emit('onSubmit', statusCode);
         dialogModelValueUpdate(false)
+      }).then(() => {
+        blob.value = null
+        onFormReset()
       })
     }
-  }).then(() => {
-    blob.value = null
-    onFormReset()
   })
 
 }

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useAuthStore } from "@/store/useAuthStore";
+import { useStatisticsStore } from "@/store/useStatisticsStore";
 import { useGenerateImageVariant } from "@core/composable/useGenerateImageVariant";
 import authV2LoginIllustrationBorderedDark from "@images/pages/auth-v2-login-illustration-bordered-dark.png";
 import authV2LoginIllustrationBorderedLight from "@images/pages/auth-v2-login-illustration-bordered-light.png";
@@ -40,13 +41,17 @@ const ability = useAbility();
 const refVForm = ref<VForm>();
 const authStore = useAuthStore();
 const { login } = authStore;
-const { loading, error, currentUser, userAbilityRules, accessToken } = storeToRefs(authStore);
+const { error, currentUser, userAbilityRules, accessToken } = storeToRefs(authStore);
+
+const statisticsStore = useStatisticsStore();
+const { onLoginFetchData } = statisticsStore
 
 const loader = ref(false)
 const instance = getCurrentInstance()
 
 const LogIn = async () => {
   try {
+    loader.value = true
     await login(credentials.value);
 
     if (!accessToken) {
@@ -65,29 +70,33 @@ const LogIn = async () => {
     //👉 -  Check if the user has already changed their password.
     const userData = jwtDecode(accessToken.value!);
     if (userData?.isPasswordChanged) {
-
+      if (currentUser.value?.role === 'ADMIN') {
+        await instance?.appContext.config.globalProperties.$initWebSocketConnection(authStore.accessToken);
+        await onLoginFetchData('app/on-login-data');
+      }
       router.push(route.query.to ? String(route.query.to) : '/').then(() => {
         toast.success('Login successful ✅⚡', {
           theme: useCookie('EduPayment-theme').value || 'auto'
         })
-
-        //❗ -  👉 - INIT WEBSOCKET PLUGIN
-        // console.error('login ws');
-
-        // instance?.appContext.config.globalProperties.$initWebSocketConnection(accessToken.value);
+        //👉 - Turn off loading for the button login
+        loader.value = false;
       })
 
     }
     else {
-      router.push(route.query.to ? String(route.query.to) : "/force-change-password")
+      router.push(route.query.to ? String(route.query.to) : "/force-change-password").then(() => {
+        //👉 - Turn off loading for the button login
+        loader.value = false;
+      })
 
     }
   } catch (err) {
     toast.error(error.value + ' 🧨❌' || 'An error occurred 🧨❌', {
       theme: useCookie('EduPayment-theme').value || 'auto'
     });
+    //👉 - Turn off loading for the button login
+    loader.value = false;
   }
-
 
 };
 
@@ -156,7 +165,7 @@ const onLoginSubmit = () => {
                     Forgot Password?
                   </RouterLink>
                 </div>
-                <VBtn class="mt-5" block type="submit" :loading="loading">
+                <VBtn class="mt-5" block type="submit" :loading="loader">
                   Login
                 </VBtn>
               </VCol>

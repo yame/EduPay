@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import { Payment, PAYMENT_STATUS, PAYMENT_TYPE } from '@/@core/types';
+import EditStatusSelectionDialog from '@/components/payments/EditStatusSelectionDialog.vue';
 import { usePaymentStore } from '@/store/usePaymentStore';
 import { toast } from 'vue3-toastify';
 
 const paymentStore = usePaymentStore()
-const { updateOne, getAllPayments } = paymentStore
+const { updateOne, getAllPayments, updateSelectionStatus } = paymentStore
 const { paymentsList, error, loading } = storeToRefs(paymentStore)
 
 
@@ -106,6 +107,33 @@ const afterSubmit = (statusCode: number) => {
   }
 }
 
+//👉 - Bulk Status Payments Implementation
+const isSelectionIdsDialogVisible = ref(false)
+const selectedRows = ref<string[]>([])
+const isSelected = ref(false)
+
+const toggleOrDeleteSelection = (ids) => {
+  isSelected.value = true
+  selectedRows.value = ids
+}
+
+const changeStatusSelection = (newStatus: PAYMENT_STATUS) => {
+  updateSelectionStatus(selectedRows.value, newStatus).then(res => {
+    toast.success('Payments Status were Changed✅😍', {
+      "theme": useCookie('EduPayment-theme').value || 'auto'
+    })
+    getAllPayments(page.value, itemsPerPage.value)
+  }).catch((err) => {
+    toast.error(err + '⛔❌', {
+      "theme": useCookie('EduPayment-theme').value || 'auto'
+    })
+  }
+  ).finally(() => {
+    selectedRows.value = []
+    isSelected.value = false
+  })
+}
+
 
 </script>
 
@@ -119,39 +147,21 @@ const afterSubmit = (statusCode: number) => {
     <VCardText>
       <VRow>
         <!-- 👉 Select Status -->
-        <VCol cols="12" sm="4">
+        <VCol cols="12" md="3" lg="3">
           <AppSelect v-model="selectedStatus" label="Status" placeholder="Select Status" :items="statusItems" clearable clear-icon="tabler-x" />
         </VCol>
 
         <!-- 👉 Select Type -->
-        <VCol cols="12" sm="4">
+        <VCol cols="12" md="3" lg="3">
           <AppSelect v-model="selectedType" label="Type" placeholder="Select Type" :items="typeItems" clearable clear-icon="tabler-x" />
         </VCol>
-        <VCol cols="12" md="4" align-self="end" class="d-flex justify-end">
+        <VCol cols="12" md="6" lg="6" class="d-flex  justify-end align-end gap-x-2">
+          <VBtn v-show="isSelected" color="warning" prepend-icon="tabler-edit" text="Update Selection" @click="isSelectionIdsDialogVisible = true" />
           <VBtn color="primary" prepend-icon="tabler-new-section" text="New Payment" @click="isAddPayementDialogVisible = true" />
+
         </VCol>
-        <!-- 👉 Select Stock Status -->
-        <!-- <VCol
-            cols="12"
-            sm="4"
-          >
-            <AppSelect
-              v-model="selectedStock"
-              placeholder="Stock"
-              :items="stockStatus"
-              clearable
-              clear-icon="tabler-x"
-            />
-          </VCol> -->
       </VRow>
     </VCardText>
-    <!-- <VCardText>
-      <div class="d-flex justify-sm-end justify-end flex-wrap gap-4">
-       
-
-        <!-- <VBtn color="success" prepend-icon="tabler-upload" text="Export" /> -->
-    <!-- </div> -->
-    <!-- </VCardText>  -->
 
     <VDivider />
     <!-- 👉 Payments Table -->
@@ -169,7 +179,7 @@ const afterSubmit = (statusCode: number) => {
           <VDivider />
           <!-- <AppDataTableServer :headers="headers" :data="payments" :totalData = "totalPayments" :loading="loading" v-model:itemsPerPage = "itemsPerPage" v-model:page="page" :search="searchQuery" :error="error" @edit-status="editStatus" :actions="actions"></AppDataTableServer> -->
 
-          <AppDataTableServer v-if="payments" @update:page="changePage" @update:items-per-page="changeSize" :headers="[
+          <AppDataTableServer v-if="payments" @update:page="changePage" @update:items-per-page="changeSize" :model-value="selectedRows" :selected-item="'id'" @update:model-value="toggleOrDeleteSelection" :headers="[
               {
                 key: 'studentDTO',
                 title: 'Student Name',
@@ -209,8 +219,9 @@ const afterSubmit = (statusCode: number) => {
     </div>
   </VCard>
 
+  <EditStatusSelectionDialog v-if="isSelectionIdsDialogVisible" v-model:is-dialog-visible="isSelectionIdsDialogVisible" @submit="changeStatusSelection" />
   <EditStatusPaymentDrawer v-if="editPayment" :edit-payment="editPayment" v-model:isDrawerOpen="isEditStatusDialogVisible" @on-update="updateStatus" />
-  <AddPaymentDialog v-model:is-dialog-visible="isAddPayementDialogVisible" @onSubmit="afterSubmit" />
+  <AddPaymentDialog v-if="isAddPayementDialogVisible" v-model:is-dialog-visible="isAddPayementDialogVisible" @onSubmit="afterSubmit" />
 
 </template>
 

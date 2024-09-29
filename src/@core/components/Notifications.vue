@@ -1,17 +1,16 @@
 <script lang="ts" setup>
+import { useCounterStore } from '@/store/useCounterStore';
 import { useNotificationStore } from '@/store/useNotificationStore';
 import type { Notification } from '@layouts/types';
 import { PerfectScrollbar } from 'vue3-perfect-scrollbar';
-const notificationStore = useNotificationStore()
-const counterStore = inject('counterStore')
 interface Props {
   notifications: Notification[]
   badgeProps?: object
   location?: any
 }
 interface Emit {
-  (e: 'read', value: number[]): void
-  (e: 'unread', value: number[]): void
+  (e: 'read', value: number): void
+  (e: 'unread', value: number): void
   (e: 'markAllRead', value: number[]): void
   (e: 'remove', value: number): void
   (e: 'click:notification', value: Notification): void
@@ -22,59 +21,64 @@ const props = withDefaults(defineProps<Props>(), {
   location: 'bottom end',
   badgeProps: undefined,
 })
-
+const counterStore = useCounterStore()
+const notificationStore = useNotificationStore()
 const emit = defineEmits<Emit>()
 
 const isAllMarkRead = computed(() => {
-  return props.notifications.some(item => item.isSeen === false)
+  return notificationStore.notificationsList.some(item => !item.isSeen)
 })
-
-
-
-const markAllReadOrUnread = async () => {
-  const allNotificationsIds = props.notifications.map(item => item.id);
-  emit('markAllRead', allNotificationsIds);
-  counterStore.clear();
-  // if (!isAllMarkRead.value)
-  // emit(isAllMarkedRead.value ? 'unread' : 'markAllRead', allNotificationsIds);
-
-}
 
 const totalUnseenNotifications = computed(() => {
-  return counterStore.counter
+  return notificationStore.notificationsList.filter(n => !n.isSeen).length
+});
+
+const isNullNotifications = computed(() =>
+  notificationStore.notificationsList.some(item => item.isSeen === false)
+)
+
+watch(() => counterStore.counter, (newCounter) => {
+  counterStore.counter = newCounter
 })
+
+const markAllRead = async () => {
+  const allNotificationsIds = notificationStore.notificationsList.map(item => item.id);
+  emit('markAllRead', allNotificationsIds);
+}
 
 const toggleReadUnread = (isSeen: boolean, Id: number) => {
   if (isSeen) {
-    emit('unread', [Id])
-    counterStore.increment()
+    emit('unread', Id)
   }
   else {
-    emit('read', [Id])
-    counterStore.decrement()
+    emit('read', Id)
   }
 }
 
 const handleClick = (notification) => {
   emit('click:notification', notification)
-
   emit('toggle-menu', false)
+}
+
+const removeNotification = (notificationId: number) => {
+  emit('remove', notificationId)
 }
 
 const router = useRouter()
-const viewAll = () => {
-  router.push('/notification')
+const viewAll = async () => {
+  await router.push('/notification')
   emit('toggle-menu', false)
-
 }
+
+
 </script>
 
 <template>
-
   <IconBtn id="notification-btn" @click="$emit('toggle-menu', true)">
-    <VBadge v-if="props.badgeProps" v-bind="props.badgeProps" :content="totalUnseenNotifications" max="10" :model-value="props.notifications.some(n => !n.isSeen)" color="error" offset-x="2" offset-y="3">
+    <VBadge v-if="props.badgeProps" v-bind="props.badgeProps" :model-value="isNullNotifications" :content="totalUnseenNotifications>0 ? totalUnseenNotifications : ''" max="10" color="error" offset-x="2" offset-y="3">
       <VIcon icon="tabler-bell" />
     </VBadge>
+
     <!-- v-if="props.badgeProps?.showMenu" -->
     <VMenu v-if="props.badgeProps?.showMenu" v-model="props.badgeProps.showMenu" activator="parent" width="380px" :location="props.location" offset="12px" :close-on-content-click="false">
 
@@ -89,8 +93,8 @@ const viewAll = () => {
             <VChip v-show="props.notifications.some(n => !n.isSeen)" size="small" color="primary" class="me-2">
               {{ totalUnseenNotifications }} New
             </VChip>
-            <IconBtn v-show="props.notifications.length" size="34" @click="markAllReadOrUnread">
-              <VIcon size="20" color="high-emphasis" :icon="!isAllMarkRead ? 'tabler-mail' : 'tabler-mail-opened' " />
+            <IconBtn v-show="props.notifications.length" size="34" @click="markAllRead">
+              <VIcon size="20" color="high-emphasis" :disabled="!isAllMarkRead" :icon="!isAllMarkRead ? 'tabler-mail' : 'tabler-mail-opened' " />
 
               <VTooltip v-if="isAllMarkRead" activator="parent" location="start">
                 {{ isAllMarkRead ? 'Mark all as read' : 'Mark all as unread' }}
@@ -130,7 +134,7 @@ const viewAll = () => {
                       </v-tooltip>
                     </IconBtn>
 
-                    <IconBtn size="20" class="close-icon" @click.stop="$emit('remove', notification.id)">
+                    <IconBtn size="20" class="close-icon" @click.stop="removeNotification(notification.id)">
                       <VIcon size="15" icon="tabler-x" />
                     </IconBtn>
                   </div>

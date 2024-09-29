@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import { Payment } from '@/@core/types';
 import { useNotificationStore } from '@/store/useNotificationStore';
+import { toast } from 'vue3-toastify';
 
 
 
 const notificationStore = useNotificationStore()
 const { notificationsFromPagination, error, loading } = storeToRefs(notificationStore)
-const { pageableNotifications } = notificationStore
+const { pageableNotifications, toggleSeen, toggleLocalNotification } = notificationStore
 
 // Data table options
 const itemsPerPage = ref(10)
@@ -47,7 +48,6 @@ const selectedSeen = ref('')
 watch([selectedSeen], (newValue) => {
   page.value = 1;
   pageableNotifications(page.value, itemsPerPage.value, newValue[0]);
-
 })
 
 const changeSize = (val) => {
@@ -68,7 +68,6 @@ watch(page, (newPage) => {
 
 onMounted(async () => {
   await pageableNotifications(page.value, itemsPerPage.value)
-
 })
 
 const isSeenItems = ref([
@@ -77,8 +76,11 @@ const isSeenItems = ref([
 ])
 
 const toggle = (item) => {
-  console.log(item);
-
+  toggleSeen(item.notificationId).then(() => {
+    toggleLocalNotification(item.notificationId)
+  }).then(() => {
+    toast.info('Notification was Toggled 😜Yummy')
+  })
 }
 
 

@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import { useAuthStore } from '@/store/useAuthStore';
-import { useCounterStore } from '@/store/useCounterStore';
 import { useNotificationStore } from '@/store/useNotificationStore';
 import { useStatisticsStore } from '@/store/useStatisticsStore';
 import type { ChartJsCustomColors } from '@/views/charts/chartjs/types';
@@ -15,7 +13,7 @@ const notificationStore = useNotificationStore();
 const { onLoginNotifications } = notificationStore;
 const statisticsStore = useStatisticsStore();
 const { statisticsBarCharData, statisticsPolarAreaCharData, error, loading } = storeToRefs(statisticsStore);
-const { onLoginFetchData } = statisticsStore
+const { onLoginFetchData, getDashboardData } = statisticsStore
 const vuetifyTheme = useTheme()
 
 const chartOptions = computed(() => getLatestBarChartConfig(vuetifyTheme.current.value))
@@ -64,9 +62,9 @@ const items = [
 
 watch(selectedOption, async (val) => {
   if (val == null) {
-    await onLoginFetchData();
+    await getDashboardData()
   } else {
-    await onLoginFetchData(val.pos);
+    await getDashboardData(val.pos);
   }
 
 });
@@ -81,25 +79,17 @@ definePage({
 //   WebSocketService.send('/app/myEndpoint', { content: 'Hello, WebSocket!' });
 // }
 
-const authStore = useAuthStore()
+console.error("INDEX BABY");
 
 
-
-if (!authStore.ws_state) {
-  useCounterStore().clear()
-  console.log("Ez Pz");
-
-  const instance = getCurrentInstance()
-  instance?.appContext.config.globalProperties.$initWebSocketConnection(authStore.accessToken);
-}
-
+// watch(() => authStore.accessToken, (newToken) =>
+//   instance?.appContext.config.globalProperties.$initWebSocketConnection(authStore.accessToken))
 
 
 onMounted(async () => {
-  onLoginFetchData().then(() => {
-    // console.log(notificationStore.notificationsList);
-  })
-})
+  await getDashboardData()
+});
+
 
 
 </script>
@@ -114,7 +104,7 @@ onMounted(async () => {
 
           <template #append>
             <div>
-              <AppCombobox v-model="selectedOption" :items="items" item-title="title" item-value="pos" label="Filter by month" placeholder="all" return-object clearable :class="$vuetify.display.width ? '1000' : '900'" />
+              <AppCombobox v-model="selectedOption" :items="items" item-title="title" item-value="pos" label="Filter by month" placeholder="all" return-object clearable class="width" />
             </div>
           </template>
         </VCardItem>
@@ -136,4 +126,7 @@ onMounted(async () => {
 </template>
 
 <style lang="scss" scoped>
+::v-deep(.v-field) {
+  width: 130px;
+}
 </style>

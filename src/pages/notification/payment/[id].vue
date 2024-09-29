@@ -1,7 +1,7 @@
   
   <script setup lang="ts">
 import { Payment, PAYMENT_STATUS, PAYMENT_TYPE } from '@/@core/types';
-import { router } from '@/plugins/3.router';
+import { router } from '@/plugins/1.router';
 import { usePaymentStore } from '@/store/usePaymentStore';
 import pdf from '@jbtje/vite-vue3pdf';
 import { toast } from 'vue3-toastify';
@@ -78,9 +78,9 @@ const updatePayment = () => {
       <!-- 👉 Form -->
       <VForm class="mt-6">
         <VRow>
-          <!-- 👉 Student Code -->
+          <!-- 👉 Id Payment -->
           <VCol cols="12" md="6">
-            <AppTextField v-model="currPayment.id" label="Student Code" :disabled="true" :readonly="true" />
+            <AppTextField v-model="currPayment.id" label="Id Payment" :disabled="true" :readonly="true" />
           </VCol>
 
           <!-- 👉 Amount -->

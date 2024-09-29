@@ -14,7 +14,7 @@ export const setupGuards = (router: _RouterTyped<RouteNamedMap & { [key: string]
      * Check if user is logged in by checking if token & user data exists in local storage
      * Feel free to update this logic to suit your needs
      */
-    const isLoggedIn = !!(useCookie('userData').value && useCookie('accessToken').value)
+    // const isLoggedIn = !!(useCookie('userData').value && useCookie('accessToken').value)
 
     /*
       If user is logged in and is trying to access login like page, redirect to home
@@ -32,6 +32,11 @@ export const setupGuards = (router: _RouterTyped<RouteNamedMap & { [key: string]
       /* eslint-disable indent */
       return { name: 'not-authorized' }
     }
+    else {
+      console.warn("Gotchaaa 👀");
+      return;
+    }
+
 
   })
 

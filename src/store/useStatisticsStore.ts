@@ -20,6 +20,16 @@ const chartJsCustomColors: ChartJsCustomColors = {
   areaChartGreyLight: '#edf1f4',
   scatterChartWarning: '#ff9f43',
 }
+
+type Statistics = {
+  countStudentsByProgram: {
+    [key: string]: [number, number];
+  };
+  paymentsCountByMonth: {
+    [key: string]: number;
+  };
+};
+
 export const useStatisticsStore = defineStore('statistic', () => {
 
   const statisticsBarCharData = ref()
@@ -58,57 +68,58 @@ export const useStatisticsStore = defineStore('statistic', () => {
     }
   }
 
+
+
+  // ? '/app/on-login-data'
+  //     : `/app/dashboard-data?month=${month}`
+
   //👉 - On Login Fetch Data
-  async function onLoginFetchData(month?: number) {
-    try {
-      const url = month === undefined
-        ? '/app/on-login-data'
-        : `/app/dashboard-data?month=${month}`
-      const { data, error: hasError, isFetching } = await useApi(url)
-      //👉 - countStudentsByProgram
-      const labels = Object.keys(data.value.countStudentsByProgram)
-      const values = Object.values(data.value.countStudentsByProgram)
-      statisticsPolarAreaCharData.value = {
-        labels: labels,
-        datasets: [
-          {
-            borderWidth: 0,
-            label: 'Total Students ',
-            data: values.map(v => v[0]),
-            backgroundColor: [chartJsCustomColors.primary, chartJsCustomColors.yellow, chartJsCustomColors.polarChartWarning, chartJsCustomColors.polarChartInfo, chartJsCustomColors.polarChartGrey, chartJsCustomColors.polarChartGreen],
-          },
-        ],
-      }
+  async function onLoginFetchData(url: string) {
+    //👉 - Get Data From Hamza's Server 
+    const { data, error: isError, isFetching } = await useApi(url)
 
-      //👉 - paymentsCountByMonth
-      const monthss = Object.keys(data.value.paymentsCountByMonth)
-      const valuess = Object.values(data.value.paymentsCountByMonth)
-
-      statisticsBarCharData.value = {
-        labels: monthss,
-        datasets: [
-          {
-            maxBarThickness: 15,
-            backgroundColor: chartJsCustomColors.lineChartPrimary,
-            borderColor: 'transparent',
-            borderRadius: { topRight: 15, topLeft: 15 },
-            data: valuess,
-          },
-        ],
-      }
-
-
-
-      loading.value = isFetching.value
-      error.value = hasError.value
-    } catch (error) {
-      console.log(error)
+    //👉 - Retrieve and Split the Program Statistics Object After Each Login
+    const programs = Object.keys((data.value as Statistics).countStudentsByProgram)
+    const programsValues = Object.values((data.value as Statistics).countStudentsByProgram)
+    statisticsPolarAreaCharData.value = {
+      labels: programs,
+      datasets: [
+        {
+          borderWidth: 0,
+          label: 'Total Students ',
+          data: programsValues.map(v => v[0]),
+          backgroundColor: [chartJsCustomColors.primary, chartJsCustomColors.yellow, chartJsCustomColors.polarChartWarning, chartJsCustomColors.polarChartInfo, chartJsCustomColors.polarChartGrey, chartJsCustomColors.polarChartGreen],
+        },
+      ],
     }
+
+    //👉 - Retrieve and Split the Month Statistics Object After Each Login 
+    const months = Object.keys((data.value as Statistics).paymentsCountByMonth)
+    const monthsValues = Object.values((data.value as Statistics).paymentsCountByMonth)
+    statisticsBarCharData.value = {
+      labels: months,
+      datasets: [
+        {
+          maxBarThickness: 15,
+          backgroundColor: chartJsCustomColors.lineChartPrimary,
+          borderColor: 'transparent',
+          borderRadius: { topRight: 15, topLeft: 15 },
+          data: monthsValues,
+        },
+      ],
+    }
+
+    loading.value = isFetching.value
+    error.value = isError.value
+  }
+
+  async function getDashboardData(month?: number) {
+    const url = month ? `/app/dashboard-data?month=${month}` : `/app/dashboard-data`
+    await onLoginFetchData(url);
   }
 
 
-
   return {
-    statisticsBarCharData, statisticsPolarAreaCharData, error, loading, onLoginFetchData
+    statisticsBarCharData, statisticsPolarAreaCharData, error, loading, onLoginFetchData, getDashboardData
   }
 })

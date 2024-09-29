@@ -18,23 +18,13 @@ const toCamelCase = (part: string) => {
   return part.charAt(0).toUpperCase() + part.slice(1);
 }
 
+definePage({
+  meta: {
+    layout: "blank",
+    unauthenticatedOnly: true,
+  },
+});
 
-// const transformObject = (original) => {
-//   // Split the email to get the name part
-//   const emailParts = original.sub.split('@');
-
-//   // Capitalize the first letter of each part of the name
-//   const firstNamePart = toCamelCase(emailParts[0]);
-//   const lastNamePart = toCamelCase(emailParts[1].split('.')[0]);
-//   const nameParts = firstNamePart + ' ' + lastNamePart
-//   return {
-//     fullName: nameParts,
-//     email: original.sub,
-//     role: original.scope.includes('ROLE_ADMIN') ? "ADMIN" : "STUDENT" // Remove 'ROLE_' prefix and capitalize
-//   };
-// }
-
-// const userData = transformObject(useCookie('userData').value)
 
 
 const authStore = useAuthStore();
@@ -54,10 +44,10 @@ const resetCookies = async () => {
   useCookie('accessToken').value = null;
   useCookie("userData").value = null;
   authStore.ws_state = null
-  useCounterStore().clear();
   instance?.appContext.config.globalProperties.$disconnectWebSocket();
 
   await router.push('/login')
+  useCounterStore().clear();
   // ℹ️ We had to remove abilities in then block because if we don't nav menu items mutation is visible while redirecting user to login page
   // Remove "userAbilities" from cookie
   useCookie('userAbilityRules').value = null

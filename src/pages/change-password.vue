@@ -5,10 +5,10 @@ import { VForm } from "vuetify/components/VForm";
 
 definePage({
   meta: {
-    layout: "blank",
-    unauthenticatedOnly: true,
-  },
-});
+    action: 'manage',
+    subject: 'STUDENT'
+  }
+})
 
 
 const refVForm = ref<VForm>()

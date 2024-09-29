@@ -373,6 +373,7 @@ declare module 'vue' {
     DialogCloseBtn: typeof import('./src/@core/components/DialogCloseBtn.vue')['default']
     DropZone: typeof import('./src/@core/components/DropZone.vue')['default']
     EditStatusPaymentDrawer: typeof import('./src/components/payments/EditStatusPaymentDrawer.vue')['default']
+    EditStatusSelectionDialog: typeof import('./src/components/payments/EditStatusSelectionDialog.vue')['default']
     EditStudentDrawer: typeof import('./src/components/students/EditStudentDrawer.vue')['default']
     EnableOneTimePasswordDialog: typeof import('./src/components/dialogs/EnableOneTimePasswordDialog.vue')['default']
     ErrorHeader: typeof import('./src/components/ErrorHeader.vue')['default']

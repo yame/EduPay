@@ -29,7 +29,6 @@ const updateOptions = (options: any) => {
 const router = useRouter()
 const route = useRoute()
 const search = ref('')
-// Fetch Orders
 
 
 const authStore = useAuthStore();
@@ -75,8 +74,7 @@ const afterSubmit = (statusCode: number) => {
 
 
 const viewPDF = (item: Payment) => {
-  console.table(item);
-
+  b
   usePaymentStore().getPaymentFile(item.id).then(response => {
     const url = URL.createObjectURL(new Blob([response?.data], { type: 'application/pdf' }));
     pdfUrl.value = url

@@ -10,6 +10,7 @@ import webSocketPlugin from './plugins/webSocketPlugin';
 import { useAuthStore } from './store/useAuthStore';
 import { useCounterStore } from './store/useCounterStore';
 
+
 // Create Vue app
 const app = createApp(App);
 // Register plugins
@@ -33,10 +34,10 @@ const token = (useCookie('accessToken').value);
 // }if (!authStore.ws_state) {
 
 const authStore = useAuthStore()
-console.error("MAIN");
+console.error("MAIN BABY");
 
-const instance = getCurrentInstance()
-// instance?.appContext.config.globalProperties.$initWebSocketConnection(authStore.accessToken);
+// if (token)
+//   app.config.globalProperties.$initWebSocketConnection(authStore.accessToken);
 
 app.use(webSocketPlugin);
 // Mount Vue app

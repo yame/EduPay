@@ -5,100 +5,80 @@ import type { Notification } from '@layouts/types';
 
 const notificationStore = useNotificationStore()
 const { notificationsList } = storeToRefs(notificationStore)
-const { markAllAsRead, toggleSeen } = notificationStore
-const counterStore = inject('counterStore')
+const { markAllAsRead, toggleSeen, toggleLocalNotification, deleteNotification, removeNotification, readAllNotifications } = notificationStore
 
-// const notifications = ref<Notification[]>([
-//   {
-//     id: 1,
-//     img: avatar4,
-//     title: 'Congratulation Flora! 🎉',
-//     subtitle: 'Won the monthly best seller badge',
-//     time: 'Today',
-//     isSeen: false,
-//     color: 'error'
-//   }
-// ])
 const badgeProps = ref({ content: notificationsList.value.length, max: '99', showMenu: false })
-const showMenu = ref(false)
 const router = useRouter();
 
 badgeProps.value.content = notificationsList.value.length
 
 
+//👉 - Delete from BD and from local notificationList Data
 const remNotification = (notificationId: number) => {
-  notificationsList.value.forEach((item, index) => {
-    if (notificationId === item.id)
-      notificationStore.deleteNotification(notificationId).then(() => notificationStore.removeNotification(notificationId)).then(() => {
-        counterStore.decrement()
-      })
+  deleteNotification(notificationId).then((res) => {
+    removeNotification(notificationId);
   })
+
 }
 
-watch(notificationsList, (newNotificationsList: Notification[]) => {
-  console.log(newNotificationsList);
+// watch(notificationsList, (newNotificationsList: Notification[]) => {
+//   notificationsList.value = newNotificationsList
+// })
 
-  notificationsList.value = newNotificationsList
-})
-
-
+//👉 - Mark All read api and local data
 const markAllRead = (allNotificationsIds: number[]) => {
   markAllAsRead().then(() => {
-    markRead(allNotificationsIds)
+    readAllNotifications(allNotificationsIds)
   })
 }
 
-
-const markRead = (notificationId: number[]) => {
-  console.warn("dlkjkfd", notificationId[0]);
-
-
-  toggleSeen(notificationId[0]).then((res) => {
-    console.log(res);
-
-    notificationsList.value.forEach(item => {
-      notificationId.forEach(id => {
-        if (id === item.id)
-          item.isSeen = true
-      })
-    })
-  })
-
-}
-
-const markUnRead = (notificationId: number[]) => {
-  toggleSeen(notificationId[0]).then((res) => {
-    console.log(res);
-
-    notificationsList.value.forEach(item => {
-      notificationId.forEach(id => {
-        if (id === item.id)
-          item.isSeen = false
-      })
-    })
+//👉 - Mark read for local data and toggle for the api
+const markRead = (notificationId: number) => {
+  toggleSeen(notificationId).then((res) => {
+    toggleLocalNotification(notificationId)
   })
 }
 
+//👉 - Mark unread for local data and toggle for the api
+const markUnRead = (notificationId: number) => {
+  toggleSeen(notificationId).then((res) => {
+    toggleLocalNotification(notificationId)
+  })
+}
+
+//👉 - handle each click notification
 const handleNotificationClick = (notification: Notification) => {
-
-  markRead([notification.id])
-  counterStore.decrement()
+  if (!notification.isSeen)
+    markRead(notification.id)
   notification.paymentId === undefined ? router.push(`/notification/registration/${notification.email}`) : router.push(`/notification/payment/${notification.paymentId}`)
   toggle(false)
 
 }
 
+//👉 - Event emitters that offers toggling the menu of notification when it needs
 const toggle = (val) => {
-  console.log(val);
-
   badgeProps.value.showMenu = val
 }
 
-const displayedNotifications = computed(() => {
-  return notificationsList.value.slice(0, 10);
+// 👉 - Sort notifications before passing them to the child component
+const sortedNotifications = computed(() => {
+  return notificationsList.value.sort((a, b) => {
+    // First, sort by isSeen (false should come before true)
+    const seenComparison = Number(a.isSeen) - Number(b.isSeen);
+
+    // If isSeen is the same, sort by registerDate (most recent first)
+    if (seenComparison === 0) {
+      return new Date(b.registerDate).getTime() - new Date(a.registerDate).getTime();
+    }
+    return seenComparison;
+  });
 });
 
-// notificationsList.sort((a,b)=>a.isSeen - b.isSeen)
+//👉 - Passing Only 10 first notifications 
+const displayedNotifications = computed(() => {
+  return sortedNotifications.value.slice(0, 10);
+});
+
 </script>
 
 <template>

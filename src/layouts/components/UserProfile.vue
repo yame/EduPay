@@ -24,10 +24,11 @@ const resetCookies = async () => {
   setCurrentUser(null)
   setToken(null)
   authStore.ws_state = null
-  useCounterStore().clear();
-  instance?.appContext.config.globalProperties.$disconnectWebSocket();
+  instance?.appContext.config.globalProperties.$disconnectWebSocket()
+
 
   await router.push('/login')
+  useCounterStore().clear();
   // ℹ️ We had to remove abilities in then block because if we don't nav menu items mutation is visible while redirecting user to login page
   // Remove "userAbilities" from cookie
   useCookie('userAbilityRules').value = null

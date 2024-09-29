@@ -129,10 +129,10 @@ const updatePassword = () => {
       <VCard flat :max-width="500" class="mt-12 mt-sm-0 pa-4">
         <VCardText>
           <h4 class="text-h4 mb-1">
-            Change Password first to enter our app? 🔒
+            Please Change Your Password to Access the App 🔒
           </h4>
           <p class="mb-0">
-            Change It!!!
+            Secure your account with a strong password.
           </p>
         </VCardText>
 

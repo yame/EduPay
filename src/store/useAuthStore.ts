@@ -128,7 +128,6 @@ export const useAuthStore = defineStore('auth', () => {
       userWithoutRoles.role = isAdmin(roles);
       currentUser.value = userWithoutRoles;
     } else {
-      console.warn("currUser is null, cannot set user role.");
       currentUser.value = null;
     }
   }

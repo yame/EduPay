@@ -82,7 +82,6 @@ export const usePaymentStore = defineStore('payment', () => {
     }
   }
 
-
   //👉 - Get payments by the status
   async function getPaymentByType(type: PAYMENT_TYPE) {
     try {
@@ -103,9 +102,10 @@ export const usePaymentStore = defineStore('payment', () => {
   //👉 - Add Payment 
   async function addOne(newPayment: DtoNewPayment, file) {
     const formData = new FormData()
+    const dateFormat = (new Date(newPayment.date)).toISOString()
     formData.append('studentCode', newPayment.studentCode.toString());
     formData.append('paymentType', newPayment.paymentType.toString());
-    formData.append('date', newPayment.date.toISOString());
+    formData.append('date', dateFormat);
     formData.append('amount', newPayment.amount.toString());
     formData.append('file', file);
 
@@ -120,7 +120,7 @@ export const usePaymentStore = defineStore('payment', () => {
     return res.status
   }
 
-
+  //👉 - Get PaymentFile
   async function getPaymentFile(paymentId) {
     try {
       return axios.get(`${import.meta.env.VITE_API_BASE_URL}/payments/receipt/${paymentId}`, {
@@ -135,5 +135,17 @@ export const usePaymentStore = defineStore('payment', () => {
     }
   }
 
-  return { paymentsList, currentPayment, currentReceipt, error, loading, getAllPayments, getPaymentById, getPaymentByStatus, getPaymentByType, getPaymentFile, getPaymentsByStudent, updateOne, addOne }
+  //👉 - Update Status's bulk of Payments 
+  async function updateSelectionStatus(ids: string[], newStatus: PAYMENT_STATUS) {
+    const response = await $api('/payments/list/update-status', {
+      method: 'PATCH',
+      body: {
+        newPaymentStatus: newStatus,
+        ids: ids
+      }
+    })
+    return response
+  }
+
+  return { paymentsList, currentPayment, currentReceipt, error, loading, getAllPayments, getPaymentById, getPaymentByStatus, getPaymentByType, getPaymentFile, getPaymentsByStudent, updateOne, addOne, updateSelectionStatus }
 })
