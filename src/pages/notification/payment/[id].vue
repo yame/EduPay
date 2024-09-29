@@ -38,6 +38,8 @@ const resolveStatusColor = (status: string) => {
 const currentPaymentPdfUrl = ref(null)
 const currentPage = ref(0)
 const pageCount = ref(0)
+const isStatusChanged = ref(false)
+
 usePaymentStore().getPaymentFile(route.params.id).then(response => {
   const url = URL.createObjectURL(new Blob([response?.data], { type: 'application/pdf' }));
   currentPaymentPdfUrl.value = url
@@ -52,6 +54,15 @@ watch(() => route.params.id, (newValue) => {
   usePaymentStore().getPaymentById(newValue).then(() => {
     currPayment.value = currentPayment.value
   })
+})
+
+//👉 - Prevent updating a new Payment until status chande to rejected or validated
+watch(() => currentPayment.value?.status, (newStatus) => {
+  if (newStatus !== PAYMENT_STATUS.CREATED)
+    isStatusChanged.value = true
+  else
+    isStatusChanged.value = false
+
 })
 
 
@@ -124,17 +135,19 @@ const updatePayment = () => {
             <AppDateTimePicker v-model="currPayment.date" label="Date" placeholder="Select date of your payment" :readonly="true" />
           </VCol>
 
-          <!-- 👉 Receipt -->
-          <VCol cols="12" md="12">
-            <pdf v-if="currentPaymentPdfUrl" :src="currentPaymentPdfUrl" @num-pages="pageCount = $event" @page-loaded="currentPage = $event"></pdf>
-          </VCol>
+          <VRow class="justify-center">
+            <!-- 👉 Receipt -->
+            <VCol cols="12" md="6">
+              <pdf v-if="currentPaymentPdfUrl" :src="currentPaymentPdfUrl" @num-pages="pageCount = $event" @page-loaded="currentPage = $event"></pdf>
+            </VCol>
+          </VRow>
 
           <!-- 👉 Submit and Cancel -->
           <VCol cols="12" class="d-flex flex-wrap justify-center gap-4">
             <RouterLink to="/">
               <v-btn color="primary">Back To Dashboard</v-btn>
             </RouterLink>
-            <v-btn color="warning" @click="updatePayment">Update Payment</v-btn>
+            <v-btn color="warning" @click="updatePayment" :disabled="!isStatusChanged">Update Payment</v-btn>
 
           </VCol>
         </VRow>
