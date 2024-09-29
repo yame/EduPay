@@ -48,6 +48,11 @@ usePaymentStore().getPaymentById(route.params.id).then(() => {
 })
 
 
+watch(() => route.params.id, (newValue) => {
+  usePaymentStore().getPaymentById(newValue).then(() => {
+    currPayment.value = currentPayment.value
+  })
+})
 
 
 const updatePayment = () => {

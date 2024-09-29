@@ -46,11 +46,24 @@ const ban = () => {
   }))
 }
 
-onMounted(() => {
-  useStudentStore().getPendingStudentsByEmail(route.params.email).then(res => {
+
+
+useStudentStore().getPendingStudentsByEmail(route.params.email).then(res => {
+  currentStudent.value = res.data.value;
+})
+
+
+watch(() => route.params.email, (newValue) => {
+  useStudentStore().getPendingStudentsByEmail(newValue).then(res => {
     currentStudent.value = res.data.value;
   })
 })
+
+// watch(() => currentStudent, (newValue) => {
+//   useStudentStore().getPendingStudentsByEmail(route.params.email).then(res => {
+//     currentStudent.value = res.data.value;
+//   })
+// })
 
 </script>
 <template>
