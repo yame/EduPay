@@ -1,6 +1,9 @@
 
 export default [
-  { heading: 'Student payments' },
+  {
+    heading: 'Payment Management ', action: 'manage',
+    subject: 'STUDENT'
+  },
 
   {
     title: 'List',

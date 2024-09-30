@@ -20,11 +20,16 @@
         {{ resolveProgram(item.programID).text }}
       </VChip>
       <div v-else-if="header.key === 'actions'">
-        <IconBtn v-for="(action, index) in actions" :key="index" @click="() => action.handler(item)" :class="{ 'not-allowed' : !item.seen  }">
-          <VIcon :disabled="item.seen ? false : true" :color="action?.color || 'secondary'" :size="action.size || 23" :icon="action.icon" />
-          <VTooltip :disabled="item.seen ? false : true" activator="parent">{{action?.icon == 'tabler-circle-check' ? "Approve Student": action?.icon == 'tabler-xbox-x' ? "Decline Student": action?.icon == 'tabler-ban' ? "Ban Student": action?.icon == 'tabler-eye' ? 'View details' : action?.icon==='tabler-edit' ? " Edit Infos ":  (action?.icon==='tabler-trash' && actions && actions?.length>1 ) ?"Delete Student":"Delete Notification" }}</VTooltip>
+        <IconBtn v-for="(action, index) in actions" :key="index" @click="action.handler(item)" :class="{ 'not-allowed': item.seen === undefined ? '' : !item.seen }">
+
+          <VIcon :disabled="item.seen === undefined ? false : !item.seen" :color="action?.color || 'secondary'" :size="action.size || 23" :icon="action.icon" />
+
+          <VTooltip :disabled="item.seen === undefined ? false : !item.seen" activator="parent">
+            {{getTooltipText(action)}}
+          </VTooltip>
         </IconBtn>
       </div>
+
       <div v-else-if="header.key==='receipt'">
         <VBtn variant="outlined" color="info" prepend-icon="tabler-stereo-glasses" size="small" @click="viewPDF(item)">
           Pdf
@@ -36,6 +41,10 @@
       <div v-else-if="header.key==='seen'">
         <VSwitch v-model="item.seen" @change="$emit('toggleRead',item)" />
       </div>
+      <VChip v-else-if="header.key === 'departmentName'" color="info">
+        {{ item.departmentName }}
+      </VChip>
+
       <span v-else>
         <!-- Render plain text for other headers -->
         {{ item[header.key] }}
@@ -121,13 +130,23 @@ const updateOptions = (options) => {
   emit('update:itemsPerPage', options.itemsPerPage);
   emit('update:page', options.page);
 };
+const getTooltipText = (action) => {
+
+  if (action.icon === 'tabler-circle-check') return 'Approve Student';
+  if (action.icon === 'tabler-xbox-x') return 'Decline Student';
+  if (action.icon === 'tabler-ban') return 'Ban Student';
+  if (action.icon === 'tabler-eye') return 'View details';
+  if (action.icon === 'tabler-edit') return 'Edit Info';
+  if (action.icon === 'tabler-trash' && props.actions.length > 1) return 'Delete Student';
+  return 'Delete Notification';
+}
 
 const viewPDF = (val) => emit('viewPDF', val)
 
 
 </script>
 
-<style scoped lang="scss">
+<style lang="scss" scoped >
 .customer-title:hover {
   color: rgba(var(--v-theme-primary)) !important;
 }
@@ -149,7 +168,6 @@ const viewPDF = (val) => emit('viewPDF', val)
 ::v-deep(.v-table > .v-table__wrapper > table) {
   padding: 0 30px;
 }
-
 .not-allowed:hover {
   cursor: not-allowed;
 }

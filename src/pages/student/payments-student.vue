@@ -9,9 +9,9 @@ import { toast } from 'vue3-toastify';
 import { VCardText, VCardTitle } from 'vuetify/components';
 
 
-
-const configStore = useConfigStore()
-configStore.isVerticalNavCollapsed = true;
+//ℹ️ - If You want to toggle Side_Menu
+// const configStore = useConfigStore()
+// configStore.isVerticalNavCollapsed = true;
 
 // Data table options
 const itemsPerPage = ref(10)
@@ -177,7 +177,7 @@ definePage({
           <span class="text-white ms-2 text-warning text-underline text-uppercase mb-5">{{ userData?.lastName }} {{ userData?.firstName }} </span>
         </span>
       </span>
-      <StudentDetails v-if="userData" :student="userData" />
+      <StudentDetails v-if="currentStudent" :student="currentStudent" />
       <div v-else>
         <VSkeletonLoader v-for="i in 1" :key="i" type="card-avatar" />
       </div>

@@ -12,25 +12,23 @@ export const useStudentStore = defineStore('student', () => {
 
   //👉 - Get All Student 
   async function getAllStudents(currentPage?: Number, itemsPerPage?: Number, programId?: string, code?: string, lastName?: string, firstName?: string) {
-    try {
-      const { data, error: hasError, isFetching } = await useApi(createUrl('/user/student', {
-        query: {
-          page: (currentPage - 1),
-          size: itemsPerPage,
-          programID: programId,
-          code: code,
-          lastName: lastName,
-          firstName: firstName
-        }
-      })
-      )
-      studentsList.value = data.value as Student[]
-      loading.value = isFetching.value
 
-      error.value = hasError.value
-    } catch (error) {
-      console.log(error)
-    }
+    const { data, error: hasError, isFetching } = await useApi(createUrl('/user/student', {
+      query: {
+        page: (currentPage - 1),
+        size: itemsPerPage,
+        programID: programId,
+        code: code,
+        lastName: lastName,
+        firstName: firstName
+      }
+    })
+    )
+    studentsList.value = data.value as Student[]
+    loading.value = isFetching.value
+
+    error.value = hasError.value
+
   }
 
   //👉 - Add Student 

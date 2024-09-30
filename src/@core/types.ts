@@ -78,6 +78,16 @@ export enum PROGRAM {
 }
 
 
+
+export interface DtoNewAdmin {
+  code: string,
+  programId: PROGRAM,
+  firstName: string,
+  lastName: string,
+  departmentName: string,
+  email: string
+}
+
 export interface DtoNewPayment {
   studentCode: string;
   amount: number;
@@ -91,6 +101,16 @@ export interface DtoNewStudent {
   firstName: string,
   lastName: string,
   email: string
+}
+
+export interface Admin {
+  code: string,
+  programID: PROGRAM,
+  firstName: string,
+  lastName: string,
+  email: string,
+  departmentName: string,
+  registerDate?: string | Date
 }
 
 export interface Student {
