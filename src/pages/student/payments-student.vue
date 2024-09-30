@@ -57,7 +57,6 @@ const filtrer = () => {
 const isAddPayementDialogVisible = ref(false)
 //👉 - Handle If Payment added or not
 const afterSubmit = (statusCode: number) => {
-  console.log(statusCode);
   if (statusCode === 200) {
     toast.success('Payment successfully added ✅', {
       "theme": useCookie('EduPayment-theme').value || 'auto'
@@ -101,8 +100,6 @@ const clearFilters = () => {
 }
 
 const updateStatus = (newStatus, newPayment) => {
-  console.log(newStatus)
-  console.log(newPayment)
   updateOne(newPayment.id, newStatus).then(() => {
     clearFilters()
     getPaymentsByStudent(page.value, itemsPerPage.value, selectedStatus.value, selectedType.value);
@@ -116,8 +113,6 @@ const updateStatus = (newStatus, newPayment) => {
     })
   })
 }
-
-
 
 
 const statusItems = ref([
@@ -149,30 +144,27 @@ const changePage = (val) => {
   page.value = val
 }
 watch(itemsPerPage, (newVal) => {
-  console.log("💢💌💢💔" + route.params.code);
-
   getPaymentsByStudent(page.value, newVal, selectedStatus.value, selectedType.value);
 });
 watch(page, (newPage) => {
   getPaymentsByStudent(newPage, itemsPerPage.value, selectedStatus.value, selectedType.value);
 });
 
-definePage({
-  meta: {
-    action: 'manage',
-    subject: 'STUDENT'
-  }
-})
 
-watch(() => currentUser.value?.email, (newV) => {
-  console.log(newV);
 
-})
 const userData = useCookie("userData").value
 onMounted(() => {
   getStudentByEmail(userData.email).then(() => {
     getPaymentsByStudent(page.value, itemsPerPage.value, selectedStatus.value, selectedType.value)
   })
+})
+
+
+definePage({
+  meta: {
+    action: 'manage',
+    subject: 'STUDENT'
+  }
 })
 
 

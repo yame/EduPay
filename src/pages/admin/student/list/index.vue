@@ -38,7 +38,7 @@ const edit = (item: Student) => {
 }
 
 const viewStudent = (item: Student) => {
-  router.push('/student/details/' + item?.code)
+  router.push('admin/student/details/' + item?.code)
 }
 
 const emailStudent = ref('')
@@ -254,7 +254,7 @@ const toggleSelection = () => {
 
         </VCol>
         <VCol cols="12" class="d-flex flex-row-reverse gap-x-4 flex-wrap gap-y-2">
-          <VBtn color="primary" prepend-icon="tabler-plus" text="New Student" @click="$router.push('/student/add')" />
+          <VBtn color="primary" prepend-icon="tabler-plus" text="New Student" @click="$router.push('admin/student/add')" />
           <VBtn v-show="isSelected" color="error" prepend-icon="tabler-trash" text="Delete selection" @click="deleteSelection" />
           <VBtn v-show="isSelected" color="secondary" prepend-icon="tabler-switch-horizontal" text="Toggle selection" @click="toggleSelection" />
           <VBtn v-show="isSelected" color="warning" prepend-icon="tabler-restore" text="Reset password selection" @click="resetPwSelection" />

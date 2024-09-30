@@ -94,10 +94,21 @@ onMounted(async () => {
   }
 });
 
-watch(() => route.path, async (newRoute) => {
-  console.log(newRoute);
-  isDataFetched.value = false
-})
+// watch(() => route.path, async (newRoute) => {
+//   console.log(newRoute);
+//   isDataFetched.value = false
+// })
+
+
+// watch(isDataFetched, async (newData) => {
+//   console.log(newData);
+// })
+
+
+// watch(() => notificationStore.NonSeenNotificationsCount, async (newCount) => {
+//   notificationStore.setNonSeenNotificationsCount(newCount);
+// })
+
 
 </script>
 

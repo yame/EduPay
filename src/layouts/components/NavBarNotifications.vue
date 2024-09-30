@@ -12,8 +12,6 @@ const router = useRouter();
 
 badgeProps.value.content = notificationsList.value.length
 
-console.log(NonSeenNotificationsCount.value);
-
 //👉 - Delete from BD and from local notificationList Data
 const remNotification = (notificationId: number) => {
   deleteNotification(notificationId).then((res) => {
@@ -54,7 +52,7 @@ const handleNotificationClick = (notification: Notification) => {
     markRead(notification.id)
   console.error(notification.subtitle);
 
-  notification.paymentId === undefined ? router.push(`/notification/registration/${notification.email}`) : !notification.subtitle.includes('CASH') === true ? router.push(`/student/${notification.paymentId}`) : router.push(`/notification/payment/${notification.paymentId}`)
+  notification.paymentId === undefined ? router.push(`/notification/registration/${notification.email}`) : !notification.subtitle.includes('CASH') ? router.push(`/student/${notification.paymentId}`) : router.push(`admin/notification/payment/${notification.paymentId}`)
   toggle(false)
 
 }

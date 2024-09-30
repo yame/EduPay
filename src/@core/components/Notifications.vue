@@ -69,7 +69,7 @@ const removeNotification = (notificationId: number) => {
 
 const router = useRouter()
 const viewAll = async () => {
-  await router.push('/notification')
+  await router.push('/admin/notification')
   emit('toggle-menu', false)
 }
 

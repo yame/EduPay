@@ -9,8 +9,6 @@ export const redirects: RouteRecordRaw[] = [
     path: '/',
     name: 'index',
     redirect: to => {
-
-
       // TODO: Get type from backend
       const userData = useCookie('userData').value
       const userRole = userData?.role
@@ -18,14 +16,22 @@ export const redirects: RouteRecordRaw[] = [
 
       if (userRole === "ADMIN")
         return { name: 'root' }
-      else if (userRole === "STUDENT")
+      if (userRole === "STUDENT")
         return { name: 'student-payments-student' }
-      return { name: 'login' }
-
+      return { name: 'login', query: to.query }
     },
   },
+  {
+    path: '/profile',
+    name: 'profile',
+    redirect: () => ({ name: 'profile' }),
+  },
+  {
+    path: '/change-password',
+    name: 'change-password',
+    redirect: () => ({ name: 'change-password' }),
+  },
+
 
 ]
 
-export const routes: RouteRecordRaw[] = [
-]

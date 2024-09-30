@@ -1,11 +1,11 @@
-import { setupLayouts } from 'virtual:generated-layouts'
 import type { App } from 'vue'
 
+import { setupLayouts } from 'virtual:generated-layouts'
 import type { RouteRecordRaw } from 'vue-router/auto'
 
 import { createRouter, createWebHistory } from 'vue-router/auto'
 
-import { redirects, routes } from './additional-routes'
+import { redirects } from './additional-routes'
 import { setupGuards } from './guards'
 
 function recursiveLayouts(route: RouteRecordRaw): RouteRecordRaw {
@@ -31,13 +31,12 @@ const router = createRouter({
     ...redirects,
     ...[
       ...pages,
-      ...routes,
     ].map(route => recursiveLayouts(route)),
   ],
 })
 
-setupGuards(router)
 
+setupGuards(router)
 export { router }
 
 export default function (app: App) {

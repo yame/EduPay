@@ -70,7 +70,7 @@ watch(() => currentPayment.value?.status, (newStatus) => {
 
 
 const updatePayment = () => {
-  router.push('/student/payments-student')
+  router.push('student/payments-student')
   // console.log(currPayment.value.status);
 
   // usePaymentStore().updateOne(route.params?.id, currPayment.value.status).then(() => {

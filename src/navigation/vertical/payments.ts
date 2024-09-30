@@ -7,9 +7,8 @@ export default [
     icon: { icon: 'tabler-brand-cashapp' },
     children: [{
       title: 'List',
-      to: { name: 'payment-list' },
-      icon: { icon: 'tabler-smart-home' },
-
+      to: { name: 'admin-payment-list' },
+      icon: { icon: 'tabler-files' },
     }]
   }
 ]

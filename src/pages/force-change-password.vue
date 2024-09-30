@@ -65,17 +65,21 @@ const LogIn = async () => {
     await login(credentials.value);
 
     //👉 -  Update Cookies for each User
-    useCookie('accessToken').value = accessToken.value;
-    useCookie('userData').value = currentUser.value ? JSON.stringify(currentUser.value) : null;
-    useCookie('userAbilityRules').value = userAbilityRules.value ? JSON.stringify(userAbilityRules.value) : null;
+    // useCookie('accessToken').value = accessToken.value;
+    // useCookie('userData').value = currentUser.value ? JSON.stringify(currentUser.value) : null;
+    // useCookie('userAbilityRules').value = userAbilityRules.value ? JSON.stringify(userAbilityRules.value) : null;
     ability.update(userAbilityRules.value || []);
 
     //👉 -  Redirect  
+    // Redirect to `to` query if exist or redirect to index route
+    // ❗ nextTick is required to wait for DOM updates and later redirect
     await nextTick(() => {
-      router.push(route.query.to ? String(route.query.to) : "/").then(() => {
+      router.replace(route.query.to ? String(route.query.to) : '/').then(() => {
         toast.success('Login successful ✅⚡', {
           theme: useCookie('EduPayment-theme').value || 'auto'
         })
+        //👉 - Turn off loading for the button login
+        loader.value = false;
       })
     })
   } catch (err) {

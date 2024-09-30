@@ -27,8 +27,6 @@ export const usePaymentStore = defineStore('payment', () => {
       )
       paymentsList.value = data.value as Payment[]
       loading.value = isFetching.value
-      console.log(loading.value);
-
       error.value = hasError.value
     } catch (error) {
       console.log(error)
@@ -49,8 +47,6 @@ export const usePaymentStore = defineStore('payment', () => {
       )
       paymentsList.value = data.value as Payment[]
       loading.value = isFetching.value
-      console.log(loading.value);
-
       error.value = hasError.value
     } catch (error) {
       console.log(error)

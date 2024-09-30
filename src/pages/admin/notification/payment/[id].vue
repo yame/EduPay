@@ -82,13 +82,6 @@ const updatePayment = () => {
   })
 }
 
-definePage({
-  meta: {
-    action: 'manage',
-    subject: 'STUDENT'
-  }
-})
-
 
 </script>
 <template>

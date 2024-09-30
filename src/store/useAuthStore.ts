@@ -19,7 +19,7 @@ interface EduPayUser {
 
 
 export const useAuthStore = defineStore('auth', () => {
-  const currentUser = ref<EduPayUser | null>(null)
+  const currentUser = ref<EduPayUser>()
   const userAbilityRules = ref<Rule[]>()
   const loading = ref(false)
   const error = ref('')
@@ -128,7 +128,7 @@ export const useAuthStore = defineStore('auth', () => {
       userWithoutRoles.role = isAdmin(roles);
       currentUser.value = userWithoutRoles;
     } else {
-      currentUser.value = null;
+      currentUser.value = undefined;
     }
   }
 

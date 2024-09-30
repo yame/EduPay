@@ -36,15 +36,14 @@ const instance = getCurrentInstance()
 const ability = useAbility();
 const router = useRouter();
 const route = useRoute();
-const userData = useCookie('userData').value
+const userData = useCookie<any>('userData')
 
 //👉 - Log Out 
 const resetCookies = async () => {
-  setCurrentUser(null)
+  setCurrentUser(undefined)
   setToken(null)
-  setUserAbilityRules(null)
   useCookie('accessToken').value = null;
-  useCookie("userData").value = null;
+  userData.value = null;
   authStore.ws_state = null
   instance?.appContext.config.globalProperties.$disconnectWebSocket();
 
@@ -52,6 +51,7 @@ const resetCookies = async () => {
   useCounterStore().clear();
   // ℹ️ We had to remove abilities in then block because if we don't nav menu items mutation is visible while redirecting user to login page
   // Remove "userAbilities" from cookie
+  setUserAbilityRules(null)
   useCookie('userAbilityRules').value = null
   // Reset ability to initial ability
   ability.update([])

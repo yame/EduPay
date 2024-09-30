@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { useAuthStore } from "@/store/useAuthStore";
-import { useCounterStore } from "@/store/useCounterStore";
 import { useNotificationStore } from "@/store/useNotificationStore";
 import { useStatisticsStore } from "@/store/useStatisticsStore";
 import { PerfectScrollbar } from "vue3-perfect-scrollbar";
@@ -13,26 +12,26 @@ const ability = useAbility();
 const authStore = useAuthStore();
 const { setCurrentUser, setToken, setUserAbilityRules, logout } = authStore;
 
-const userData = useCookie('userData').value
+const userData = useCookie<any>('userData')
 
 const loading = ref(false)
 
 const instance = getCurrentInstance()
 const resetCookies = async () => {
 
-  setUserAbilityRules(null)
   useCookie('accessToken').value = null;
-  useCookie("userData").value = null;
-  setCurrentUser(null)
+  userData.value = null;
+  setCurrentUser(undefined)
   setToken(null)
   authStore.ws_state = null
   instance?.appContext.config.globalProperties.$disconnectWebSocket()
 
-
+  //👉 - Redirect to login Page
   await router.push('/login')
-  useCounterStore().clear();
+
   // ℹ️ We had to remove abilities in then block because if we don't nav menu items mutation is visible while redirecting user to login page
   // Remove "userAbilities" from cookie
+  setUserAbilityRules(null)
   useCookie('userAbilityRules').value = null
   // Reset ability to initial ability
   ability.update([])

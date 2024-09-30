@@ -3,7 +3,7 @@ export default [
 
   {
     title: 'Users',
-    to: { name: 'user-list-pending' },
+    to: { name: 'admin-user-list-pending' },
     icon: { icon: 'tabler-users-group' },
 
   }

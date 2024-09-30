@@ -170,12 +170,7 @@ const deleteSelection = () => {
   })
 }
 
-definePage({
-  meta: {
-    action: 'manage',
-    subject: 'STUDENT'
-  }
-})
+
 
 //!SECTION
 
