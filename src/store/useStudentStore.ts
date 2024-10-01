@@ -1,5 +1,6 @@
 import { DtoNewStudent, Student } from "@/@core/types";
 import axios from 'axios';
+import { UUID } from "crypto";
 import { PROGRAM } from './../@core/types';
 
 export const useStudentStore = defineStore('student', () => {
@@ -99,27 +100,25 @@ export const useStudentStore = defineStore('student', () => {
 
   //👉 - Get List student pending
   async function getPendingStudents(currentPage?: Number, itemsPerPage?: Number, email?: String) {
-    try {
-      const { data, error: hasError, isFetching } = await useApi(createUrl('/user/pending-students', {
-        query: {
-          page: (currentPage - 1),
-          size: itemsPerPage,
-          email: email
-          // programID: programId,
-          // code: code,
-          // lastName: lastName,
-          // firstName: firstName
-        }
-      })
-      )
-      pendingStudents.value = data.value as Student[]
-      loading.value = isFetching.value
 
-      error.value = hasError.value
-    } catch (error) {
-      console.log(error)
-    }
+    const { data, error: hasError, isFetching } = await useApi(createUrl('/user/pending-students', {
+      query: {
+        page: (currentPage - 1),
+        size: itemsPerPage,
+        email: email
+        // programID: programId,
+        // code: code,
+        // lastName: lastName,
+        // firstName: firstName
+      }
+    })
+    )
+    pendingStudents.value = data.value as Student[]
+    loading.value = isFetching.value
+
+    error.value = hasError.value
   }
+
 
 
   //👉 - Get List student pending by email
@@ -218,11 +217,43 @@ export const useStudentStore = defineStore('student', () => {
   }
 
 
+
+  //👉 - Generete Receipt when payment is validated
+  async function generateReceiptPayment(id: UUID) {
+    try {
+
+      const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/receipt/generate-receipt?paymentId=${id}`, {
+        responseType: 'blob',
+        headers: {
+          Authorization: `Bearer ${useCookie('accessToken').value}`,
+        },
+      })
+      loading.value = false
+      console.log('Response:', response); // Log the entire response for debugging
+
+      return response
+      // if (response.) {
+      //   const blob = await response.blob();
+      //   const link = document.createElement('a');
+      //   link.href = window.URL.createObjectURL(blob);
+      //   link.download = 'INV-2024-0f028218.pdf'; // File name to save
+      //   document.body.appendChild(link);
+      //   link.click();
+      //   document.body.removeChild(link);
+      // } else {
+      //   console.error('Failed to download file:', response.status);
+      // }
+    } catch (error) {
+      console.error('Error fetching file:', error);
+    }
+
+  }
+
   return {
     studentsList, currentStudent, loading, error, pendingStudents, updateOne, approvingStudentRegistration, banStudentRegistration, declineStudentRegistration, getPendingStudents, deleteUserByEmail, getAllStudents, addOne, getStudentByCode, getStudentsByProgram, getStudentByEmail, toggleEnableUserAccount, getPendingStudentsByEmail, uploadStudentFile, approveMultipleUsers,
     declineMultipleUsers,
     banMultipleUsers,
     resetPasswordToMultipleStudents,
-    deleteMultipleStudents, toggleMultipleStudents
+    deleteMultipleStudents, toggleMultipleStudents, generateReceiptPayment
   }
 })

@@ -24,7 +24,7 @@ const addStudent = () => {
   refForm.value?.validate().then(({ valid }) => {
     if (valid) {
       addOne(newStudent.value).then(() => {
-        router.push('admin/student/list').then(() => {
+        router.push('/admin/admin/list').then(() => {
           toast.success('Student successfully added ✔', {
             "theme": useCookie('EduPayment-theme').value || 'auto'
           })

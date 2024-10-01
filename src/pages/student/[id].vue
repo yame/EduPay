@@ -1,11 +1,17 @@
   
   <script setup lang="ts">
 import { Payment, PAYMENT_STATUS, PAYMENT_TYPE } from '@/@core/types';
-import { router } from '@/plugins/1.router';
 import { usePaymentStore } from '@/store/usePaymentStore';
+import { useStudentStore } from '@/store/useStudentStore';
 import pdf from '@jbtje/vite-vue3pdf';
+import { toast } from 'vue3-toastify';
+
 const paymentStore = usePaymentStore()
 const { currentPayment, loading } = storeToRefs(paymentStore)
+
+const studentStore = useStudentStore()
+const { generateReceiptPayment } = (studentStore)
+
 const route = useRoute();
 const currPayment = ref<Payment>({
   id: route.params?.id,
@@ -39,6 +45,8 @@ const currentPage = ref(0)
 const pageCount = ref(0)
 const isStatusChanged = ref(false)
 
+const router = useRouter()
+
 usePaymentStore().getPaymentFile(route.params.id).then(response => {
   const url = URL.createObjectURL(new Blob([response?.data], { type: 'application/pdf' }));
   currentPaymentPdfUrl.value = url
@@ -69,17 +77,44 @@ watch(() => currentPayment.value?.status, (newStatus) => {
 })
 
 
-const updatePayment = () => {
-  router.push('student/payments-student')
-  // console.log(currPayment.value.status);
+const downloadReceipt = () => {
+  generateReceiptPayment(route.params.id).then(response => {
+    if (response.status === 200) {
+      const blob = new Blob([response.data], { type: response.headers['content-type'] });
 
-  // usePaymentStore().updateOne(route.params?.id, currPayment.value.status).then(() => {
-  //   router.push('/').then(() => {
-  //     toast.success('Paymant successfully Updated ⚡✔', {
-  //       "theme": useCookie('EduPayment-theme').value || 'auto'
-  //     })
-  //   })
-  // })
+      // Extract filename from Content-Disposition header
+      let filename = 'download.pdf';
+
+      const contentDisposition = response.headers['content-disposition'];
+      console.warn('Content-Disposition:', contentDisposition);
+      if (contentDisposition) {
+        const matches = /filename[^=\n]*=(.*?)(;|$)/.exec(contentDisposition);
+        if (matches && matches[1]) {
+          filename = matches[1].trim().replace(/['"]/g, '');
+        }
+      }
+
+      // Create a blob URL and trigger download
+      const blobUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = blobUrl;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(blobUrl);
+
+    }
+
+  }).then(() => {
+    router.push('/student/payments-student').then(() => {
+      toast.success('Receipt successfully downloaded ✔', {
+        "theme": useCookie('EduPayment-theme').value || 'auto'
+      })
+    }).catch((err) => console.log(err)
+    )
+  })
+
 }
 
 definePage({
@@ -163,7 +198,7 @@ definePage({
             <RouterLink to="/">
               <v-btn color="primary">Back To your payment List</v-btn>
             </RouterLink>
-            <v-btn color="warning" @click="updatePayment">Download receipt</v-btn>
+            <v-btn prepend-icon="tabler-download" color="warning" @click="downloadReceipt">Download receipt</v-btn>
 
           </VCol>
         </VRow>
