@@ -4,7 +4,6 @@ import { Payment, PAYMENT_STATUS, PAYMENT_TYPE } from '@/@core/types';
 import { useAuthStore } from '@/store/useAuthStore';
 import { usePaymentStore } from '@/store/usePaymentStore';
 import { useStudentStore } from '@/store/useStudentStore';
-import { useConfigStore } from '@core/stores/config';
 import { toast } from 'vue3-toastify';
 import { VCardText, VCardTitle } from 'vuetify/components';
 
@@ -73,7 +72,7 @@ const afterSubmit = (statusCode: number) => {
 
 
 const viewPDF = (item: Payment) => {
-  b
+
   usePaymentStore().getPaymentFile(item.id).then(response => {
     const url = URL.createObjectURL(new Blob([response?.data], { type: 'application/pdf' }));
     pdfUrl.value = url

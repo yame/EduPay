@@ -3,12 +3,63 @@ import { Notification } from "@/@layouts/types";
 export const useNotificationStore = defineStore("notification", () => {
 
   const notificationsList = ref<Notification[]>([])
+  const notificationsListStudent = ref<Notification[]>([])
   const notificationsFromPagination = ref()
   const NonSeenNotificationsCount = ref<number>(0)
   const loading = ref(false)
   const error = ref('')
 
+
+
   //{"notificationId":1,"paymentId":"d739e1c3-27c8-4aa1-ac62-4b1e0b8c3651","message":"Your payment was REJECTED.","registerDate":"2024-09-29T22:20:54.000+00:00","seen":false}
+
+  //SECTION - Student Processus
+  //👉 - Add A notification to our local data for student
+  function pushNotificationStudent(message: Notification) {
+    const jsonObject = JSON.parse(message);
+    const notification: Notification = {
+      id: jsonObject.notificationId,
+      paymentId: jsonObject.paymentId,
+      icon: 'tabler-edit',
+      title: `Your Payment Status: Updated 📊`,
+      subtitle: jsonObject.message,
+      time: getNotificationTime(jsonObject.registerDate),
+      isSeen: jsonObject.seen,
+      color: 'info'
+    }
+    // //👉 - Check if a notification has the same id already exists
+    const exists = notificationsListStudent.value.some((n) => n.id === notification.id)
+    if (!exists) {
+      notificationsListStudent.value.unshift(notification)
+    }
+  }
+  //👉 - Remove searched notification 
+  function removeNotificationStudent(id: number) {
+    const idSet = new Set(notificationsListStudent.value.map(notification => notification.id));
+    if (idSet.has(id)) {
+      notificationsListStudent.value = notificationsListStudent.value.filter(notification => notification.id !== id);
+      idSet.delete(id);
+    }
+  }
+  //👉 - Mark All notifications readd
+  function readAllNotificationsStudent(ids: number[]) {
+    const idSet = new Set(ids)
+    notificationsListStudent.value.forEach((n) => {
+      if (idSet.has(n.id) && !n.isSeen) {
+        n.isSeen = true
+      }
+    })
+  }
+  //👉 - Toggle Seen Notification
+  function toggleLocalNotificationStudent(id: number) {
+    // const idsSet = new Set(notificationsList.value.map(n=>n.id))
+    const searchedNotification = notificationsListStudent.value.find(n => n.id === id)
+    if (searchedNotification) {
+      searchedNotification.isSeen = !searchedNotification.isSeen;
+    }
+  }
+  //!SECTION
+
 
 
   //SECTION - ACTIONS FOR MANAGING LOCAL DATA
@@ -168,7 +219,12 @@ export const useNotificationStore = defineStore("notification", () => {
   }
   //!SECTION
 
-  return { NonSeenNotificationsCount, notificationsList, notificationsFromPagination, loading, error, pageableNotifications, pushNotification, setNonSeenNotificationsCount, onLoginNotifications, markAllAsRead, removeNotification, readAllNotifications, deleteNotification, toggleSeen, toggleLocalNotification, deleteMultipleNotifications, toggleSeenMultipleNotifications, markAsReadMultipleNotifications, decrement };
+  return {
+    NonSeenNotificationsCount, notificationsListStudent, notificationsList, notificationsFromPagination, loading, error, pageableNotifications, pushNotification, setNonSeenNotificationsCount, onLoginNotifications, markAllAsRead, removeNotification, readAllNotifications, deleteNotification, toggleSeen, toggleLocalNotification, deleteMultipleNotifications, toggleSeenMultipleNotifications, markAsReadMultipleNotifications, decrement, pushNotificationStudent
+    , removeNotificationStudent,
+    readAllNotificationsStudent,
+    toggleLocalNotificationStudent
+  };
 }, {
   persist: true
 });

@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import { useAuthStore } from '@/store/useAuthStore';
 import { useCounterStore } from '@/store/useCounterStore';
 import { useNotificationStore } from '@/store/useNotificationStore';
 import type { Notification } from '@layouts/types';
@@ -23,35 +24,65 @@ const props = withDefaults(defineProps<Props>(), {
 })
 const counterStore = useCounterStore()
 const notificationStore = useNotificationStore()
-const { notificationsList, NonSeenNotificationsCount } = storeToRefs(notificationStore)
+const { notificationsList, notificationsListStudent, NonSeenNotificationsCount } = storeToRefs(notificationStore)
+const authStore = useAuthStore()
+const { currentUser } = storeToRefs(authStore)
 const emit = defineEmits<Emit>()
 
 const isAllMarkRead = computed(() => {
-  return notificationsList.value.some(item => !item.isSeen)
+  if (currentUser.value?.role === 'Admin') {
+    return notificationsList.value.some(item => !item.isSeen)
+  }
+  return notificationsListStudent.value.some(item => !item.isSeen)
+
 })
 
 const totalUnseenNotifications = computed(() => {
   return NonSeenNotificationsCount.value
 });
 
-const isNullNotifications = computed(() =>
-  notificationsList.value.some(item => item.isSeen === false)
+const isNullNotifications = computed(() => {
+  if (currentUser.value?.role === 'Admin')
+    notificationsList.value.some(item => item.isSeen === false)
+  else
+    notificationsListStudent.value.some(item => item.isSeen === false)
+}
+
 )
 
 const markAllRead = async () => {
-  const allNotificationsIds = notificationsList.value.map(item => item.id);
-  NonSeenNotificationsCount.value = 0;
-  emit('markAllRead', allNotificationsIds);
+  if (currentUser.value?.role === 'Admin') {
+    const allNotificationsIds = notificationsList.value.map(item => item.id);
+    NonSeenNotificationsCount.value = 0;
+    emit('markAllRead', allNotificationsIds);
+  }
+  else {
+    const allNotificationsIds = notificationsListStudent.value.map(item => item.id);
+    NonSeenNotificationsCount.value = 0;
+    emit('markAllRead', allNotificationsIds);
+  }
 }
 
 const toggleReadUnread = (isSeen: boolean, Id: number) => {
-  if (isSeen) {
-    emit('unread', Id)
-    NonSeenNotificationsCount.value++;
+  if (currentUser.value?.role === 'Admin') {
+    if (isSeen) {
+      emit('unread', Id)
+      NonSeenNotificationsCount.value++;
+    }
+    else {
+      emit('read', Id)
+      notificationStore.decrement()
+    }
   }
   else {
-    emit('read', Id)
-    notificationStore.decrement()
+    if (isSeen) {
+      emit('unread', Id)
+      NonSeenNotificationsCount.value++;
+    }
+    else {
+      emit('read', Id)
+      notificationStore.decrement()
+    }
   }
 }
 

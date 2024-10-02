@@ -6,7 +6,7 @@ import { toast } from 'vue3-toastify';
 
 const paymentStore = usePaymentStore()
 const { updateOne, getAllPayments, updateSelectionStatus } = paymentStore
-const { paymentsList, error, loading } = storeToRefs(paymentStore)
+const { paymentsList, msgError, error, loading } = storeToRefs(paymentStore)
 
 
 // Data table options
@@ -41,16 +41,21 @@ const clearFilters = () => {
   searchCode.value = ''
 }
 
-const updateStatus = (newStatus, newPayment) => {
-  console.log(newStatus)
-  console.log(newPayment)
-  updateOne(newPayment.id, newStatus).then(() => {
-    alert('changed')
-
+const updateStatus = async (newStatus, newPayment) => {
+  updateOne(newPayment.id, newStatus).then(res => {
+    if (!res) {
+      if (msgError.value === '')
+        toast.error('You cannot change the payment status to the same value. Please select a different status.');
+      else
+        toast.error(msgError.value)
+    }
+    else
+      toast.success("The payment status has been successfully updated!");
   }).then(() => {
     clearFilters()
     getAllPayments(page.value, itemsPerPage.value);
   })
+
 }
 
 
@@ -93,7 +98,6 @@ watch(page, (newPage) => {
 
 //👉 - Handle If Payment added or not
 const afterSubmit = (statusCode: number) => {
-  console.log(statusCode);
   if (statusCode === 200) {
     toast.success('Payment successfully added ✅', {
       "theme": useCookie('EduPayment-theme').value || 'auto'

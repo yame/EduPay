@@ -5,8 +5,7 @@ import { router } from '@/plugins/1.router';
 import { usePaymentStore } from '@/store/usePaymentStore';
 import pdf from '@jbtje/vite-vue3pdf';
 import { toast } from 'vue3-toastify';
-const paymentStore = usePaymentStore()
-const { currentPayment, loading } = storeToRefs(paymentStore)
+
 const route = useRoute();
 const currPayment = ref<Payment>({
   id: route.params?.id,
@@ -39,23 +38,27 @@ const currentPaymentPdfUrl = ref(null)
 const currentPage = ref(0)
 const pageCount = ref(0)
 const isStatusChanged = ref(false)
+const paymentStore = usePaymentStore()
+const { updateOne, getAllPayments, getPaymentById, getPaymentFile, updateSelectionStatus } = paymentStore
+const { paymentsList, currentPayment, msgError, error, loading } = storeToRefs(paymentStore)
 
-usePaymentStore().getPaymentFile(route.params.id).then(response => {
+
+getPaymentFile(route.params.id).then(response => {
   const url = URL.createObjectURL(new Blob([response?.data], { type: 'application/pdf' }));
   currentPaymentPdfUrl.value = url
 })
 
-usePaymentStore().getPaymentById(route.params.id).then(() => {
+getPaymentById(route.params.id).then(() => {
   currPayment.value = currentPayment.value
 })
 
 
 watch(() => route.params.id, (newValue) => {
-  usePaymentStore().getPaymentFile(newValue).then(response => {
+  getPaymentFile(newValue).then(response => {
     const url = URL.createObjectURL(new Blob([response?.data], { type: 'application/pdf' }));
     currentPaymentPdfUrl.value = url
   })
-  usePaymentStore().getPaymentById(newValue).then(() => {
+  getPaymentById(newValue).then(() => {
     currPayment.value = currentPayment.value
   })
 })
@@ -73,12 +76,19 @@ watch(() => currentPayment.value?.status, (newStatus) => {
 const updatePayment = () => {
   console.log(currPayment.value.status);
 
-  usePaymentStore().updateOne(route.params?.id, currPayment.value.status).then(() => {
-    router.push('/').then(() => {
-      toast.success('Paymant successfully Updated ⚡✔', {
-        "theme": useCookie('EduPayment-theme').value || 'auto'
+  updateOne(route.params?.id, currPayment.value.status).then((res) => {
+    if (!res) {
+      if (usePaymentStore().msgError === '')
+        toast.error('You cannot change the payment status to the same value. Please select a different status.');
+      else
+        toast.error(msgError.value)
+    }
+    else
+      router.push('/').then(() => {
+        toast.success('Paymant successfully Updated ⚡✔', {
+          "theme": useCookie('EduPayment-theme').value || 'auto'
+        })
       })
-    })
   })
 }
 

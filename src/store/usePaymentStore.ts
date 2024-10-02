@@ -11,6 +11,7 @@ export const usePaymentStore = defineStore('payment', () => {
   const currentReceipt = ref<File>()
   const loading = ref(true)
   const error = ref('')
+  const msgError = ref('')
 
   //👉 - Get all payments 
   async function getAllPayments(currentPage?: Number, itemsPerPage?: Number, status?: string, type?: string, code?: string, min?: number, max?: number) {
@@ -92,7 +93,21 @@ export const usePaymentStore = defineStore('payment', () => {
 
   //👉 - Update the payment status
   async function updateOne(id: UUID, newStatus: PAYMENT_STATUS) {
-    return await useApi(`/payments/${id}/status-update?newStatus=${newStatus}`).patch()
+    try {
+      const response = await axios.patch(`${import.meta.env.VITE_API_BASE_URL}/payments/${id}/status-update?newStatus=${newStatus}`, {}, {
+        headers: {
+          Authorization: `Bearer ${useCookie('accessToken').value}`,
+        },
+      })
+
+      return response.data
+    } catch (err) {
+      if (err.response) {
+        console.warn(err.response.data);
+        msgError.value = err.response.data
+      }
+      return null;
+    }
   }
 
   //👉 - Add Payment 
@@ -147,5 +162,5 @@ export const usePaymentStore = defineStore('payment', () => {
     return response
   }
 
-  return { paymentsList, currentPayment, currentReceipt, error, loading, getAllPayments, getPaymentById, getPaymentByStatus, getPaymentByType, getPaymentFile, getPaymentsByStudent, updateOne, addOne, updateSelectionStatus }
+  return { msgError, paymentsList, currentPayment, currentReceipt, error, loading, getAllPayments, getPaymentById, getPaymentByStatus, getPaymentByType, getPaymentFile, getPaymentsByStudent, updateOne, addOne, updateSelectionStatus }
 })

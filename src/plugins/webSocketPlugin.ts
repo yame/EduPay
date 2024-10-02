@@ -36,7 +36,7 @@ export default function (app: App) {
       if (authStore.currentUser?.role === 'STUDENT')
         WebSocketService.client?.subscribe('/notifications/' + email + '/payment-status-changed', (message) => {
           console.log(message.body);
-          notificationStore.pushNotification(message.body);
+          notificationStore.pushNotificationStudent(message.body);
         });
       //!SECTION
     } catch (error) {

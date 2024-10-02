@@ -232,17 +232,7 @@ export const useStudentStore = defineStore('student', () => {
       console.log('Response:', response); // Log the entire response for debugging
 
       return response
-      // if (response.) {
-      //   const blob = await response.blob();
-      //   const link = document.createElement('a');
-      //   link.href = window.URL.createObjectURL(blob);
-      //   link.download = 'INV-2024-0f028218.pdf'; // File name to save
-      //   document.body.appendChild(link);
-      //   link.click();
-      //   document.body.removeChild(link);
-      // } else {
-      //   console.error('Failed to download file:', response.status);
-      // }
+
     } catch (error) {
       console.error('Error fetching file:', error);
     }

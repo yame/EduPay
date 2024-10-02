@@ -32,6 +32,7 @@ export const useAuthStore = defineStore('auth', () => {
 
   watch(currentUser, (newUser: EduPayUser) => {
     useCookie('userData').value = JSON.stringify(newUser);
+    setCurrentUser(useCookie('userData').value)
   });
 
   //👉 - Get All Student 

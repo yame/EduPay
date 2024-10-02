@@ -54,6 +54,8 @@ usePaymentStore().getPaymentFile(route.params.id).then(response => {
 
 usePaymentStore().getPaymentById(route.params.id).then(() => {
   currPayment.value = currentPayment.value
+  if (currPayment.value.status !== PAYMENT_STATUS.VALIDATED)
+    toast.info('You cannot download your receipt at this time. Please contact your administration for further assistance.');
 })
 
 
@@ -64,6 +66,8 @@ watch(() => route.params.id, (newValue) => {
   })
   usePaymentStore().getPaymentById(newValue).then(() => {
     currPayment.value = currentPayment.value
+    if (currPayment.value.status !== PAYMENT_STATUS.VALIDATED)
+      toast.info('You cannot download your receipt at this time. Please contact your administration for further assistance.');
   })
 })
 
@@ -76,9 +80,10 @@ watch(() => currentPayment.value?.status, (newStatus) => {
 
 })
 
-
+const isDownloaded = ref(false)
 const downloadReceipt = () => {
   generateReceiptPayment(route.params.id).then(response => {
+    console.log(response);
     if (response.status === 200) {
       const blob = new Blob([response.data], { type: response.headers['content-type'] });
 
@@ -103,19 +108,21 @@ const downloadReceipt = () => {
       link.click();
       document.body.removeChild(link);
       window.URL.revokeObjectURL(blobUrl);
+      setTimeout(() => {
+        isDownloaded.value = true
+      }, 3000);
 
     }
-
-  }).then(() => {
-    router.push('/student/payments-student').then(() => {
-      toast.success('Receipt successfully downloaded ✔', {
-        "theme": useCookie('EduPayment-theme').value || 'auto'
-      })
-    }).catch((err) => console.log(err)
-    )
   })
-
 }
+
+watch(isDownloaded, (newValue) => {
+  router.push('/student/payments-student').then(() => {
+    toast.success('Receipt successfully downloaded ✔', {
+      "theme": useCookie('EduPayment-theme').value || 'auto'
+    })
+  })
+})
 
 definePage({
   meta: {
@@ -198,7 +205,7 @@ definePage({
             <RouterLink to="/">
               <v-btn color="primary">Back To your payment List</v-btn>
             </RouterLink>
-            <v-btn prepend-icon="tabler-download" color="warning" @click="downloadReceipt">Download receipt</v-btn>
+            <v-btn v-show="currentPayment.status===PAYMENT_STATUS.VALIDATED" prepend-icon="tabler-download" color="warning" @click="downloadReceipt">Download receipt</v-btn>
 
           </VCol>
         </VRow>

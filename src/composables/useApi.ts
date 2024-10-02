@@ -22,20 +22,25 @@ export const useApi = createFetch({
 
       return { options }
     },
-    afterFetch(ctx) {
+    async afterFetch(ctx) {
       const { data, response } = ctx
 
+      // Handle HTTP errors
+      if (!response.ok) {
+        const errorBody = await response.text(); // or response.json() if expecting JSON
+        console.error(`Error ${response.status}: ${errorBody}`);
+        throw new Error(`HTTP error! status: ${response.status}, message: ${errorBody}`);
+      }
+
       // Parse data if it's JSON
-
-      let parsedData = null
+      let parsedData = null;
       try {
-        parsedData = destr(data)
-      }
-      catch (error) {
-        console.error(error)
+        parsedData = destr(data);
+      } catch (error) {
+        console.error(error);
       }
 
-      return { data: parsedData, response }
+      return { data: parsedData, response };
     },
   },
 })

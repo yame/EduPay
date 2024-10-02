@@ -7,7 +7,6 @@ import Vue3Toastify, { type ToastContainerOptions } from 'vue3-toastify';
 import '@core/scss/template/index.scss';
 import '@styles/styles.scss';
 import webSocketPlugin from './plugins/webSocketPlugin';
-import { useAuthStore } from './store/useAuthStore';
 import { useCounterStore } from './store/useCounterStore';
 
 
@@ -24,8 +23,8 @@ app.use(Vue3Toastify, {
 } as ToastContainerOptions);
 
 // Check for existing token and initialize WebSocket connection
-const token = (useCookie('accessToken').value);
-
+// const userData = (useCookie('userData').value);
+// provide('userData', userData)
 // if (token && !useAuthStore().ws_state) {
 //   console.error('main ws');
 
@@ -33,7 +32,7 @@ const token = (useCookie('accessToken').value);
 //   app.config.globalProperties.$initWebSocketConnection(token);
 // }if (!authStore.ws_state) {
 
-const authStore = useAuthStore()
+
 console.error("MAIN BABY");
 
 // if (token)
