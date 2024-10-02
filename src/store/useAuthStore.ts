@@ -26,14 +26,7 @@ export const useAuthStore = defineStore('auth', () => {
   const accessToken = ref<string | null>(null)
   const ws_state = ref<string | null>(null)
 
-  watch(accessToken, (newToken) => {
-    useCookie('accessToken').value = newToken;
-  });
 
-  watch(currentUser, (newUser: EduPayUser) => {
-    useCookie('userData').value = JSON.stringify(newUser);
-    setCurrentUser(useCookie('userData').value)
-  });
 
   //👉 - Get All Student 
   async function login(credentials: Credentials) {
@@ -166,4 +159,6 @@ export const useAuthStore = defineStore('auth', () => {
   return {
     currentUser, ws_state, loading, error, accessToken, userAbilityRules, register, setUserAbilityRules, setCurrentUser, setToken, login, logout, getCurrentUser, resetPasswordToDefault, changePassword, approveRegistration, declineRegistration, banRegistration, toogleAccountStatus
   }
+}, {
+  persist: true
 })

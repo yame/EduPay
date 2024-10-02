@@ -10,9 +10,6 @@ export const useNotificationStore = defineStore("notification", () => {
   const error = ref('')
 
 
-
-  //{"notificationId":1,"paymentId":"d739e1c3-27c8-4aa1-ac62-4b1e0b8c3651","message":"Your payment was REJECTED.","registerDate":"2024-09-29T22:20:54.000+00:00","seen":false}
-
   //SECTION - Student Processus
   //👉 - Add A notification to our local data for student
   function pushNotificationStudent(message: Notification) {
@@ -20,12 +17,12 @@ export const useNotificationStore = defineStore("notification", () => {
     const notification: Notification = {
       id: jsonObject.notificationId,
       paymentId: jsonObject.paymentId,
-      icon: 'tabler-edit',
+      icon: 'tabler-alert-octagon',
       title: `Your Payment Status: Updated 📊`,
       subtitle: jsonObject.message,
       time: getNotificationTime(jsonObject.registerDate),
       isSeen: jsonObject.seen,
-      color: 'info'
+      color: 'error'
     }
     // //👉 - Check if a notification has the same id already exists
     const exists = notificationsListStudent.value.some((n) => n.id === notification.id)
@@ -61,6 +58,22 @@ export const useNotificationStore = defineStore("notification", () => {
   //!SECTION
 
 
+  //SECTION - Student Section Api
+  //👉 - Toggle Seen Notification Student
+  async function toggleSeenStudent(id: number) {
+    const response = await useApi('/notifications/student/toggle-seen?id=' + id).patch()
+    return response.data.value
+  }
+
+  //👉 - Delete Notification Student
+  async function deleteNotificationStudent(id: number) {
+    return await useApi('/notifications/student/delete?id=' + id).delete()
+  }
+
+
+  //!SECTION
+
+
 
   //SECTION - ACTIONS FOR MANAGING LOCAL DATA
   //👉 - Add A notification to our local data
@@ -69,12 +82,12 @@ export const useNotificationStore = defineStore("notification", () => {
     const notification: Notification = message.includes('payment') ? {
       id: jsonObject.notificationId,
       paymentId: jsonObject.paymentId,
-      icon: (jsonObject.message.includes('REJECTED') || jsonObject.message.includes('VALIDATED')) ? 'tabler-edit' : 'tabler-coin',
-      title: (jsonObject.message.includes('REJECTED') || jsonObject.message.includes('VALIDATED')) ? `Your Payment Status: Updated 📊` : `New Payment 💸💰`,
+      icon: 'tabler-coin',
+      title: `New Payment 💸💰`,
       subtitle: jsonObject.message,
       time: getNotificationTime(jsonObject.registerDate),
       isSeen: jsonObject.seen,
-      color: (jsonObject.message.includes('REJECTED') || jsonObject.message.includes('VALIDATED')) ? 'info' : 'success'
+      color: 'success'
     } : {
       id: jsonObject.notificationId,
       email: jsonObject.email,
@@ -223,7 +236,8 @@ export const useNotificationStore = defineStore("notification", () => {
     NonSeenNotificationsCount, notificationsListStudent, notificationsList, notificationsFromPagination, loading, error, pageableNotifications, pushNotification, setNonSeenNotificationsCount, onLoginNotifications, markAllAsRead, removeNotification, readAllNotifications, deleteNotification, toggleSeen, toggleLocalNotification, deleteMultipleNotifications, toggleSeenMultipleNotifications, markAsReadMultipleNotifications, decrement, pushNotificationStudent
     , removeNotificationStudent,
     readAllNotificationsStudent,
-    toggleLocalNotificationStudent
+    toggleLocalNotificationStudent, toggleSeenStudent
+    , deleteNotificationStudent
   };
 }, {
   persist: true
