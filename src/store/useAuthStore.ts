@@ -1,20 +1,11 @@
 import { Rule } from '@/plugins/casl/ability';
 import axios from 'axios';
-import { ChangePWDTO, DtoNewStudent } from './../@core/types';
+import { ChangePWDTO, DtoNewStudent, EduPayUser } from './../@core/types';
 
 interface Credentials {
   email: string,
   password: string
 }
-
-interface EduPayUser {
-  departmentName: string,
-  firstName: string,
-  lastName: string,
-  role: string,
-  email: string
-}
-
 
 
 

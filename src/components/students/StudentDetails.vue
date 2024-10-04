@@ -1,12 +1,11 @@
 
 
 <script setup lang="ts">
-import { Student } from '@/@core/types';
-import { VForm } from 'vuetify/components/VForm'
+import { EduPayUser } from '@/@core/types';
 
 
 interface Props {
-  student: Student
+  admin: EduPayUser
 }
 const props = defineProps<Props>()
 const email = ref(null)
@@ -22,28 +21,30 @@ onMounted(() => {
       <div class="text-body-1 ">
         <div class="d-flex align-center gap-x-2">
           <span class="font-weight-bold text-h6">Email : </span>
-          <v-text-field readonly ref="email">{{ props.student.email }}</v-text-field>
+          <v-text-field readonly ref="email">{{ props.admin.email }}</v-text-field>
         </div>
       </div>
-      <div class="text-body-1">
+      <div v-if="props.admin.role==='STUDENT'" class="text-body-1">
         <div class="d-flex align-center gap-x-2">
           <span class="font-weight-bold text-h6">Code : </span>
-          <v-chip :label="false" size="small" color="warning">{{ props.student.code }}</v-chip>
+          <v-chip :label="false" size="small" color="warning">{{ props.admin.code }}</v-chip>
         </div>
       </div>
       <div class="text-body-1 ">
         <div class="d-flex align-center gap-x-2">
-          <span class="font-weight-bold text-h6">Program : </span>
-          <v-chip color="warning">{{ props.student.programId }}</v-chip>
+          <span class="font-weight-bold text-h6">Department name : </span>
+          <v-chip color="warning">{{ props.admin.departmentName }}</v-chip>
         </div>
 
       </div>
       <div class="text-body-1 ">
         <div class="d-flex align-center gap-x-2">
-          <span class="font-weight-bold text-h6">Account : </span>
-          <v-switch v-model="props.student.enabled" readonly color="warning"></v-switch>
+          <span class="font-weight-bold text-h6">Role : </span>
+          <v-chip color="warning">{{ props.admin.role }}</v-chip>
         </div>
+
       </div>
+
     </div>
   </VCard>
 </template>

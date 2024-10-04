@@ -31,7 +31,10 @@ export const useAdminStore = defineStore('admin', () => {
 
   //👉 - Add Admin 
   async function addOne(newStudent: DtoNewAdmin) {
-    return await useApi('/user/admin/new').post(newStudent)
+    return await $api('/user/admin/new', {
+      method: 'POST',
+      body: { ...newStudent }
+    })
   }
 
 

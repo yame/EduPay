@@ -41,6 +41,16 @@ export interface GridColumn {
 // Data table
 export interface SortItem { key: string; order?: boolean | 'asc' | 'desc' }
 
+
+export interface EduPayUser {
+  departmentName?: DEPARTMENT_NAME,
+  firstName: string,
+  lastName: string,
+  role: string,
+  email: string
+}
+
+
 export interface Options {
   page: number
   itemsPerPage: number
@@ -80,11 +90,9 @@ export enum PROGRAM {
 
 
 export interface DtoNewAdmin {
-  code: string,
-  programId: PROGRAM,
   firstName: string,
   lastName: string,
-  departmentName: string,
+  departmentName: DEPARTMENT_NAME,
   email: string
 }
 
@@ -139,4 +147,15 @@ export interface ChangePWDTO {
   newPassword: string
 }
 
+export enum DEPARTMENT_NAME {
+  PHYSICS = 'PHYSICS ',
+  CHEMISTRY = 'CHEMISTRY ',
+  MATHEMATICS = 'MATHEMATICS ',
+  INFORMATICS = 'INFORMATICS ',
+  EARTH_AND_LIF = 'EARTH_AND_LIF '
+}
+
+
 export const PROGRAM_ITEMS = [PROGRAM.SMA, PROGRAM.SMC, PROGRAM.SMI, PROGRAM.SMP, PROGRAM.SVT];
+
+export const DEPARTMENT_ITEMS = [DEPARTMENT_NAME.CHEMISTRY, DEPARTMENT_NAME.EARTH_AND_LIF, DEPARTMENT_NAME.PHYSICS, DEPARTMENT_NAME.INFORMATICS, DEPARTMENT_NAME.MATHEMATICS]

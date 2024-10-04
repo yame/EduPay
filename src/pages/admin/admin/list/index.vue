@@ -44,15 +44,15 @@ const edit = (item: Student) => {
   isEditStudentDialogVisible.value = true
 }
 
-const viewStudent = (item: Student) => {
-  router.push('admin/student/details/' + item?.code)
+const viewAdmin = (item: Student) => {
+  router.push('/admin/admin/details/' + item?.email)
 }
 
 const emailStudent = ref('')
 const isDeleteDialogVisible = ref(false)
-const deleteStudent = (item) => {
+const deleteAdmin = (item) => {
   deleteUserByEmail(item).then(() => {
-    getAllStudents(page.value, itemsPerPage.value)
+    getAllAdmins(page.value, itemsPerPage.value)
   })
 }
 const deleteOne = (item) => {
@@ -261,7 +261,7 @@ const toggleSelection = () => {
 
         </VCol>-->
         <VCol cols="12" class="d-flex flex-row-reverse gap-x-4 flex-wrap gap-y-2">
-          <VBtn color="primary" prepend-icon="tabler-plus" text="New Admin" @click="$router.push('admin/student/add')" />
+          <VBtn color="primary" prepend-icon="tabler-plus" text="New Admin" @click="$router.push('/admin/admin/add')" />
           <VBtn v-show="isSelected" color="error" prepend-icon="tabler-trash" text="Delete selection" @click="deleteSelection" />
           <VBtn v-show="isSelected" color="secondary" prepend-icon="tabler-switch-horizontal" text="Toggle selection" @click="toggleSelection" />
           <VBtn v-show="isSelected" color="warning" prepend-icon="tabler-restore" text="Reset password selection" @click="resetPwSelection" />
@@ -330,7 +330,7 @@ const toggleSelection = () => {
                 title : 'toogle Account'
               }
             ]" :data="students" :totalData="totalStudents" :actions="[
-              { icon: 'tabler-eye',color:'secondary', handler: (item) => viewStudent(item) },
+              { icon: 'tabler-eye',color:'secondary', handler: (item) => viewAdmin(item) },
               { icon: 'tabler-edit',color:'warning' ,handler: (item) => edit(item) },
               { icon: 'tabler-trash',color:'error', handler: (item) => deleteOne(item) },
             ]" @update:items-per-page="changeSize" @update:total-data="changeTotalData" @toggleAccount="toggleAccount" @update:model-value="toggleOrDeleteSelection" />
@@ -344,7 +344,7 @@ const toggleSelection = () => {
 
     <EditStudentDrawer v-if="isEditStudentDialogVisible" :edit-student="editStudent" v-model:isDrawerOpen="isEditStudentDialogVisible" @on-update="updateStudent" />
 
-    <DeleteConfirmation v-if="isDeleteDialogVisible" :code-delete="emailStudent" v-model:is-dialog-visible="isDeleteDialogVisible" confirmation-question="Vouler vous vraiment supprimer l'Etudiant ? " title="SUPPRESSION" @confirm="deleteStudent" />
+    <DeleteConfirmation v-if="isDeleteDialogVisible" :code-delete="emailStudent" v-model:is-dialog-visible="isDeleteDialogVisible" confirmation-question="Vouler vous vraiment supprimer l'Etudiant ? " title="SUPPRESSION" @confirm="deleteAdmin" />
 
   </VCard>
 </template>
