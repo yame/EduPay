@@ -7,7 +7,7 @@ import { VCardTitle } from 'vuetify/components';
 const authStore = useAuthStore();
 const { currentUser } = storeToRefs(authStore)
 
-
+watch(currentUser)
 
 </script>
 

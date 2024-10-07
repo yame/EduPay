@@ -176,7 +176,7 @@ definePage({
           <span class="text-white ms-2 text-warning text-underline text-uppercase mb-5">{{ userData?.lastName }} {{ userData?.firstName }} </span>
         </span>
       </span>
-      <StudentDetails v-if="currentStudent" :student="currentStudent" />
+      <StudentDetails v-if="currentStudent" :admin="currentStudent" />
       <div v-else>
         <VSkeletonLoader v-for="i in 1" :key="i" type="card-avatar" />
       </div>

@@ -21,26 +21,26 @@ onMounted(() => {
       <div class="text-body-1 ">
         <div class="d-flex align-center gap-x-2">
           <span class="font-weight-bold text-h6">Email : </span>
-          <v-text-field readonly ref="email">{{ props.admin.email }}</v-text-field>
+          <v-text-field readonly ref="email">{{ props.admin?.email }}</v-text-field>
         </div>
       </div>
-      <div v-if="props.admin.role==='STUDENT'" class="text-body-1">
+      <div v-if="Object.hasOwn(props.admin,'code')" class="text-body-1">
         <div class="d-flex align-center gap-x-2">
           <span class="font-weight-bold text-h6">Code : </span>
-          <v-chip :label="false" size="small" color="warning">{{ props.admin.code }}</v-chip>
+          <v-chip :label="false" size="small" color="warning">{{ props.admin?.code }}</v-chip>
         </div>
       </div>
-      <div class="text-body-1 ">
+      <div v-if="Object.hasOwn(props.admin,'role')" class="text-body-1 ">
         <div class="d-flex align-center gap-x-2">
           <span class="font-weight-bold text-h6">Department name : </span>
-          <v-chip color="warning">{{ props.admin.departmentName }}</v-chip>
+          <v-chip color="warning">{{ props.admin?.departmentName }}</v-chip>
         </div>
 
       </div>
       <div class="text-body-1 ">
         <div class="d-flex align-center gap-x-2">
           <span class="font-weight-bold text-h6">Role : </span>
-          <v-chip color="warning">{{ props.admin.role }}</v-chip>
+          <v-chip color="warning">{{ 'STUDENT'}}</v-chip>
         </div>
 
       </div>

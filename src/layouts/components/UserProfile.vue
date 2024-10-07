@@ -87,29 +87,28 @@ const userProfileList = [
 
       <!-- SECTION Menu -->
       <VMenu activator="parent" width="240" location="bottom end" offset="12px">
-        <VList>
+        <VList class="pa-0">
           <VListItem>
-            <div class="d-flex gap-2 align-center">
-              <VListItemAction>
-                <VBadge dot location="bottom right" offset-x="3" offset-y="3" color="success" bordered>
-                  <VAvatar :icon="resolveUserRoleVariant(currentUser?.role)?.icon" :color="resolveUserRoleVariant(currentUser?.role)?.color" />
-                </VBadge>
-              </VListItemAction>
-
+            <div class="d-flex  gap-1 align-center">
               <div>
+                <VListItemAction>
+                  <VBadge dot location="bottom right" offset-x="3" offset-y="3" color="success" bordered>
+                    <VAvatar :icon="resolveUserRoleVariant(currentUser?.role)?.icon" :color="resolveUserRoleVariant(currentUser?.role)?.color" />
+                  </VBadge>
+                </VListItemAction>
+                <VListItemSubtitle class="text-capitalize text-disabled">
+                  {{ currentUser?.role }}
+
+                </VListItemSubtitle>
+              </div>
+              <div class="pa-4">
                 <h6 class="text-h6 font-weight-medium">
                   {{ currentUser?.lastName }} {{ currentUser?.firstName }}
                 </h6>
-                <div class="d-flex justify-content-between mt-1">
-                  <VListItemSubtitle class="text-capitalize text-disabled">
-                    {{ currentUser?.role }}
-
-                  </VListItemSubtitle>
-                  <VChip v-show="currentUser?.role =='ADMIN'" class="ml-2 text-small" color="info" size="x-small">
-                    <VIcon start size="12" icon="tabler-building-skyscraper" />
-                    {{ currentUser?.departmentName }}
-                  </VChip>
-                </div>
+                <VChip v-show="currentUser?.role =='ADMIN'" class="text-small" color="info" size="x-small">
+                  <VIcon start size="12" icon="tabler-building-skyscraper" />
+                  {{ currentUser?.departmentName }}
+                </VChip>
 
               </div>
             </div>
