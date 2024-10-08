@@ -22,11 +22,23 @@
       <div v-else-if="header.key === 'actions'">
         <IconBtn v-for="(action, index) in actions" :key="index" @click="action.handler(item)" :class="{ 'not-allowed': item.seen === undefined ? '' : !item.seen }">
 
-          <VIcon :disabled="item.seen === undefined ? false : !item.seen" :color="action?.color || 'secondary'" :size="action.size || 23" :icon="action.icon" />
+          <div v-if="action.icon==='tabler-git-compare' && item.status!=='CREATED'">
+            <VIcon :disabled="item.seen === undefined ? false : !item.seen" :color="action?.color || 'secondary'" :size="action.size || 23" :icon="action.icon" />
 
-          <VTooltip :disabled="item.seen === undefined ? false : !item.seen" activator="parent">
-            {{getTooltipText(action)}}
-          </VTooltip>
+            <VTooltip :disabled="item.seen === undefined ? false : !item.seen" activator="parent">
+              {{getTooltipText(action)}}
+            </VTooltip>
+          </div>
+          <div v-else>
+          </div>
+
+          <div v-if="action.icon!=='tabler-git-compare'">
+            <VIcon :disabled="item.seen === undefined ? false : !item.seen" :color="action?.color || 'secondary'" :size="action.size || 23" :icon="action.icon" />
+
+            <VTooltip :disabled="item.seen === undefined ? false : !item.seen" activator="parent">
+              {{getTooltipText(action)}}
+            </VTooltip>
+          </div>
         </IconBtn>
       </div>
 
@@ -137,6 +149,7 @@ const getTooltipText = (action) => {
   if (action.icon === 'tabler-ban') return 'Ban Student';
   if (action.icon === 'tabler-eye') return 'View details';
   if (action.icon === 'tabler-edit') return 'Edit Info';
+  if (action.icon === 'tabler-git-compare') return 'Compare changes ';
   if (action.icon === 'tabler-trash' && props.actions.length > 1) return 'Delete Student';
   return 'Delete Notification';
 }

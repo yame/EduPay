@@ -5,7 +5,7 @@ import { usePaymentStore } from '@/store/usePaymentStore';
 import { toast } from 'vue3-toastify';
 
 const paymentStore = usePaymentStore()
-const { updateOne, getAllPayments, updateSelectionStatus } = paymentStore
+const { updateOne, getAllPayments, updateSelectionStatus, getChangesPayment } = paymentStore
 const { paymentsList, msgError, error, loading } = storeToRefs(paymentStore)
 
 
@@ -28,6 +28,17 @@ const editPayment = ref<Payment>(null)
 const editStatus = (item: Payment) => {
   editPayment.value = item
   isEditStatusDialogVisible.value = true
+}
+
+
+//👉 - Compare Implementation
+const currentPaymentChanges = ref(null)
+const isCompareDialogVisible = ref(false)
+const compareChanges = (item) => {
+  getChangesPayment(item.id).then((res) => {
+    currentPaymentChanges.value = res.data.value
+    isCompareDialogVisible.value = true
+  })
 }
 
 const viewDetails = (item) => {
@@ -213,6 +224,7 @@ const changeStatusSelection = (newStatus: PAYMENT_STATUS) => {
               }
             ]" :data="payments" :totalData="totalPayments" :actions="[
               { icon: 'tabler-edit', handler: (item) => editStatus(item) },
+              { icon: 'tabler-git-compare', color:'error',handler: (item) => compareChanges(item) },
             ]" />
 
         </div>
@@ -226,7 +238,7 @@ const changeStatusSelection = (newStatus: PAYMENT_STATUS) => {
   <EditStatusSelectionDialog v-if="isSelectionIdsDialogVisible" v-model:is-dialog-visible="isSelectionIdsDialogVisible" @submit="changeStatusSelection" />
   <EditStatusPaymentDrawer v-if="editPayment" :edit-payment="editPayment" v-model:isDrawerOpen="isEditStatusDialogVisible" @on-update="updateStatus" />
   <AddPaymentDialog v-if="isAddPayementDialogVisible" v-model:is-dialog-visible="isAddPayementDialogVisible" @onSubmit="afterSubmit" />
-
+  <CompareDialog v-if="currentPaymentChanges" :currentChanges="currentPaymentChanges" :is-dialog-visible="isCompareDialogVisible" @update:is-dialog-visible="isCompareDialogVisible =false" />
 </template>
 
 <style lang="scss" scoped>

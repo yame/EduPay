@@ -12,6 +12,7 @@ const email = ref(null)
 onMounted(() => {
   email.value.focus();
 })
+console.log(props.admin);
 
 </script>
 
@@ -40,7 +41,7 @@ onMounted(() => {
       <div class="text-body-1 ">
         <div class="d-flex align-center gap-x-2">
           <span class="font-weight-bold text-h6">Role : </span>
-          <v-chip color="warning">{{ 'STUDENT'}}</v-chip>
+          <v-chip color="warning">{{ Object.hasOwn(props.admin,'role') ? props.admin.role:'STUDENT' }}</v-chip>
         </div>
 
       </div>

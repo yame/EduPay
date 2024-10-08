@@ -13,6 +13,13 @@ export const usePaymentStore = defineStore('payment', () => {
   const error = ref('')
   const msgError = ref('')
 
+
+  //👉 - Get Status changes Payment
+  async function getChangesPayment(id: UUID) {
+    return await useApi('/payments/status-change-info?paymentId=' + id)
+  }
+
+
   //👉 - Get all payments 
   async function getAllPayments(currentPage?: Number, itemsPerPage?: Number, status?: string, type?: string, code?: string, min?: number, max?: number) {
     try {
@@ -162,5 +169,5 @@ export const usePaymentStore = defineStore('payment', () => {
     return response
   }
 
-  return { msgError, paymentsList, currentPayment, currentReceipt, error, loading, getAllPayments, getPaymentById, getPaymentByStatus, getPaymentByType, getPaymentFile, getPaymentsByStudent, updateOne, addOne, updateSelectionStatus }
+  return { msgError, paymentsList, currentPayment, currentReceipt, error, loading, getAllPayments, getPaymentById, getPaymentByStatus, getPaymentByType, getPaymentFile, getPaymentsByStudent, updateOne, addOne, updateSelectionStatus, getChangesPayment }
 })

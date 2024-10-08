@@ -330,7 +330,6 @@ const toggleSelection = () => {
                 title : 'toogle Account'
               }
             ]" :data="students" :totalData="totalStudents" :actions="[
-              { icon: 'tabler-eye',color:'secondary', handler: (item) => viewAdmin(item) },
               { icon: 'tabler-edit',color:'warning' ,handler: (item) => edit(item) },
               { icon: 'tabler-trash',color:'error', handler: (item) => deleteOne(item) },
             ]" @update:items-per-page="changeSize" @update:total-data="changeTotalData" @toggleAccount="toggleAccount" @update:model-value="toggleOrDeleteSelection" />
