@@ -30,7 +30,6 @@ const authStore = useAuthStore()
 const { register } = authStore
 
 const form = ref<DtoNewStudent>({
-  code: '',
   email: '',
   firstName: '',
   lastName: '',

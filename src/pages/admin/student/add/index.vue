@@ -24,7 +24,7 @@ const addStudent = () => {
   refForm.value?.validate().then(({ valid }) => {
     if (valid) {
       addOne(newStudent.value).then(() => {
-        router.push('admin/student/list').then(() => {
+        router.push('/admin/student/list').then(() => {
           toast.success('Student successfully added ✔', {
             "theme": useCookie('EduPayment-theme').value || 'auto'
           })
@@ -50,9 +50,9 @@ const addStudent = () => {
     </VCardTitle>
     <VForm class="pt-0 px-5 pb-5" ref="refForm" @submit.prevent="addStudent">
       <VRow>
-        <VCol cols="12" md="6">
+        <!-- <VCol cols="12" md="6">
           <AppTextField v-model="newStudent.code" label="Code" placeholder="Your Code" :rules="[requiredValidator]" />
-        </VCol>
+        </VCol> -->
         <VCol cols="12" md="6">
           <AppTextField v-model="newStudent.firstName" label="FirstName" placeholder="Your FirstName" :rules="[requiredValidator]" />
         </VCol>
