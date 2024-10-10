@@ -54,7 +54,7 @@ const resetCookies = async () => {
   useCounterStore().clear();
 
   // Reset abilities and clean up user ability rules
-  setUserAbilityRules(null);
+  setUserAbilityRules([]);
   useCookie('userAbilityRules').value = null;
   ability.update([]);
 

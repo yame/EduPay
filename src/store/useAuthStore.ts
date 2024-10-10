@@ -36,9 +36,9 @@ export const useAuthStore = defineStore('auth', () => {
       //👉 - Set UserAbilityRules
       if (userData.roles.includes('ADMIN'))
         setUserAbilityRules([
-          { action: "manage", subject: "all" },
-          { action: "manage", subject: "ADMIN" },
           { action: "manage", subject: "STUDENT" },
+          { action: "manage", subject: "ADMIN" },
+          { action: "manage", subject: "all" },
         ])
       else if (userData.roles.includes("STUDENT"))
         setUserAbilityRules([

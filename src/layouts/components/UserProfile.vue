@@ -37,7 +37,7 @@ const resetCookies = async () => {
   instance?.appContext.config.globalProperties.$disconnectWebSocket()
 
   // Reset user abilities and clean up any abilities in cookies
-  setUserAbilityRules(null)
+  setUserAbilityRules([])
   useCookie('userAbilityRules').value = null
   ability.update([])
 

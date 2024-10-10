@@ -32,7 +32,7 @@ definePage({
 });
 
 const credentials = ref({
-  email: "hamza@damiri.com",
+  email: "john@doe.com",
   password: "123321",
 });
 const isPasswordVisible = ref(false);
@@ -49,12 +49,17 @@ const router = useRouter();
 const ability = useAbility();
 const refVForm = ref<VForm>();
 const authStore = useAuthStore();
-const { login } = authStore;
+const { login, setUserAbilityRules } = authStore;
 const { error, currentUser, userAbilityRules, accessToken } = storeToRefs(authStore);
 
 const statisticsStore = useStatisticsStore();
 const { onLoginFetchData } = statisticsStore
 const { isDataFetched } = storeToRefs(statisticsStore)
+
+watch(() => userAbilityRules.value, (value) => {
+  console.warn(value);
+  setUserAbilityRules(value)
+})
 
 const loader = ref(false)
 const instance = getCurrentInstance()

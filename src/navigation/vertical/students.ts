@@ -1,7 +1,7 @@
 export default [
   {
     heading: 'Student Management', action: 'manage',
-    subject: 'ADMIN'
+    subject: 'all'
   },
 
   {
@@ -13,14 +13,14 @@ export default [
       to: { name: 'admin-student-list' },
       icon: { icon: 'tabler-users' },
       action: 'manage',
-      subject: 'ADMIN'
+      subject: 'all'
     },
     {
       title: 'Add',
       to: { name: 'admin-student-add' },
       icon: { icon: 'tabler-user-plus' },
       action: 'manage',
-      subject: 'ADMIN'
+      subject: 'all'
     }]
   }
 ]

@@ -1,7 +1,7 @@
 export default [
   {
     heading: 'Dashboard', action: 'manage',
-    subject: 'ADMIN'
+    subject: 'all'
   },
 
 
@@ -10,6 +10,6 @@ export default [
     to: { name: 'root' },
     icon: { icon: 'tabler-dashboard' },
     action: 'manage',
-    subject: 'ADMIN'
+    subject: 'all'
   }
 ]
