@@ -11,8 +11,8 @@ class WebSocketService {
         return;
       }
 
-      // const socket = new WebSocket('ws://192.168.1.111:9099/ws');
-      const socket = new WebSocket('ws://localhost:9099/ws');
+      const socket = new WebSocket('ws://192.168.1.111:9099/ws');
+      // const socket = new WebSocket('ws://localhost:9099/ws');
 
       this.client = new Client({
         webSocketFactory: () => socket,

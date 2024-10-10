@@ -19,6 +19,10 @@
       <VChip v-else-if="header.key === 'programID'" :color="resolveProgram(item.programID)?.color" label size="small">
         {{ resolveProgram(item.programID).text }}
       </VChip>
+
+      <VChip v-else-if="header.key === 'departmentName'" :color="resolveDepartmentColor(item.departmentName)?.color" label size="small">
+        {{(item.departmentName) }}
+      </VChip>
       <div v-else-if="header.key === 'actions'">
         <IconBtn v-for="(action, index) in actions" :key="index" @click="action.handler(item)" :class="{ 'not-allowed': item.seen === undefined ? '' : !item.seen }">
 
@@ -53,9 +57,6 @@
       <div v-else-if="header.key==='seen'">
         <VSwitch v-model="item.seen" @change="$emit('toggleRead',item)" />
       </div>
-      <VChip v-else-if="header.key === 'departmentName'" color="info">
-        {{ item.departmentName }}
-      </VChip>
 
       <span v-else>
         <!-- Render plain text for other headers -->
@@ -77,7 +78,7 @@
 </template>
 
 <script setup lang="ts">
-import { PAYMENT_STATUS, PAYMENT_TYPE, PROGRAM } from '@/@core/types';
+import { DEPARTMENT_NAME, PAYMENT_STATUS, PAYMENT_TYPE, PROGRAM } from '@/@core/types';
 // Props
 const props = defineProps({
   selectedItem: String,
@@ -126,6 +127,18 @@ const resolveProgram = (type: string) => {
   return { text: PROGRAM.SVT, color: 'warning' }
 }
 
+
+const resolveDepartmentColor = (department: string) => {
+  if (department === DEPARTMENT_NAME.INFORMATICS)
+    return { text: DEPARTMENT_NAME.INFORMATICS, color: 'primary' }
+  if (department === DEPARTMENT_NAME.CHEMISTRY)
+    return { text: DEPARTMENT_NAME.CHEMISTRY, color: 'secondary' }
+  if (department === DEPARTMENT_NAME.EARTH_AND_LIF)
+    return { text: DEPARTMENT_NAME.EARTH_AND_LIF, color: 'success' }
+  if (department === DEPARTMENT_NAME.MATHEMATICS)
+    return { text: DEPARTMENT_NAME.MATHEMATICS, color: 'info' }
+  return { text: DEPARTMENT_NAME.PHYSICS, color: 'error' }
+}
 
 // Local State
 const itemsPerPage = ref(10);

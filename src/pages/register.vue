@@ -41,6 +41,7 @@ const router = useRouter()
 const loading = ref(false);
 const isRegistred = ref(false)
 const msgRegistration = ref(null)
+const photo = ref<File | null>(null)
 
 const onSubmit = () => {
   refVForm.value?.validate().then(({ valid }) => {
@@ -48,7 +49,7 @@ const onSubmit = () => {
       loading.value = true
       try {
         console.table(form.value)
-        register(form.value).then((res) => {
+        register(form.value, photo.value).then((res) => {
           msgRegistration.value = res.data.value
           console.log(msgRegistration.value);
           loading.value = false
@@ -64,6 +65,10 @@ const onSubmit = () => {
   })
 }
 
+const getFileData = (fileData) => {
+  console.log(fileData);
+  photo.value = fileData.file
+}
 
 
 </script>
@@ -103,13 +108,26 @@ const onSubmit = () => {
         <VCardText>
           <VForm v-if="!isRegistred" ref="refVForm" @submit.prevent="onSubmit">
             <VRow>
+              <!-- 👉 Media -->
+              <VCol cols="12">
+                <VCard class="mb-6">
+                  <VCardItem>
+                    <template #title>
+                      Student Image
+                    </template>
+                    <template #append>
+                      <span class="text-primary font-weight-medium text-sm cursor-pointer">Add Media from URL</span>
+                    </template>
+                  </VCardItem>
+
+                  <VCardText>
+                    <DropZone @get-file="getFileData" />
+                  </VCardText>
+                </VCard>
+              </VCol>
               <!-- email -->
               <VCol cols="12">
                 <AppTextField v-model="form.email" :rules="[requiredValidator, emailValidator]" label="Email" type="email" placeholder="Email" />
-              </VCol>
-              <!-- FirstName -->
-              <VCol cols="12">
-                <AppTextField v-model="form.code" :rules="[requiredValidator,studentCodeValidator]" label="Student Code" placeholder="Student Code" />
               </VCol>
               <!-- LastName -->
               <VCol cols="12">

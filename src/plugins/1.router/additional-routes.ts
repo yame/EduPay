@@ -10,15 +10,16 @@ export const redirects: RouteRecordRaw[] = [
     name: 'index',
     redirect: to => {
       // TODO: Get type from backend
-      const userData = useCookie('userData').value
+      const userData = (useCookie('userData').value)
       const userRole = userData?.role
       console.log("🚩THE ADDITIONAL ROUTES got a userRole 😍 🚩 => ", userRole);
 
       if (userRole === "ADMIN")
         return { name: 'root' }
-      if (userRole === "STUDENT")
+      else if (userRole === "STUDENT")
         return { name: 'student-payments-student' }
-      return { name: 'login', query: to.query }
+      else
+        return { name: 'login' }
     },
   },
   {

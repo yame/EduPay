@@ -1,5 +1,8 @@
 export default [
-  { heading: 'Payment Management' },
+  {
+    heading: 'Payment Management', action: 'manage',
+    subject: 'ADMIN'
+  },
 
   {
     title: 'Payments',
@@ -9,6 +12,8 @@ export default [
       title: 'List',
       to: { name: 'admin-payment-list' },
       icon: { icon: 'tabler-files' },
+      action: 'manage',
+      subject: 'ADMIN'
     }]
   }
 ]

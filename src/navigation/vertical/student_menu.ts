@@ -1,7 +1,8 @@
 
 export default [
   {
-    heading: 'Payment Management ', action: 'manage',
+    heading: 'Payment Management ',
+    action: 'manage',
     subject: 'STUDENT'
   },
 

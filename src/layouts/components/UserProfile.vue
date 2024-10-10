@@ -16,28 +16,35 @@ const { currentUser } = storeToRefs(authStore);
 
 // const userData = useCookie<any>('userData')
 
+watch(() => currentUser.value, (newUser) => {
+  console.error(newUser);
+
+})
+
 const loading = ref(false)
 
 const instance = getCurrentInstance()
 const resetCookies = async () => {
 
+  // Reset cookies and other states
   useCookie('accessToken').value = null;
   useCookie('userData').value = null;
   setCurrentUser(undefined)
   setToken(null)
   authStore.ws_state = null
+
+  // Disconnect WebSocket if it's active
   instance?.appContext.config.globalProperties.$disconnectWebSocket()
 
-  //👉 - Redirect to login Page
-  await router.push('/login')
-
-  // ℹ️ We had to remove abilities in then block because if we don't nav menu items mutation is visible while redirecting user to login page
-  // Remove "userAbilities" from cookie
+  // Reset user abilities and clean up any abilities in cookies
   setUserAbilityRules(null)
   useCookie('userAbilityRules').value = null
-  // Reset ability to initial ability
   ability.update([])
-  // getCurrentInstance()?.appContext.config.globalProperties.$disconnectWebSocket()
+
+  // Redirect to login page after everything is cleaned up
+  await nextTick(() => {
+    router.replace({ name: 'login' })
+  })
 }
 
 const deconnecter = async () => {

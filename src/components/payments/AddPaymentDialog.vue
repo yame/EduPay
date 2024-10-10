@@ -105,6 +105,18 @@ const onFormReset = () => {
 
 }
 
+const now = new Date()
+const currentMonth = now.toLocaleString('default', { month: '2-digit' })
+const currentYear = now.getFullYear()
+const currentDay = now.getDate() + 1
+
+
+const nextMonth = now.toLocaleString('default', { month: '2-digit' })
+const nextYear = now.getFullYear() + 999
+const nextDay = now.getDate()
+
+console.table({ currentYear, currentMonth, currentDay });
+console.table({ nextYear, nextMonth, nextDay });
 
 </script>
 
@@ -143,7 +155,7 @@ const onFormReset = () => {
 
             <!-- 👉 Payment Date -->
             <VCol cols="12" md="6">
-              <AppDateTimePicker :rules="[requiredValidator]" v-model="newPayment.date" label="Date" placeholder="Select date of your payment" />
+              <AppDateTimePicker :rules="[requiredValidator]" v-model="newPayment.date" label="Date" placeholder="Select date of your payment" :config="{ dateFormat: 'Y-m-d', disable: [{ from: `${currentYear}-${currentMonth}-${currentDay}`, to: `${nextYear}-${nextMonth}-${nextDay}` }] }" />
             </VCol>
 
             <!-- 👉 Receipt -->

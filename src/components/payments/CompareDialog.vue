@@ -1,23 +1,10 @@
 <script setup lang="ts">
-import americanExDark from '@images/icons/payments/img/ae-dark.png'
-import americanExLight from '@images/icons/payments/img/american-express.png'
-import dcDark from '@images/icons/payments/img/dc-dark.png'
-import dcLight from '@images/icons/payments/img/dc-light.png'
-import jcbDark from '@images/icons/payments/img/jcb-dark.png'
-import jcbLight from '@images/icons/payments/img/jcb-light.png'
-import masterCardDark from '@images/icons/payments/img/master-dark.png'
-import masterCardLight from '@images/icons/payments/img/mastercard.png'
-import visaDark from '@images/icons/payments/img/visa-dark.png'
-import visaLight from '@images/icons/payments/img/visa-light.png'
+import { VIcon } from 'vuetify/components';
 
 const props = defineProps<Props>()
 const emit = defineEmits<Emit>()
 
-const visa = useGenerateImageVariant(visaLight, visaDark)
-const masterCard = useGenerateImageVariant(masterCardLight, masterCardDark)
-const americanEx = useGenerateImageVariant(americanExLight, americanExDark)
-const jcb = useGenerateImageVariant(jcbLight, jcbDark)
-const dc = useGenerateImageVariant(dcLight, dcDark)
+
 
 interface Props {
   isDialogVisible: boolean
@@ -25,12 +12,9 @@ interface Props {
 }
 
 const currentPaymentData = ref(structuredClone(toRaw(props.currentChanges)))
-console.warn(currentPaymentData.value);
 
 watch(() => props.currentChanges, (val) => {
   currentPaymentData.value = val
-  console.warn(currentPaymentData.value);
-
 })
 
 interface Emit {
@@ -40,33 +24,28 @@ interface Emit {
 const dialogVisibleUpdate = (val: boolean) => {
   emit('update:isDialogVisible', val)
 }
-
+//  "id": "49aca71d-5e98-41cd-ad38-b76b9d497a1e", "adminEmail": "hamza@damiri.com", "paymentId": "e8c6ef36-dd6f-49f0-8619-bd66a05e4c9f", "newStatus": "REJECTED", "oldStatus": "CREATED", "changeDate": "2024-09-28T15:39:11.000+00:00"
 const paymentMethodsData = [
   {
-    title: 'Visa',
-    type: 'Credit Card',
-    img: visa,
+    title: currentPaymentData.value?.adminEmail,
+    type: 'Admin Email',
+    img: 'tabler-mail',
   },
   {
-    title: 'American Express',
-    type: 'Credit Card',
-    img: americanEx,
+    title: resolveStatusColor(currentPaymentData.value?.oldStatus)?.text,
+    type: 'Old Status',
+    img: 'tabler-file',
   },
   {
-    title: 'Mastercard',
-    type: 'Credit Card',
-    img: masterCard,
+    title: resolveStatusColor(currentPaymentData.value?.newStatus)?.text,
+    type: 'New Status',
+    img: 'tabler-file-invoice',
   },
   {
-    title: 'JCB',
-    type: 'Credit Card',
-    img: jcb,
-  },
-  {
-    title: 'Diners Club',
-    type: 'Credit Card',
-    img: dc,
-  },
+    title: new Date(currentPaymentData.value?.changeDate).toDateString(),
+    type: 'Change Date',
+    img: 'tabler-calendar',
+  }
 
 ]
 </script>
@@ -75,23 +54,28 @@ const paymentMethodsData = [
   <VDialog :model-value="props.isDialogVisible" :width="$vuetify.display.smAndDown ? 'auto' : 750" @update:model-value="dialogVisibleUpdate">
     <!-- 👉 dialog close btn -->
     <DialogCloseBtn @click="emit('update:isDialogVisible', false)" />
-    {{ currentPaymentData }}
     <VCard class="pa-2 pa-sm-10">
       <VCardText>
         <!-- 👉 Title -->
         <h4 class="text-h4 text-center mb-2">
-          View Current Payment
+          Comparison of Payment Status
         </h4>
 
         <div v-for="(item, index) in paymentMethodsData" :key="index">
           <div class="d-flex justify-space-between align-center py-4 gap-x-4">
             <div class="d-flex align-center">
-              <VImg :src="item.img.value" height="30" width="50" class="me-4" />
-              <h6 class="text-h6">
+              <VIcon height="30" width="50" class="me-4">{{ item.img }}</VIcon>
+              <h6 v-if="item.type!=='Old Status' && item.type!=='New Status'" class="text-h6">
                 {{ item.title }}
               </h6>
+              <VChip v-else class="text-h6" :color="resolveStatusColor(item.title)?.color">
+                {{ item.title }}
+              </VChip>
             </div>
-            <div class="d-none d-sm-block text-body-1">
+            <div v-if="item.type!=='Old Status'" class="d-none d-sm-block text-body-1">
+              {{ item.type }}
+            </div>
+            <div v-else class="d-none d-sm-block text-body-1 text-decoration-line-through">
               {{ item.type }}
             </div>
           </div>

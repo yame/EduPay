@@ -81,8 +81,18 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   //👉 - Register new Student
-  async function register(payload: DtoNewStudent) {
-    return await useApi('/user/register').post(payload)
+  async function register(payload: DtoNewStudent, file) {
+    const formData = new FormData();
+    console.log(payload);
+
+    formData.append("pendingStudentDTO", JSON.stringify(payload))
+
+    formData.append("photo", file)
+    return await axios.post('/user/register', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    })
   }
 
 

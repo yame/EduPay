@@ -40,23 +40,30 @@ const userData = useCookie<any>('userData')
 
 //👉 - Log Out 
 const resetCookies = async () => {
-  setCurrentUser(undefined)
-  setToken(null)
+  // Reset states, cookies, and tokens
+  setCurrentUser(undefined);
+  setToken(null);
   useCookie('accessToken').value = null;
   userData.value = null;
-  authStore.ws_state = null
+  authStore.ws_state = null;
+
+  // Disconnect WebSocket if applicable
   instance?.appContext.config.globalProperties.$disconnectWebSocket();
 
-  await router.push('/login')
+  // Clear counter store (ensure this happens before redirect)
   useCounterStore().clear();
-  // ℹ️ We had to remove abilities in then block because if we don't nav menu items mutation is visible while redirecting user to login page
-  // Remove "userAbilities" from cookie
-  setUserAbilityRules(null)
-  useCookie('userAbilityRules').value = null
-  // Reset ability to initial ability
-  ability.update([])
-  // getCurrentInstance()?.appContext.config.globalProperties.$disconnectWebSocket()
-}
+
+  // Reset abilities and clean up user ability rules
+  setUserAbilityRules(null);
+  useCookie('userAbilityRules').value = null;
+  ability.update([]);
+
+  // Finally, redirect to the login page
+  await nextTick(() => {
+    router.replace({ name: 'login' })
+  })
+};
+
 
 const deconnect = async () => {
   loading.value = true

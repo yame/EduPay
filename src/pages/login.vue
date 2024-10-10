@@ -15,10 +15,19 @@ import { toast } from "vue3-toastify";
 // import { toast } from 'vue3-toastify';
 import { VForm } from "vuetify/components/VForm";
 
+
+const themeName = ref(useCookie('EduPayment-theme'))
+
+
+watch(() => themeName.value, (newThemeName) => console.log(newThemeName), {
+  deep: true
+}
+)
+
 definePage({
   meta: {
     layout: "blank",
-    unauthenticatedOnly: true,
+    unauthenticatedOnly: true
   }
 });
 
@@ -57,7 +66,7 @@ const LogIn = async () => {
 
     if (!accessToken) {
       toast.error('You are Not Authorized 💔', {
-        theme: useCookie('EduPayment-theme').value || 'auto'
+        theme: themeName.value || 'auto'
       });
       return;
     }
@@ -87,10 +96,11 @@ const LogIn = async () => {
 
       // Redirect to `to` query if exist or redirect to index route
       // ❗ nextTick is required to wait for DOM updates and later redirect
+
       await nextTick(() => {
-        router.replace(route.query.to ? String(route.query.to) : '/').then(() => {
+        router.push('/').then(() => {
           toast.success('Login successful ✅⚡', {
-            theme: useCookie('EduPayment-theme').value || 'auto'
+            theme: themeName.value || 'auto'
           })
           //👉 - Turn off loading for the button login
           loader.value = false;
@@ -106,7 +116,7 @@ const LogIn = async () => {
     }
   } catch (err) {
     toast.error(error.value + ' 🧨❌' || 'An error occurred 🧨❌', {
-      theme: useCookie('EduPayment-theme').value || 'auto'
+      theme: themeName.value || 'auto'
     });
     //👉 - Turn off loading for the button login
     loader.value = false;

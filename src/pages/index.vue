@@ -84,6 +84,7 @@ const route = useRoute()
 console.error("INDEX BABY");
 
 
+
 // watch(() => authStore.accessToken, (newToken) =>
 //   instance?.appContext.config.globalProperties.$initWebSocketConnection(authStore.accessToken))
 
