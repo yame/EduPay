@@ -32,7 +32,7 @@ definePage({
 });
 
 const credentials = ref({
-  email: "john@doe.com",
+  email: "hamza@damiri.com",
   password: "123321",
 });
 const isPasswordVisible = ref(false);
@@ -56,14 +56,11 @@ const statisticsStore = useStatisticsStore();
 const { onLoginFetchData } = statisticsStore
 const { isDataFetched } = storeToRefs(statisticsStore)
 
-watch(() => userAbilityRules.value, (value) => {
-  console.warn(value);
-  setUserAbilityRules(value)
-})
+
 
 const loader = ref(false)
 const instance = getCurrentInstance()
-
+ability.update([]);
 const LogIn = async () => {
   try {
     loader.value = true

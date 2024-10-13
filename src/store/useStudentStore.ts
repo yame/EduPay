@@ -222,7 +222,7 @@ export const useStudentStore = defineStore('student', () => {
   async function generateReceiptPayment(id: UUID) {
     try {
 
-      const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/receipt/generate-receipt?paymentId=${id}`, {
+      const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/generate-pdf/receipt?paymentId=${id}`, {
         responseType: 'blob',
         headers: {
           Authorization: `Bearer ${useCookie('accessToken').value}`,

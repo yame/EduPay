@@ -69,11 +69,12 @@ const deconnect = async () => {
   loading.value = true
   logout().then(() => setTimeout(() => {
     loading.value = false
-  }, 1000)).then(() => {
-    resetCookies();
-    useStatisticsStore().isDataFetched = false
-    useNotificationStore().notificationsList = []
-  })
+  }, 1000))
+
+  await resetCookies();
+  useStatisticsStore().isDataFetched = false
+  useNotificationStore().notificationsList = []
+
 }
 
 

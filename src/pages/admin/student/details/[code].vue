@@ -70,7 +70,6 @@ const filtrer = () => {
 const isAddPayementDialogVisible = ref(false)
 //👉 - Handle If Payment added or not
 const afterSubmit = (statusCode: number) => {
-  console.log(statusCode);
   if (statusCode === 200) {
     toast.success('Payment successfully added ✅', {
       "theme": useCookie('EduPayment-theme').value || 'auto'
@@ -113,8 +112,6 @@ const clearFilters = () => {
 }
 
 const updateStatus = (newStatus, newPayment) => {
-  console.log(newStatus)
-  console.log(newPayment)
   updateOne(newPayment.id, newStatus).then(() => {
     clearFilters()
     getAllPayments(page.value, itemsPerPage.value, selectedStatus.value, selectedType.value, route.params?.code);
@@ -161,8 +158,6 @@ const changePage = (val) => {
   page.value = val
 }
 watch(itemsPerPage, (newVal) => {
-  console.log("💢💌💢💔" + route.params.code);
-
   getAllPayments(page.value, newVal, selectedStatus.value, selectedType.value, route.params?.code);
 });
 watch(page, (newPage) => {

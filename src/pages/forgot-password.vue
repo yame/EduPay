@@ -33,7 +33,6 @@ const resetPassword = () => {
   refVForm.value?.validate().then(({ valid }) => {
     if (valid) {
       resetPasswordToDefault(email.value).then((res) => {
-        console.log(res.data.value);
         isReset.value = true
       })
     }

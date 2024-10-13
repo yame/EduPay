@@ -51,6 +51,11 @@
           Pdf
         </VBtn>
       </div>
+      <div v-else-if="header.key==='receipt-pdf'">
+        <VBtn v-show="item.status===PAYMENT_STATUS.VALIDATED" variant="tonal" color="success" prepend-icon="tabler-download" size="small" @click="downloadPdf(item)">
+          Download
+        </VBtn>
+      </div>
       <div v-else-if="header.key==='enabled'">
         <VSwitch v-model="item.enabled" @change="$emit('toggleAccount',item)" />
       </div>
@@ -95,7 +100,7 @@ const props = defineProps({
 const { headers, data, totalData, actions, selectedItem } = toRefs(props);
 
 // Emits
-const emit = defineEmits(['edit-status', 'update:itemsPerPage', 'update:page', 'viewPDF', 'toggleAccount', 'toggleRead', 'update:selectedRows']);
+const emit = defineEmits(['edit-status', 'update:itemsPerPage', 'update:page', 'viewPDF', 'downloadPdf', 'toggleAccount', 'toggleRead', 'update:selectedRows']);
 const resolvePaymentStatus = (status: string) => {
   if (status === PAYMENT_STATUS.CREATED)
     return { text: PAYMENT_STATUS.CREATED, color: 'primary' }
@@ -168,6 +173,7 @@ const getTooltipText = (action) => {
 }
 
 const viewPDF = (val) => emit('viewPDF', val)
+const downloadPdf = (val) => emit('downloadPdf', val)
 
 
 </script>

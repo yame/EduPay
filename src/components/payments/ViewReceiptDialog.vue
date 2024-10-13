@@ -21,7 +21,6 @@ const dialogModelValueUpdate = (val: boolean) => {
   emit('update:isDialogVisible', val)
 }
 
-console.log(props.url);
 
 </script>
 

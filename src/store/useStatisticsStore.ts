@@ -40,6 +40,10 @@ export const useStatisticsStore = defineStore('statistic', () => {
   const error = ref('')
   const isDataFetched = ref(false)
 
+  watch(isDataFetched, (newValue) => {
+    isDataFetched.value = newValue
+  })
+
   //👉 - Get Statistics by amount 
   async function getStatisticsByAmount(month?: number) {
     try {
@@ -84,8 +88,6 @@ export const useStatisticsStore = defineStore('statistic', () => {
     //👉 - Set NonSeenNotificationsCount after login Admin
 
     useNotificationStore().setNonSeenNotificationsCount((data.value as Statistics).NonSeenNotificationsCount)
-    console.warn(data.value.NonSeenNotificationsCount);
-
     //SECTION -
     if ((data.value as Statistics).countStudentsByProgram && (data.value as Statistics).countStudentsByProgram) {
       //👉 - Retrieve and Split the Program Statistics Object After Each Login

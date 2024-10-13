@@ -30,7 +30,6 @@ const addStudent = () => {
           })
         })
       }).catch((err) => {
-        console.log(err);
 
         toast.error('Error Student not added 🧨❌', {
           "theme": useCookie('EduPayment-theme').value || 'auto'

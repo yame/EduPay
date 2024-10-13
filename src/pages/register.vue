@@ -51,7 +51,6 @@ const onSubmit = () => {
         console.table(form.value)
         register(form.value, photo.value).then((res) => {
           msgRegistration.value = res.data.value
-          console.log(msgRegistration.value);
           loading.value = false
           isRegistred.value = true
           // router.push('/login')
@@ -66,7 +65,6 @@ const onSubmit = () => {
 }
 
 const getFileData = (fileData) => {
-  console.log(fileData);
   photo.value = fileData.file
 }
 

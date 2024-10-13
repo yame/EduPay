@@ -14,6 +14,11 @@ export const redirects: RouteRecordRaw[] = [
       const userRole = userData?.role
       console.log("🚩THE ADDITIONAL ROUTES got a userRole 😍 🚩 => ", userRole);
 
+      watch(() => userRole, (role) => {
+        console.error(role);
+
+      })
+
       if (userRole === "ADMIN")
         return { name: 'root' }
       else if (userRole === "STUDENT")

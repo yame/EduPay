@@ -36,7 +36,7 @@ const { currentUser } = storeToRefs(authStore);
 
 const studentStore = useStudentStore();
 const { currentStudent } = storeToRefs(studentStore);
-const { getStudentByEmail } = (studentStore);
+const { getStudentByEmail, generateReceiptPayment } = (studentStore);
 
 
 const isViewReceiptPDFVisible = ref(false)
@@ -69,6 +69,47 @@ const afterSubmit = (statusCode: number) => {
   }
 }
 
+const isDownloaded = ref(false)
+
+
+const downloadReceipt = (id) => {
+  generateReceiptPayment(id).then(response => {
+    if (response.status === 200) {
+      const blob = new Blob([response.data], { type: response.headers['content-type'] });
+
+      // Extract filename from Content-Disposition header
+      let filename = 'download.pdf';
+
+      const contentDisposition = response.headers['content-disposition'];
+      console.warn('Content-Disposition:', contentDisposition);
+      if (contentDisposition) {
+        const matches = /filename[^=\n]*=(.*?)(;|$)/.exec(contentDisposition);
+        if (matches && matches[1]) {
+          filename = matches[1].trim().replace(/['"]/g, '');
+        }
+      }
+
+      // Create a blob URL and trigger download
+      const blobUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = blobUrl;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(blobUrl);
+      setTimeout(() => {
+        isDownloaded.value = true;
+      }, 3000);
+
+    }
+  })
+}
+
+
+const generatePdf = (item: Payment) => {
+  downloadReceipt(item.id)
+}
 
 
 const viewPDF = (item: Payment) => {
@@ -247,8 +288,13 @@ definePage({
               {
                 key: 'receipt',
                 title: 'receipt',
+              },
+              {
+                key: 'receipt-pdf',
+                title: 'Confirmation Receipt',
               }
-            ]" @viewPDF="viewPDF" :data="payments" :totalData="totalPayments" @update:items-per-page="changeSize" @update:page="changePage" />
+
+            ]" @viewPDF="viewPDF" @downloadPdf="generatePdf" :data="payments" :totalData="totalPayments" @update:items-per-page="changeSize" @update:page="changePage" />
 
         </div>
         <div v-else>

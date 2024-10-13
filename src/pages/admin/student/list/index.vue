@@ -54,7 +54,6 @@ const deleteOne = (item) => {
 }
 
 const updateStudent = (item) => {
-  console.log(item);
   updateOne(item).then(() => {
     getAllStudents(page.value, itemsPerPage.value).then(() => {
       toast.success('Student successfully updated ✅', {
@@ -90,7 +89,6 @@ watch(itemsPerPage, (newVal) => {
 
 
 const toggleAccount = (item) => {
-  console.log(item)
   toggleEnableUserAccount(item.email).then((res) => {
     return (res.data.value);
 
@@ -146,7 +144,6 @@ const isLoading = ref(false)
 const loadStudents = () => {
   isLoading.value = true
   uploadStudentFile(file.value[0]).then(res => {
-    console.log(res.status);
     toast.success(res.split('.')[0] + ' ✅', {
       "theme": useCookie('EduPayment-theme').value || 'auto'
     })

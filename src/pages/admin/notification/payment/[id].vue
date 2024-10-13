@@ -74,8 +74,6 @@ watch(() => currentPayment.value?.status, (newStatus) => {
 
 
 const updatePayment = () => {
-  console.log(currPayment.value.status);
-
   updateOne(route.params?.id, currPayment.value.status).then((res) => {
     if (!res) {
       if (usePaymentStore().msgError === '')

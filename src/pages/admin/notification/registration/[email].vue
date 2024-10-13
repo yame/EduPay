@@ -14,7 +14,6 @@ const route = useRoute();
 const router = useRouter();
 const currentStudent = ref<Student>({
   email: route.params.email,
-  code: "",
   firstName: "",
   lastName: "",
   programID: PROGRAM.SMA,
@@ -84,11 +83,6 @@ watch(() => route.params.email, (newValue) => {
           <!-- 👉 Student Code -->
           <VCol cols="12" md="6">
             <AppTextField v-model="currentStudent.email" label="email" :disabled="true" :readonly="true" />
-          </VCol>
-
-          <!-- 👉 Student Code -->
-          <VCol cols="12" md="6">
-            <AppTextField v-model="currentStudent.code" label="Student Code" placeholder="Student Code" :readonly="true" />
           </VCol>
 
           <!-- 👉 Student First Name -->

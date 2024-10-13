@@ -11,13 +11,11 @@ interface Credentials {
 
 export const useAuthStore = defineStore('auth', () => {
   const currentUser = ref<EduPayUser>()
-  const userAbilityRules = ref<Rule[]>()
+  const userAbilityRules = ref<Rule[] | null>(null)
   const loading = ref(false)
   const error = ref('')
   const accessToken = ref<string | null>(null)
   const ws_state = ref<string | null>(null)
-
-
 
   //👉 - Get All Student 
   async function login(credentials: Credentials) {
@@ -45,7 +43,7 @@ export const useAuthStore = defineStore('auth', () => {
           { action: "manage", subject: "STUDENT" },
         ])
       else
-        setUserAbilityRules([])
+        setUserAbilityRules(null)
 
 
       return response.data
@@ -83,12 +81,17 @@ export const useAuthStore = defineStore('auth', () => {
   //👉 - Register new Student
   async function register(payload: DtoNewStudent, file) {
     const formData = new FormData();
-    console.log(payload);
 
-    formData.append("pendingStudentDTO", JSON.stringify(payload))
+    // const pendingStudentDTO = { ...payload }
+    // console.table(pendingStudentDTO)
 
-    formData.append("photo", file)
-    return await axios.post('/user/register', formData, {
+    formData.append('email', payload.email.toString())
+    formData.append('lastName', payload.lastName.toString())
+    formData.append('firstName', payload.firstName.toString())
+    formData.append('programID', payload.programID.toString())
+    formData.append('photo', file)
+
+    return await axios.post(`${import.meta.env.VITE_API_BASE_URL}/user/register`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data'
       }
@@ -133,7 +136,7 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   //👉 - Set UserAbilityRules
-  function setUserAbilityRules(newUserAbilityRules) {
+  function setUserAbilityRules(newUserAbilityRules: Rule[] | null) {
     userAbilityRules.value = newUserAbilityRules;
   }
 
@@ -159,7 +162,5 @@ export const useAuthStore = defineStore('auth', () => {
 
   return {
     currentUser, ws_state, loading, error, accessToken, userAbilityRules, register, setUserAbilityRules, setCurrentUser, setToken, login, logout, getCurrentUser, resetPasswordToDefault, changePassword, approveRegistration, declineRegistration, banRegistration, toogleAccountStatus
-  }
-}, {
-  persist: true
-})
+  };
+}, { persist: true })

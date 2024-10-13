@@ -65,9 +65,9 @@ const LogIn = async () => {
     await login(credentials.value);
 
     //👉 -  Update Cookies for each User
-    // useCookie('accessToken').value = accessToken.value;
-    // useCookie('userData').value = currentUser.value ? JSON.stringify(currentUser.value) : null;
-    // useCookie('userAbilityRules').value = userAbilityRules.value ? JSON.stringify(userAbilityRules.value) : null;
+    useCookie('accessToken').value = accessToken.value;
+    useCookie('userData').value = currentUser.value ? JSON.stringify(currentUser.value) : null;
+    useCookie('userAbilityRules').value = userAbilityRules.value ? JSON.stringify(userAbilityRules.value) : null;
     ability.update(userAbilityRules.value || []);
 
     //👉 -  Redirect  

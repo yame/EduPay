@@ -71,8 +71,6 @@ export function resolveStatusColor(status: string) {
 }
 
 export function resolveDepartmentColor(department: string) {
-  console.log(department);
-
   if (department === DEPARTMENT_NAME.INFORMATICS)
     return { text: DEPARTMENT_NAME.INFORMATICS, color: 'primary' }
   if (department === DEPARTMENT_NAME.CHEMISTRY)

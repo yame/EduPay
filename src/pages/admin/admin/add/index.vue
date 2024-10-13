@@ -28,8 +28,6 @@ const addAdmin = () => {
           })
         })
       }).catch((err) => {
-        console.log(err);
-
         toast.error('Error Admin not added 🧨❌', {
           "theme": useCookie('EduPayment-theme').value || 'auto'
         })

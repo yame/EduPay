@@ -12,7 +12,6 @@ const email = ref(null)
 onMounted(() => {
   email.value.focus();
 })
-console.log(props.admin);
 
 </script>
 

@@ -2,71 +2,69 @@
 import { useAuthStore } from "@/store/useAuthStore";
 import { useNotificationStore } from "@/store/useNotificationStore";
 import { useStatisticsStore } from "@/store/useStatisticsStore";
+import { useAbility } from '@casl/vue';
+import { getCurrentInstance, ref } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 import { PerfectScrollbar } from "vue3-perfect-scrollbar";
 
 const router = useRouter();
 const route = useRoute();
 const ability = useAbility();
-
-// TODO: Get DATA from backend
 const authStore = useAuthStore();
+const notificationStore = useNotificationStore();
+const statisticsStore = useStatisticsStore();
 
 const { setCurrentUser, setToken, setUserAbilityRules, logout } = authStore;
 const { currentUser } = storeToRefs(authStore);
+const loading = ref(false);
+const instance = getCurrentInstance();
 
-// const userData = useCookie<any>('userData')
 
-watch(() => currentUser.value, (newUser) => {
-  console.error(newUser);
+const userData = useCookie<any>('userData')
+console.table(userData);
 
-})
+// watch(() => currentUser.value, (newUser) => {
+//   console.log("Current User: ", newUser);
+// });
 
-const loading = ref(false)
-
-const instance = getCurrentInstance()
 const resetCookies = async () => {
-
-  // Reset cookies and other states
   useCookie('accessToken').value = null;
   useCookie('userData').value = null;
-  setCurrentUser(undefined)
-  setToken(null)
-  authStore.ws_state = null
+  setCurrentUser(undefined);
+  setToken(null);
+  authStore.ws_state = null;
 
-  // Disconnect WebSocket if it's active
-  instance?.appContext.config.globalProperties.$disconnectWebSocket()
-
-  // Reset user abilities and clean up any abilities in cookies
-  setUserAbilityRules([])
-  useCookie('userAbilityRules').value = null
-  ability.update([])
-
-  // Redirect to login page after everything is cleaned up
-  await nextTick(() => {
-    router.replace({ name: 'login' })
-  })
-}
-
-const deconnecter = async () => {
-  loading.value = true
-  logout().then(() => {
-    resetCookies()
-    useStatisticsStore().isDataFetched = false
-    useNotificationStore().notificationsList = []
-  }
-  ).finally(() => loading.value = false)
+  await instance?.appContext.config.globalProperties.$disconnectWebSocket();
+  statisticsStore.isDataFetched = true;
+  statisticsStore.statisticsBarCharData = undefined
+  statisticsStore.statisticsPolarAreaCharData = undefined
+  notificationStore.notificationsList = [];
 };
 
-
+const disconnectUser = async () => {
+  loading.value = true;
+  try {
+    await logout();
+    await resetCookies();
+    await router.push('/login')
+    setUserAbilityRules(null)
+    useCookie('userAbilityRules').value = null;
+    ability.update([]);
+    // authStore.$reset()
+  } catch (error) {
+    console.error("Logout Error: ", error);
+  } finally {
+    loading.value = false;
+  }
+};
 
 const resolveUserRoleVariant = (role: string) => {
-  if (role === 'ADMIN')
-    return { color: 'info', icon: 'tabler-crown' }
-  if (role === 'STUDENT')
-    return { color: 'warning', icon: 'tabler-school' }
-  return { color: 'primary', icon: 'tabler-user' }
-}
-
+  const roleVariants: Record<string, { color: string; icon: string }> = {
+    ADMIN: { color: 'info', icon: 'tabler-crown' },
+    STUDENT: { color: 'warning', icon: 'tabler-school' },
+  };
+  return roleVariants[role] || { color: 'primary', icon: 'tabler-user' };
+};
 
 const userProfileList = [
   { type: "divider" },
@@ -84,39 +82,35 @@ const userProfileList = [
   },
 ];
 
-
 </script>
 
 <template>
-  <VBadge v-if="currentUser" dot bordered location="bottom right" offset-x="1" offset-y="2" color="success">
-    <VAvatar :color=" (currentUser)  ? resolveUserRoleVariant(currentUser?.role)?.color : undefined">
-      <VIcon :icon=" (currentUser)  ? resolveUserRoleVariant(currentUser?.role)?.icon : undefined" />
+  <VBadge v-if="userData" dot bordered location="bottom right" offset-x="1" offset-y="2" color="success">
+    <VAvatar :color="(userData) ? resolveUserRoleVariant(userData?.role)?.color : 'undefined'">
+      <VIcon :icon="(userData) ? resolveUserRoleVariant(userData?.role)?.icon : 'undefined'" />
 
-      <!-- SECTION Menu -->
       <VMenu activator="parent" width="240" location="bottom end" offset="12px">
         <VList class="pa-0">
           <VListItem>
-            <div class="d-flex  gap-1 align-center">
+            <div class="d-flex gap-1 align-center">
               <div>
                 <VListItemAction>
                   <VBadge dot location="bottom right" offset-x="3" offset-y="3" color="success" bordered>
-                    <VAvatar :icon="resolveUserRoleVariant(currentUser?.role)?.icon" :color="resolveUserRoleVariant(currentUser?.role)?.color" />
+                    <VAvatar :icon="(userData) ? resolveUserRoleVariant(userData?.role)?.icon : 'undefined'" :color="(userData) ? resolveUserRoleVariant(userData?.role)?.color : 'undefined'" />
                   </VBadge>
                 </VListItemAction>
                 <VListItemSubtitle class="text-capitalize text-disabled">
-                  {{ currentUser?.role }}
-
+                  {{ userData?.role }}
                 </VListItemSubtitle>
               </div>
               <div class="pa-4">
                 <h6 class="text-h6 font-weight-medium">
-                  {{ currentUser?.lastName }} {{ currentUser?.firstName }}
+                  {{ userData?.lastName }} {{ userData?.firstName }}
                 </h6>
-                <VChip v-show="currentUser?.role =='ADMIN'" class="text-small" color="info" size="x-small">
+                <VChip v-show="userData?.role === 'ADMIN'" class="text-small" color="info" size="x-small">
                   <VIcon start size="12" icon="tabler-building-skyscraper" />
-                  {{ currentUser?.departmentName }}
+                  {{ userData?.departmentName }}
                 </VChip>
-
               </div>
             </div>
           </VListItem>
@@ -127,22 +121,23 @@ const userProfileList = [
                 <template #prepend>
                   <VIcon :icon="item.icon" size="22" />
                 </template>
-
                 <VListItemTitle>{{ item.title }}</VListItemTitle>
               </VListItem>
-
               <VDivider v-else class="my-2" />
             </template>
 
             <div class="px-4 py-2">
-              <VBtn block size="small" color="error" append-icon="tabler-logout" :loading="loading" @click="deconnecter">
+              <VBtn block size="small" color="error" append-icon="tabler-logout" :loading="loading" @click="disconnectUser">
                 Logout
               </VBtn>
             </div>
           </PerfectScrollbar>
         </VList>
       </VMenu>
-      <!-- !SECTION -->
     </VAvatar>
   </VBadge>
 </template>
+
+<style scoped>
+/* Add any component-specific styles here */
+</style>

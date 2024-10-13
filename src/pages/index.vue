@@ -12,7 +12,7 @@ import { useTheme } from 'vuetify';
 const notificationStore = useNotificationStore();
 const { onLoginNotifications } = notificationStore;
 const statisticsStore = useStatisticsStore();
-const { statisticsBarCharData, statisticsPolarAreaCharData, error, loading, isDataFetched } = storeToRefs(statisticsStore);
+const { statisticsBarCharData, statisticsPolarAreaCharData, error, loading } = storeToRefs(statisticsStore);
 const { onLoginFetchData, getDashboardData } = statisticsStore
 const vuetifyTheme = useTheme()
 
@@ -84,20 +84,23 @@ const route = useRoute()
 console.error("INDEX BABY");
 
 
-
 // watch(() => authStore.accessToken, (newToken) =>
 //   instance?.appContext.config.globalProperties.$initWebSocketConnection(authStore.accessToken))
 
+if (!statisticsStore.isDataFetched) {
+  await getDashboardData()
+}
 
 onMounted(async () => {
-  if (!isDataFetched.value) {
-    await getDashboardData()
-  }
+  console.warn(statisticsStore.isDataFetched);
+  statisticsStore.isDataFetched = false
+
+
 });
 
-// watch(() => route.path, async (newRoute) => {
+// watch(() => route.fullPath, (newRoute: any) => {
 //   console.log(newRoute);
-//   isDataFetched.value = false
+//   // isDataFetched.value = false
 // })
 
 

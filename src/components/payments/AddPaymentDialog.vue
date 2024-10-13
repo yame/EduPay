@@ -61,7 +61,6 @@ const selectFile = (e) => {
     };
     file.value[0] = renamedFile
     blob.value = fileData.value[0].url;
-    console.log(fileData.value[0]);
   }
 };
 
@@ -76,8 +75,6 @@ const onFormSubmit = async () => {
       // console.table(file.value[0]);
 
       addOne(newPayment.value, file.value[0]).then(res => {
-        console.log(res);
-
         emit('onSubmit', res);
         dialogModelValueUpdate(false)
       }).then(() => {

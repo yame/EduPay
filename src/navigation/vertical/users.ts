@@ -1,7 +1,8 @@
 export default [
   {
-    heading: 'Users Management', action: 'manage',
-    subject: 'all'
+    heading: 'Users Management',
+    action: 'manage',
+    subject: 'ADMIN'
   },
 
   {
@@ -9,6 +10,6 @@ export default [
     to: { name: 'admin-user-list-pending' },
     icon: { icon: 'tabler-users-group' },
     action: 'manage',
-    subject: 'all'
+    subject: 'ADMIN'
   }
 ]
