@@ -2,6 +2,7 @@
 import { useAuthStore } from "@/store/useAuthStore";
 import { useCounterStore } from "@/store/useCounterStore";
 import { useNotificationStore } from "@/store/useNotificationStore";
+import { useProfileImgStore } from "@/store/useProfileImgStore";
 import { useStatisticsStore } from "@/store/useStatisticsStore";
 
 
@@ -52,12 +53,12 @@ const resetCookies = async () => {
 
   // Clear counter store (ensure this happens before redirect)
   useCounterStore().clear();
-
+  useAuthStore().$reset();
   // Reset abilities and clean up user ability rules
   setUserAbilityRules([]);
   useCookie('userAbilityRules').value = null;
   ability.update([]);
-
+  profileImgUrl.value = null;
   // Finally, redirect to the login page
   await nextTick(() => {
     router.replace({ name: 'login' })
@@ -77,6 +78,51 @@ const deconnect = async () => {
 
 }
 
+//👉 - Profile Picture Implementation
+const profileImgStore = useProfileImgStore()
+const { getProfilePicture, updateProfilePicture } = profileImgStore
+const { profileImgUrl } = storeToRefs(profileImgStore)
+
+
+
+
+
+const imageUrl = ref(null);
+const isHovered = ref(false);
+const fileInput = ref(null);
+
+const triggerFileInput = () => {
+  fileInput.value?.click();
+};
+
+
+const loadProfilePicture = async () => {
+  await getProfilePicture(userData.value.email)
+  imageUrl.value = profileImgUrl.value!
+
+}
+
+const handleFileChange = (event) => {
+  const file = event.target.files[0];
+  updateProfilePicture(userData.value?.email, file).then(response => {
+    const url = URL.createObjectURL(new Blob([response?.data]));
+    imageUrl.value = (url);
+
+  }).then(() => {
+    loadProfilePicture()
+  })
+  // if (file) {
+  //   imageUrl.value = URL.createObjectURL(file);
+  // }
+};
+
+
+onMounted(() => {
+  if (userData.value?.role === 'STUDENT')
+    loadProfilePicture()
+})
+
+
 
 </script>
 
@@ -88,8 +134,24 @@ const deconnect = async () => {
         <div>
           <VCardText class="text-center pt-12">
             <!-- 👉 Avatar -->
-            <VAvatar rounded :size="100" variant="outlined" :color="(userData) ? resolveUserRoleVariant(userData?.role)?.color : undefined" :icon="(userData) ? resolveUserRoleVariant(userData?.role)?.icon : undefined" />
 
+            <VAvatar v-if=" userData.role === 'ADMIN'" rounded :size="100" variant="outlined" :color="(userData) ? resolveUserRoleVariant(userData?.role)?.color : undefined" :icon="(userData) ? resolveUserRoleVariant(userData?.role)?.icon : undefined" />
+
+            <div v-if="userData.role === 'STUDENT'" class="profile-pic">
+              <v-avatar v-if="profileImgUrl" @mouseenter="isHovered = true" @mouseleave="isHovered = false" :size="'165px'" class="avatar" @click="triggerFileInput">
+                <VAvatar :image="profileImgUrl" :size="165" />
+
+                <!-- <img v-if="imageUrl" :src="profileImgUrl" alt="Profile Picture" /> -->
+                <input ref="fileInput" type="file" @change="handleFileChange" accept="image/*" style="display: none;" />
+
+                <!-- Custom Icon overlay -->
+                <div v-if="isHovered" class="change-icon-overlay">
+                  <VIcon class="icon">tabler-camera </VIcon> <b class="text-body">change picture</b> <!-- Use any custom icon -->
+                </div>
+              </v-avatar>
+              <VAvatar v-else rounded variant="outlined" :color="(userData) ? resolveUserRoleVariant(userData?.role)?.color : undefined" :icon="(userData) ? resolveUserRoleVariant(userData?.role)?.icon : undefined" />
+
+            </div>
             <!-- 👉 User fullName -->
             <h5 class="text-h5 mt-4">
               {{ userData?.lastName }} {{ userData?.firstName }}
@@ -112,16 +174,6 @@ const deconnect = async () => {
 
             <!-- 👉 User Details list -->
             <VList class="card-list mt-2">
-              <VListItem>
-                <VListItemTitle>
-                  <h6 class="text-h6">
-                    Username:
-                    <div class="d-inline-block text-body-1">
-                      {{ userData?.fullName }}
-                    </div>
-                  </h6>
-                </VListItemTitle>
-              </VListItem>
 
               <VListItem>
                 <VListItemTitle>
@@ -130,6 +182,17 @@ const deconnect = async () => {
                   </span>
                   <span class="text-body-1">
                     {{ userData?.email }}
+                  </span>
+                </VListItemTitle>
+              </VListItem>
+
+              <VListItem>
+                <VListItemTitle>
+                  <span class="text-h6">
+                    Filière:
+                  </span>
+                  <span class="text-body-1">
+                    {{ userData?.programId }}
                   </span>
                 </VListItemTitle>
               </VListItem>
@@ -145,7 +208,7 @@ const deconnect = async () => {
                 </VListItemTitle>
               </VListItem>
 
-              <VListItem>
+              <VListItem v-if="Object.hasOwn(userData,'departmentName')">
                 <VListItemTitle>
                   <h6 class="text-h6">
                     Department Name:
@@ -165,8 +228,9 @@ const deconnect = async () => {
 
         <!-- 👉 Edit and Suspend button -->
         <VCardText class="d-flex justify-center gap-x-4">
-          <VBtn variant="elevated">
-            Edit
+          <VBtn variant="elevated" color="warning">
+            Export Profile
+
           </VBtn>
 
           <VBtn variant="tonal" color="error" :loading="loading" @click="deconnect">
@@ -178,3 +242,38 @@ const deconnect = async () => {
     <!-- !SECTION -->
   </VRow>
 </template>
+
+<style scoped lang="scss">
+.profile-pic {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  cursor: pointer;
+  color: white;
+}
+
+.avatar {
+  position: relative;
+  color: white;
+}
+
+.change-icon-overlay {
+  position: absolute;
+  bottom: 0px;
+  right: 10px;
+  background-color: rgba(0, 0, 0, 0.6);
+  border-radius: 40%;
+  padding: 11px;
+  color: white;
+}
+
+.icon {
+  font-size: 24px;
+  color: white;
+}
+
+// ::v-deep(.v-img__img--cover:hover) {
+//   transform: translateX(30px);
+// }
+</style>

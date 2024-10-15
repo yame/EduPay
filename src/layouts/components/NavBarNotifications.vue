@@ -1,6 +1,5 @@
 <script lang="ts" setup>
 import { router } from '@/plugins/1.router';
-import { useAuthStore } from '@/store/useAuthStore';
 import { useNotificationStore } from '@/store/useNotificationStore';
 import type { Notification } from '@layouts/types';
 
@@ -11,10 +10,11 @@ const { markAllAsRead, toggleSeen, toggleLocalNotification, deleteNotification, 
 const badgeProps = ref({ content: notificationsList.value.length, max: '99', showMenu: false })
 const router = useRouter();
 
-const authStore = useAuthStore()
-const { currentUser } = storeToRefs(authStore)
+const userData = useCookie<any>('userData')
 
 badgeProps.value.content = notificationsList.value.length
+
+
 
 watch(notificationsList, (newNotificationsList: Notification[]) => {
   notificationsList.value = newNotificationsList
@@ -26,7 +26,7 @@ watch(notificationsListStudent, (newNotificationsListStudent: Notification[]) =>
 
 //👉 - Delete from BD and from local notificationList Data
 const remNotification = (notificationId: number) => {
-  if (currentUser.value?.role === 'ADMIN')
+  if (userData.value?.role === 'ADMIN')
     deleteNotification(notificationId).then((res) => {
       removeNotification(notificationId);
     })
@@ -39,7 +39,7 @@ const remNotification = (notificationId: number) => {
 
 //👉 - Mark All read api and local data
 const markAllRead = (allNotificationsIds: number[]) => {
-  if (currentUser.value?.role === 'ADMIN')
+  if (userData.value?.role === 'ADMIN')
     markAllAsRead().then(() => {
       readAllNotifications(allNotificationsIds)
     })
@@ -47,7 +47,7 @@ const markAllRead = (allNotificationsIds: number[]) => {
 
 //👉 - Mark read for local data and toggle for the api
 const markRead = (notificationId: number) => {
-  if (currentUser.value?.role === 'ADMIN')
+  if (userData.value?.role === 'ADMIN')
     toggleSeen(notificationId).then((res) => {
       toggleLocalNotification(notificationId)
     })
@@ -60,7 +60,7 @@ const markRead = (notificationId: number) => {
 
 //👉 - Mark unread for local data and toggle for the api
 const markUnRead = (notificationId: number) => {
-  if (currentUser.value?.role === 'ADMIN')
+  if (userData.value?.role === 'ADMIN')
     toggleSeen(notificationId).then((res) => {
       toggleLocalNotification(notificationId)
     })
@@ -73,7 +73,7 @@ const markUnRead = (notificationId: number) => {
 
 //👉 - handle each click notification
 const handleNotificationClick = (notification: Notification) => {
-  if (currentUser.value?.role === 'ADMIN') {
+  if (userData.value?.role === 'ADMIN') {
     if (!notification.isSeen)
       markRead(notification.id)
     notification.paymentId === undefined ? router.push(`/admin/notification/registration/${notification.email}`) : router.push(`/admin/notification/payment/${notification.paymentId}`)
@@ -99,16 +99,19 @@ const toggle = (val) => {
 
 //👉 - Passing Only 10 first notifications 
 const displayedNotifications = computed(() => {
-  if (currentUser.value?.role === 'ADMIN')
+  if (userData.value?.role === 'ADMIN')
     return notificationsList.value.slice(0, 10);
-  if (currentUser.value?.role === 'STUDENT')
+  else if (userData.value?.role === 'STUDENT')
     return notificationsListStudent.value
 });
+
+
+
 
 </script>
 
 <template>
-  <div v-if="currentUser">
+  <div v-if="userData">
     <Notifications :notifications="displayedNotifications" :badge-props="badgeProps" @mark-all-read="markAllRead" @remove="remNotification" @read="markRead" @unread="markUnRead" @click:notification="handleNotificationClick" @toggle-menu="toggle" />
 
   </div>

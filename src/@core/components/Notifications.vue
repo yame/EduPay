@@ -26,11 +26,12 @@ const counterStore = useCounterStore()
 const notificationStore = useNotificationStore()
 const { notificationsList, notificationsListStudent, NonSeenNotificationsCount } = storeToRefs(notificationStore)
 const authStore = useAuthStore()
-const { currentUser } = storeToRefs(authStore)
 const emit = defineEmits<Emit>()
+const userData = useCookie<any>('userData')
+
 
 const isAllMarkRead = computed(() => {
-  if (currentUser.value?.role === 'ADMIN') {
+  if (userData.value?.role === 'ADMIN') {
     return notificationsList.value.some(item => !item.isSeen)
   }
   return notificationsListStudent.value.some(item => !item.isSeen)
@@ -51,7 +52,7 @@ const totalUnseenNotifications = computed(() => {
 // )
 
 const markAllRead = async () => {
-  if (currentUser.value?.role === 'ADMIN') {
+  if (userData.value?.role === 'ADMIN') {
     const allNotificationsIds = notificationsList.value.map(item => item.id);
     NonSeenNotificationsCount.value = 0;
     emit('markAllRead', allNotificationsIds);
@@ -64,7 +65,7 @@ const markAllRead = async () => {
 }
 
 const toggleReadUnread = (isSeen: boolean, Id: number) => {
-  if (currentUser.value?.role === 'ADMIN') {
+  if (userData.value?.role === 'ADMIN') {
     if (isSeen) {
       emit('unread', Id)
       NonSeenNotificationsCount.value++;
@@ -105,11 +106,16 @@ const viewAll = async () => {
 }
 
 
+watch(() => userData.value, (ll) => {
+  console.warn(ll);
+
+})
+
 </script>
 
 <template>
   <IconBtn id="notification-btn" @click="$emit('toggle-menu', true)">
-    <VBadge v-if="props.badgeProps" v-bind="props.badgeProps" :model-value="!!totalUnseenNotifications" :content="totalUnseenNotifications" max="10" color="error" offset-x="2" offset-y="3">
+    <VBadge v-if="userData" v-bind="props.badgeProps" :model-value="!!totalUnseenNotifications" :content="totalUnseenNotifications" max="10" color="error" offset-x="2" offset-y="3">
       <VIcon icon="tabler-bell" />
     </VBadge>
 
@@ -127,7 +133,7 @@ const viewAll = async () => {
             <VChip v-show="props.notifications.some(n => !n.isSeen)" size="small" color="primary" class="me-2">
               {{ totalUnseenNotifications }} New
             </VChip>
-            <IconBtn v-show="props.notifications.length && currentUser.role==='ADMIN'" size="34" @click="markAllRead">
+            <IconBtn v-show="props.notifications.length && userData?.role==='ADMIN'" size="34" @click="markAllRead">
               <VIcon size="20" color="high-emphasis" :disabled="!isAllMarkRead" :icon="!isAllMarkRead ? 'tabler-mail' : 'tabler-mail-opened' " />
 
               <VTooltip v-if="isAllMarkRead" activator="parent" location="start">

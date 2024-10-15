@@ -239,7 +239,5 @@ export const useNotificationStore = defineStore("notification", () => {
     toggleLocalNotificationStudent, toggleSeenStudent
     , deleteNotificationStudent
   };
-}, {
-  persist: true
 });
 

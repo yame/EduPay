@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useAuthStore } from "@/store/useAuthStore";
 import { useNotificationStore } from "@/store/useNotificationStore";
+import { useProfileImgStore } from "@/store/useProfileImgStore";
 import { useStatisticsStore } from "@/store/useStatisticsStore";
 import { useAbility } from '@casl/vue';
 import { getCurrentInstance, ref } from 'vue';
@@ -27,30 +28,66 @@ console.table(userData);
 //   console.log("Current User: ", newUser);
 // });
 
-const resetCookies = async () => {
+const resetCookies = () => {
   useCookie('accessToken').value = null;
-  useCookie('userData').value = null;
-  setCurrentUser(undefined);
+  userData.value = null
+  // localStorage.setItem('auth', null)
   setToken(null);
-  authStore.ws_state = null;
+  setCurrentUser(undefined);
+  setUserAbilityRules(null)
+  useCookie('userData').value = null;
+  useCookie('userAbilityRules').value = null;
+}
 
+const disconnectWebSocket = async () => {
   await instance?.appContext.config.globalProperties.$disconnectWebSocket();
+}
+
+const resetUsedStates = () => {
   statisticsStore.isDataFetched = true;
-  statisticsStore.statisticsBarCharData = undefined
-  statisticsStore.statisticsPolarAreaCharData = undefined
+  // statisticsStore.statisticsBarCharData = undefined
+  // statisticsStore.statisticsPolarAreaCharData = undefined
   notificationStore.notificationsList = [];
-};
+  authStore.ws_state = null;
+  profileImgUrl.value = null;
+}
+
+// const resetCookies = async () => {
+//   useCookie('accessToken').value = null;
+//   useCookie('userData').value = null;
+//   setCurrentUser(undefined);
+//   setToken(null);
+//   statisticsStore.isDataFetched = true;
+//   // statisticsStore.statisticsBarCharData = undefined
+//   // statisticsStore.statisticsPolarAreaCharData = undefined
+//   notificationStore.notificationsList = [];
+//   authStore.ws_state = null;
+//   profileImgUrl.value = null;
+
+//   await router.push('/login')
+
+//   setUserAbilityRules(null)
+//   useCookie('userAbilityRules').value = null;
+//   ability.update([]);
+
+
+// };
 
 const disconnectUser = async () => {
   loading.value = true;
   try {
     await logout();
+    await disconnectWebSocket();
     await resetCookies();
+
+
     await router.push('/login')
-    setUserAbilityRules(null)
+
+    // ℹ️ We had to remove abilities in then block because if we don't nav menu items mutation is visible while redirecting user to login page
+    // Remove "userAbilities" from cookie
     useCookie('userAbilityRules').value = null;
+    // Reset ability to initial ability
     ability.update([]);
-    // authStore.$reset()
   } catch (error) {
     console.error("Logout Error: ", error);
   } finally {
@@ -82,12 +119,50 @@ const userProfileList = [
   },
 ];
 
+
+
+//👉 - Profile Picture Implementation
+const profileImgStore = useProfileImgStore()
+const { getProfilePicture, updateProfilePicture } = profileImgStore
+const { profileImgUrl } = storeToRefs(profileImgStore)
+
+
+
+
+
+const imageUrl = ref(null);
+
+
+const loadProfilePicture = async () => {
+  const res = await getProfilePicture(userData.value.email)
+  console.warn(res.status);
+  if (res.status === 200)
+    imageUrl.value = profileImgUrl.value
+  else
+    imageUrl.value = null
+
+}
+
+onMounted(() => {
+  if (userData.value?.role === 'STUDENT')
+    loadProfilePicture()
+})
+
+
+
 </script>
 
 <template>
   <VBadge v-if="userData" dot bordered location="bottom right" offset-x="1" offset-y="2" color="success">
-    <VAvatar :color="(userData) ? resolveUserRoleVariant(userData?.role)?.color : 'undefined'">
-      <VIcon :icon="(userData) ? resolveUserRoleVariant(userData?.role)?.icon : 'undefined'" />
+    <VAvatar size="38" variant="elevated">
+
+      <VIcon v-if="userData?.role==='ADMIN'" :icon="(userData) ? resolveUserRoleVariant(userData?.role)?.icon : 'undefined'" :color="(userData) ? resolveUserRoleVariant(userData?.role)?.color : 'undefined'" />
+
+      <div v-if="userData.role === 'STUDENT'">
+        <VAvatar v-if="imageUrl" :image="imageUrl" />
+
+        <VIcon v-else :icon="(userData) ? resolveUserRoleVariant(userData?.role)?.icon : 'undefined'" :color="(userData) ? resolveUserRoleVariant(userData?.role)?.color : 'undefined'" />
+      </div>
 
       <VMenu activator="parent" width="240" location="bottom end" offset="12px">
         <VList class="pa-0">
@@ -96,7 +171,14 @@ const userProfileList = [
               <div>
                 <VListItemAction>
                   <VBadge dot location="bottom right" offset-x="3" offset-y="3" color="success" bordered>
-                    <VAvatar :icon="(userData) ? resolveUserRoleVariant(userData?.role)?.icon : 'undefined'" :color="(userData) ? resolveUserRoleVariant(userData?.role)?.color : 'undefined'" />
+                    <!-- <VAvatar :icon="(userData) ? resolveUserRoleVariant(userData?.role)?.icon : 'undefined'" :color="(userData) ? resolveUserRoleVariant(userData?.role)?.color : 'undefined'" /> -->
+                    <VAvatar v-if=" userData.role === 'ADMIN'" rounded :color="(userData) ? resolveUserRoleVariant(userData?.role)?.color : undefined" :icon="(userData) ? resolveUserRoleVariant(userData?.role)?.icon : undefined" />
+
+                    <div v-if="userData.role === 'STUDENT'">
+                      <VAvatar v-if="imageUrl" :image="imageUrl" />
+                      <VAvatar v-else rounded :color="(userData) ? resolveUserRoleVariant(userData?.role)?.color : undefined" :icon="(userData) ? resolveUserRoleVariant(userData?.role)?.icon : undefined" />
+
+                    </div>
                   </VBadge>
                 </VListItemAction>
                 <VListItemSubtitle class="text-capitalize text-disabled">
@@ -135,6 +217,7 @@ const userProfileList = [
         </VList>
       </VMenu>
     </VAvatar>
+
   </VBadge>
 </template>
 

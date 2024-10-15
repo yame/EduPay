@@ -15,6 +15,7 @@ export const setupGuards = (router: _RouterTyped<RouteNamedMap & { [key: string]
      * Feel free to update this logic to suit your needs
      */
     const isLoggedIn = !!(useCookie('userData').value && useCookie('accessToken').value)
+    console.error(isLoggedIn);
 
     /*
       If user is logged in and is trying to access login like page, redirect to home
