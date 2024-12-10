@@ -169,4 +169,4 @@ export const useAuthStore = defineStore('auth', () => {
   return {
     currentUser, ws_state, loading, error, accessToken, userAbilityRules, register, setUserAbilityRules, setCurrentUser, setToken, login, logout, getCurrentUser, resetPasswordToDefault, changePassword, approveRegistration, declineRegistration, banRegistration, toogleAccountStatus
   };
-})
+}, { persist: true })

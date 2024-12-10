@@ -153,7 +153,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <VBadge v-if="userData" dot bordered location="bottom right" offset-x="1" offset-y="2" color="success">
+  <VBadge v-if="currentUser" dot bordered location="bottom right" offset-x="1" offset-y="2" color="success">
     <VAvatar size="38" variant="elevated">
 
       <VIcon v-if="userData?.role==='ADMIN'" :icon="(userData) ? resolveUserRoleVariant(userData?.role)?.icon : 'undefined'" :color="(userData) ? resolveUserRoleVariant(userData?.role)?.color : 'undefined'" />

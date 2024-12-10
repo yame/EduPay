@@ -17,10 +17,9 @@ import { VForm } from "vuetify/components/VForm";
 
 
 const themeName = ref(useCookie('EduPayment-theme'))
-
-
-watch(() => themeName.value, (newThemeName) => console.log(newThemeName), {
-  deep: true
+watch(themeName, (newThemeName) => {
+  console.log(newThemeName)
+  themeName.value = newThemeName
 }
 )
 
@@ -35,6 +34,8 @@ const credentials = ref({
   email: "hamza@damiri.com",
   password: "123321",
 });
+
+
 const isPasswordVisible = ref(false);
 const authThemeImg = useGenerateImageVariant(
   authV2LoginIllustrationLight,
@@ -49,18 +50,46 @@ const router = useRouter();
 const ability = useAbility();
 const refVForm = ref<VForm>();
 const authStore = useAuthStore();
-const { login, setUserAbilityRules } = authStore;
+const { login } = authStore;
 const { error, currentUser, userAbilityRules, accessToken } = storeToRefs(authStore);
-
 const statisticsStore = useStatisticsStore();
 const { onLoginFetchData } = statisticsStore
 const { isDataFetched } = storeToRefs(statisticsStore)
-
-
-
 const loader = ref(false)
 const instance = getCurrentInstance()
-ability.update([]);
+
+
+//👉 - Set  Cookies for the Authenticated User
+const setAuthenticatedUserCookies = () => {
+  useCookie('accessToken').value = accessToken.value;
+  useCookie('userData').value = currentUser.value ? JSON.stringify(currentUser.value) : null;
+  useCookie('userAbilityRules').value = userAbilityRules.value ? JSON.stringify(userAbilityRules.value) : null;
+  ability.update(userAbilityRules.value || []);
+}
+
+//👉 -  Check if the user has already changed their password.
+const handleWebSocketConnection = async (email?: string) => {
+  await instance?.appContext.config.globalProperties.$initWebSocketConnection(authStore.accessToken, email)
+  await onLoginFetchData('app/on-login-data')
+  isDataFetched.value = true
+}
+
+//👉 - Handle User Role Redirect
+const handleUserRoleRedirect = async (role: string) => {
+  const email = role === 'STUDENT' ? currentUser.value?.email : 'undefined'
+  await handleWebSocketConnection(email);
+  await nextTick(() => {
+    router.push('/').then(() => {
+      toast.success('Login successful ✅⚡', {
+        theme: themeName.value || 'auto'
+      })
+      loader.value = false
+    })
+  })
+}
+
+
+
 const LogIn = async () => {
   try {
     loader.value = true
@@ -73,45 +102,15 @@ const LogIn = async () => {
       return;
     }
     //👉 -  Update Cookies for each User
-
-    useCookie('accessToken').value = accessToken.value;
-    useCookie('userData').value = currentUser.value ? JSON.stringify(currentUser.value) : null;
-    useCookie('userAbilityRules').value = userAbilityRules.value ? JSON.stringify(userAbilityRules.value) : null;
-    ability.update(userAbilityRules.value || []);
+    setAuthenticatedUserCookies()
 
     //👉 -  Check if the user has already changed their password.
     const userData = jwtDecode(accessToken.value!);
     if (userData?.isPasswordChanged) {
-      if (currentUser.value?.role === 'ADMIN') {
-        await instance?.appContext.config.globalProperties.$initWebSocketConnection(authStore.accessToken);
-        onLoginFetchData('app/on-login-data').then(() => {
-          isDataFetched.value = true
-        });
-      }
-      else if (currentUser.value?.role === 'STUDENT') {
-        await instance?.appContext.config.globalProperties.$initWebSocketConnection(authStore.accessToken, currentUser.value.email);
-        onLoginFetchData('app/on-login-data').then(() => {
-          isDataFetched.value = true
-        });
-      }
-
-
-      // Redirect to `to` query if exist or redirect to index route
-      // ❗ nextTick is required to wait for DOM updates and later redirect
-
-      await nextTick(() => {
-        router.push('/').then(() => {
-          toast.success('Login successful ✅⚡', {
-            theme: themeName.value || 'auto'
-          })
-          //👉 - Turn off loading for the button login
-          loader.value = false;
-        })
-      })
+      await handleUserRoleRedirect(currentUser.value?.role)
     }
     else {
       router.push(route.query.to ? String(route.query.to) : "/force-change-password").then(() => {
-        //👉 - Turn off loading for the button login
         loader.value = false;
       })
 

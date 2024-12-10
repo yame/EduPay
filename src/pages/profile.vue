@@ -39,6 +39,10 @@ const router = useRouter();
 const route = useRoute();
 const userData = useCookie<any>('userData')
 
+
+
+
+
 //👉 - Log Out 
 const resetCookies = async () => {
   // Reset states, cookies, and tokens
@@ -47,9 +51,7 @@ const resetCookies = async () => {
   useCookie('accessToken').value = null;
   userData.value = null;
   authStore.ws_state = null;
-
-  // Disconnect WebSocket if applicable
-  instance?.appContext.config.globalProperties.$disconnectWebSocket();
+  await instance?.appContext.config.globalProperties.$disconnectWebSocket();
 
   // Clear counter store (ensure this happens before redirect)
   useCounterStore().clear();

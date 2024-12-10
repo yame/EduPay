@@ -115,7 +115,7 @@ watch(() => userData.value, (ll) => {
 
 <template>
   <IconBtn id="notification-btn" @click="$emit('toggle-menu', true)">
-    <VBadge v-if="userData" v-bind="props.badgeProps" :model-value="!!totalUnseenNotifications" :content="totalUnseenNotifications" max="10" color="error" offset-x="2" offset-y="3">
+    <VBadge v-if="authStore.currentUser" v-bind="props.badgeProps" :model-value="!!totalUnseenNotifications" :content="totalUnseenNotifications" max="10" color="error" offset-x="2" offset-y="3">
       <VIcon icon="tabler-bell" />
     </VBadge>
 
